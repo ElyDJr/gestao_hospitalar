@@ -43,7 +43,7 @@ class _TelaPacientesState extends State<TelaPacientes> {
                 const SizedBox(height: 10),
 
                 DropdownButtonFormField<String>(
-                  value: risco,
+  initialValue: risco,
                   decoration: const InputDecoration(labelText: "Triagem"),
                   items: const [
                     "Emergência",

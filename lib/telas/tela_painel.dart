@@ -5,6 +5,7 @@ import 'tela_mapa_leitos.dart';
 import 'tela_estoque.dart';
 import 'tela_faturamento.dart';
 import '../estados/dados_globais.dart';
+import 'tela_cadastro_medicos.dart';
 
 class TelaPainel extends StatefulWidget {
   const TelaPainel({super.key});
@@ -21,69 +22,94 @@ class _TelaPainelState extends State<TelaPainel> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-  appBar: AppBar(
-    title: const Text("MONGE - GESTÃO HOSPITALAR"),
-    backgroundColor: Colors.teal,
-    foregroundColor: Colors.white,
-    actions: [
-      Padding(
-        padding: const EdgeInsets.only(right: 10),
-        child: IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () {
+      appBar: AppBar(
+        title: const Text("MONGE - GESTÃO HOSPITALAR"),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {
 
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: const Text("Login do Usuário"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Login do Usuário"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
 
-                    TextField(
-                      decoration: InputDecoration(labelText: "Usuário"),
+                        TextField(
+                          decoration: InputDecoration(labelText: "Usuário"),
+                        ),
+
+                        TextField(
+                          obscureText: true,
+                          decoration: InputDecoration(labelText: "Senha"),
+                        ),
+                      ],
                     ),
-
-                    TextField(
-                      obscureText: true,
-                      decoration: InputDecoration(labelText: "Senha"),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancelar"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancelar"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Entrar"),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Entrar"),
-                  ),
-                ],
-              ),
-            );
+                );
 
-          },
-        ),
+              },
+            ),
+          ),
+        ],
       ),
-    ],
-  ),
 
-  body: Row(
-    children: [
+      body: Row(
+        children: [
 
-      NavigationRail(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) {
-          setState(() => _selectedIndex = i);
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (i) {
+              setState(() => _selectedIndex = i);
             },
             extended: MediaQuery.of(context).size.width > 1000,
             destinations: const [
-              NavigationRailDestination(icon: Icon(Icons.dashboard), label: Text("Início")),
-              NavigationRailDestination(icon: Icon(Icons.people), label: Text("Pacientes")),
-              NavigationRailDestination(icon: Icon(Icons.bed), label: Text("Leitos")),
-              NavigationRailDestination(icon: Icon(Icons.inventory), label: Text("Estoque")),
-              NavigationRailDestination(icon: Icon(Icons.attach_money), label: Text("Faturamento")),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.dashboard),
+                label: Text("Início"),
+              ),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.people),
+                label: Text("Pacientes"),
+              ),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.medical_services),
+                label: Text("Médicos"),
+              ),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.bed),
+                label: Text("Leitos"),
+              ),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.inventory),
+                label: Text("Estoque"),
+              ),
+
+              NavigationRailDestination(
+                icon: Icon(Icons.attach_money),
+                label: Text("Faturamento"),
+              ),
             ],
           ),
 
@@ -100,6 +126,7 @@ class _TelaPainelState extends State<TelaPainel> {
   Widget _getPage(int index) {
 
     switch (index) {
+
       case 0:
         return _dashboard();
 
@@ -107,12 +134,15 @@ class _TelaPainelState extends State<TelaPainel> {
         return const TelaPacientes();
 
       case 2:
-        return const TelaMapaLeitos();
+        return const TelaCadastroMedicos();
 
       case 3:
-        return const TelaEstoque();
+        return const TelaMapaLeitos();
 
       case 4:
+        return const TelaEstoque();
+
+      case 5:
         return const TelaFaturamento();
 
       default:
@@ -122,18 +152,37 @@ class _TelaPainelState extends State<TelaPainel> {
 
   Widget _dashboard() {
 
-    int emergencia = DadosGlobais.pacientes.where((p) => p.riskLevel == "Emergência").length;
-    int urgencia = DadosGlobais.pacientes.where((p) => p.riskLevel == "Urgência").length;
-    int poucoUrgente = DadosGlobais.pacientes.where((p) => p.riskLevel == "Pouco Urgente").length;
-    int naoUrgente = DadosGlobais.pacientes.where((p) => p.riskLevel == "Não Urgente").length;
+    int emergencia = DadosGlobais.pacientes
+        .where((p) => p.riskLevel == "Emergência")
+        .length;
+
+    int urgencia = DadosGlobais.pacientes
+        .where((p) => p.riskLevel == "Urgência")
+        .length;
+
+    int poucoUrgente = DadosGlobais.pacientes
+        .where((p) => p.riskLevel == "Pouco Urgente")
+        .length;
+
+    int naoUrgente = DadosGlobais.pacientes
+        .where((p) => p.riskLevel == "Não Urgente")
+        .length;
 
     return Padding(
       padding: const EdgeInsets.all(20),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          const Text("Painel Geral", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text(
+            "Painel Geral",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
           const SizedBox(height: 20),
 
           Wrap(
@@ -172,7 +221,9 @@ class _TelaPainelState extends State<TelaPainel> {
               ElevatedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Cadastro de convênio (em breve)")),
+                    const SnackBar(
+                      content: Text("Cadastro de convênio (em breve)"),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.business),
@@ -187,91 +238,100 @@ class _TelaPainelState extends State<TelaPainel> {
 
   void _showMedicalForm() {
 
-  String? selectedPatient;
-  final medicineCtrl = TextEditingController();
-  bool alta = false;
+    String? selectedPatient;
+    final medicineCtrl = TextEditingController();
+    bool alta = false;
 
-  showDialog(
-    context: context,
-    builder: (ctx) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
 
-      return StatefulBuilder(
-        builder: (context, setStateDialog) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
 
-          return AlertDialog(
-            title: const Text("Atendimento Médico"),
+            return AlertDialog(
+              title: const Text("Atendimento Médico"),
 
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
 
-                DropdownButton<String>(
-                  value: selectedPatient,
-                  hint: const Text("Selecionar Paciente"),
-                  isExpanded: true,
-                  items: DadosGlobais.pacientes.map((p) {
-                    return DropdownMenuItem(
-                      value: p.name,
-                      child: Text(p.name),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setStateDialog(() {
-                      selectedPatient = val;
-                    });
-                  },
-                ),
+                  DropdownButton<String>(
+                    value: selectedPatient,
+                    hint: const Text("Selecionar Paciente"),
+                    isExpanded: true,
 
-                TextField(
-                  controller: medicineCtrl,
-                  decoration: const InputDecoration(labelText: "Medicamento"),
-                ),
+                    items: DadosGlobais.pacientes.map((p) {
 
-                SwitchListTile(
-                  title: const Text("Dar Alta Médica"),
-                  value: alta,
-                  onChanged: (val) {
-                    setStateDialog(() {
-                      alta = val;
-                    });
-                  },
-                ),
-              ],
-            ),
+                      return DropdownMenuItem(
+                        value: p.name,
+                        child: Text(p.name),
+                      );
 
-            actions: [
+                    }).toList(),
 
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Cancelar"),
+                    onChanged: (val) {
+                      setStateDialog(() {
+                        selectedPatient = val;
+                      });
+                    },
+                  ),
+
+                  TextField(
+                    controller: medicineCtrl,
+                    decoration: const InputDecoration(
+                      labelText: "Medicamento",
+                    ),
+                  ),
+
+                  SwitchListTile(
+                    title: const Text("Dar Alta Médica"),
+                    value: alta,
+                    onChanged: (val) {
+                      setStateDialog(() {
+                        alta = val;
+                      });
+                    },
+                  ),
+                ],
               ),
 
-              ElevatedButton(
-                onPressed: selectedPatient == null
-                    ? null
-                    : () {
+              actions: [
 
-                        final paciente = DadosGlobais.pacientes.firstWhere(
-                          (p) => p.name == selectedPatient,
-                        );
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("Cancelar"),
+                ),
 
-                        // 🔥 NÃO SOBRESCREVER HISTÓRICO
-                        paciente.medicalHistory =
-                            "${paciente.medicalHistory}\nMedicamento: ${medicineCtrl.text}";
+                ElevatedButton(
+                  onPressed: selectedPatient == null
+                      ? null
+                      : () {
 
-                        paciente.medication = medicineCtrl.text;
+                          final paciente =
+                              DadosGlobais.pacientes.firstWhere(
+                            (p) => p.name == selectedPatient,
+                          );
 
-                        paciente.discharged = alta;
+                          paciente.medicalHistory =
+                              "${paciente.medicalHistory}\nMedicamento: ${medicineCtrl.text}";
 
-                        setState(() {});
+                          paciente.medication = medicineCtrl.text;
 
-                        Navigator.pop(ctx);
+                          paciente.discharged = alta;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Atendimento registrado")),
-                        );
-                      },
-                child: const Text("Salvar"),
+                          setState(() {});
+
+                          Navigator.pop(ctx);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Atendimento registrado"),
+                            ),
+                          );
+                        },
+
+                  child: const Text("Salvar"),
                 ),
               ],
             );
@@ -282,19 +342,38 @@ class _TelaPainelState extends State<TelaPainel> {
   }
 
   Widget _card(String title, int value, Color color) {
+
     return Container(
       width: 170,
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color),
       ),
+
       child: Column(
         children: [
-          Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
           const SizedBox(height: 10),
-          Text("$value", style: TextStyle(fontSize: 26, color: color, fontWeight: FontWeight.bold)),
+
+          Text(
+            "$value",
+            style: TextStyle(
+              fontSize: 26,
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

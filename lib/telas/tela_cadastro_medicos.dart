@@ -7,90 +7,87 @@ class TelaCadastroMedicos extends StatefulWidget {
   const TelaCadastroMedicos({super.key});
 
   @override
-  State<TelaCadastroMedicos> createState() => _TelaCadastroMedicosState();
+  State<TelaCadastroMedicos> createState() =>
+      _TelaCadastroMedicosState();
 }
 
-class _TelaCadastroMedicosState extends State<TelaCadastroMedicos> {
+class _TelaCadastroMedicosState
+    extends State<TelaCadastroMedicos> {
 
-  void _novoCadastroMedicos() {
+  void _novoMedico() {
 
     final nome = TextEditingController();
-    final cpf = TextEditingController();
-    final especialidade = TextEditingController();
     final crm = TextEditingController();
+    final especialidade = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (_) {
 
-        return AlertDialog(
-          title: const Text("Novo Médico"),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setDialogState) {
 
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          return AlertDialog(
+            title: const Text("Novo Médico"),
 
-              TextField(
-                controller: nome,
-                decoration: const InputDecoration(
-                  labelText: "Nome",
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+
+              children: [
+
+                TextField(
+                  controller: nome,
+                  decoration: const InputDecoration(
+                    labelText: "Nome",
+                  ),
                 ),
+
+                TextField(
+                  controller: crm,
+                  decoration: const InputDecoration(
+                    labelText: "CRM",
+                  ),
+                ),
+
+                TextField(
+                  controller: especialidade,
+                  decoration: const InputDecoration(
+                    labelText: "Especialidade",
+                  ),
+                ),
+              ],
+            ),
+
+            actions: [
+
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancelar"),
               ),
 
-              TextField(
-                controller: cpf,
-                decoration: const InputDecoration(
-                  labelText: "CPF",
-                ),
-              ),
+              ElevatedButton(
+                onPressed: () {
 
-              TextField(
-                controller: crm,
-                decoration: const InputDecoration(
-                  labelText: "CRM",
-                ),
-              ),
+                  setState(() {
 
-              TextField(
-                controller: especialidade,
-                decoration: const InputDecoration(
-                  labelText: "Especialidade",
-                ),
+                    DadosGlobais.medicos.add(
+
+                      Doctor(
+                        name: nome.text,
+                        specialty: especialidade.text,
+                        crm: crm.text,
+                      ),
+                    );
+                  });
+
+                  Navigator.pop(context);
+                },
+
+                child: const Text("Salvar"),
               ),
             ],
-          ),
-
-          actions: [
-
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
-            ),
-
-            ElevatedButton(
-              onPressed: () {
-
-                setState(() {
-
-                  DadosGlobais.medicos.add(
-
-                    Doctor(
-                      name: nome.text,
-                      cpf: cpf.text,
-                      crm: crm.text,
-                      specialty: especialidade.text,
-                    ),
-                  );
-                });
-
-                Navigator.pop(context);
-              },
-
-              child: const Text("Salvar"),
-            ),
-          ],
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -100,7 +97,7 @@ class _TelaCadastroMedicosState extends State<TelaCadastroMedicos> {
     return Scaffold(
 
       floatingActionButton: FloatingActionButton(
-        onPressed: _novoCadastroMedicos,
+        onPressed: _novoMedico,
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add),
       ),
@@ -108,18 +105,25 @@ class _TelaCadastroMedicosState extends State<TelaCadastroMedicos> {
       body: ListView.builder(
 
         padding: const EdgeInsets.all(20),
+
         itemCount: DadosGlobais.medicos.length,
 
         itemBuilder: (_, i) {
 
-          final medico = DadosGlobais.medicos[i];
+          final m = DadosGlobais.medicos[i];
 
           return Card(
 
             child: ListTile(
-              title: Text(medico.name),
-              subtitle: Text(medico.specialty),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              title: Text(m.name),
+
+              subtitle: Text(
+                "Especialidade: ${m.specialty}",
+              ),
+
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+              ),
             ),
           );
         },
