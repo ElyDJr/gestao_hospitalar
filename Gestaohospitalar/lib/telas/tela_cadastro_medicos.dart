@@ -7,15 +7,11 @@ class TelaCadastroMedicos extends StatefulWidget {
   const TelaCadastroMedicos({super.key});
 
   @override
-  State<TelaCadastroMedicos> createState() =>
-      _TelaCadastroMedicosState();
+  State<TelaCadastroMedicos> createState() => _TelaCadastroMedicosState();
 }
 
-class _TelaCadastroMedicosState
-    extends State<TelaCadastroMedicos> {
-
+class _TelaCadastroMedicosState extends State<TelaCadastroMedicos> {
   void _novoMedico() {
-
     final nome = TextEditingController();
     final crm = TextEditingController();
     final especialidade = TextEditingController();
@@ -25,7 +21,6 @@ class _TelaCadastroMedicosState
 
       builder: (_) => StatefulBuilder(
         builder: (context, setDialogState) {
-
           return AlertDialog(
             title: const Text("Novo Médico"),
 
@@ -33,32 +28,24 @@ class _TelaCadastroMedicosState
               mainAxisSize: MainAxisSize.min,
 
               children: [
-
                 TextField(
                   controller: nome,
-                  decoration: const InputDecoration(
-                    labelText: "Nome",
-                  ),
+                  decoration: const InputDecoration(labelText: "Nome"),
                 ),
 
                 TextField(
                   controller: crm,
-                  decoration: const InputDecoration(
-                    labelText: "CRM",
-                  ),
+                  decoration: const InputDecoration(labelText: "CRM"),
                 ),
 
                 TextField(
                   controller: especialidade,
-                  decoration: const InputDecoration(
-                    labelText: "Especialidade",
-                  ),
+                  decoration: const InputDecoration(labelText: "Especialidade"),
                 ),
               ],
             ),
 
             actions: [
-
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Cancelar"),
@@ -66,11 +53,8 @@ class _TelaCadastroMedicosState
 
               ElevatedButton(
                 onPressed: () {
-
                   setState(() {
-
                     DadosGlobais.medicos.add(
-
                       Doctor(
                         name: nome.text,
                         specialty: especialidade.text,
@@ -93,9 +77,7 @@ class _TelaCadastroMedicosState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       floatingActionButton: FloatingActionButton(
         onPressed: _novoMedico,
         backgroundColor: Colors.teal,
@@ -103,27 +85,20 @@ class _TelaCadastroMedicosState
       ),
 
       body: ListView.builder(
-
         padding: const EdgeInsets.all(20),
 
         itemCount: DadosGlobais.medicos.length,
 
         itemBuilder: (_, i) {
-
           final m = DadosGlobais.medicos[i];
 
           return Card(
-
             child: ListTile(
               title: Text(m.name),
 
-              subtitle: Text(
-                "Especialidade: ${m.specialty}",
-              ),
+              subtitle: Text("Especialidade: ${m.specialty}"),
 
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
             ),
           );
         },
