@@ -8,19 +8,16 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-
   final user = TextEditingController();
   final pass = TextEditingController();
 
   void _login() {
-    if (user.text == "admin" && pass.text == "123") {
-      Navigator.pushReplacementNamed(context, "/home");
-    }
+    // LOGIN LIVRE (SEM VALIDAÇÃO)
+    Navigator.pushReplacementNamed(context, "/home");
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Center(
         child: SizedBox(
@@ -28,11 +25,18 @@ class _TelaLoginState extends State<TelaLogin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               const Text("LOGIN HOSPITAL"),
 
-              TextField(controller: user, decoration: const InputDecoration(labelText: "Usuário")),
-              TextField(controller: pass, decoration: const InputDecoration(labelText: "Senha"), obscureText: true),
+              TextField(
+                controller: user,
+                decoration: const InputDecoration(labelText: "Usuário"),
+              ),
+
+              TextField(
+                controller: pass,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: "Senha"),
+              ),
 
               const SizedBox(height: 20),
 

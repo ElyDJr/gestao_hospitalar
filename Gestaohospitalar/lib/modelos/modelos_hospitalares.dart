@@ -46,11 +46,13 @@ class Patient {
   String name;
   String age;
   String cpf;
+
   String bedId;
   String insurance;
   String riskLevel;
 
   String observation;
+
   String medicalHistory;
   String evolution;
   String exams;
@@ -59,6 +61,19 @@ class Patient {
   String? doctorName;
 
   bool discharged;
+
+  bool internado;
+
+  // 🔥 SEM CONTROLE DE FLUXO
+  // (você decide manualmente na tela)
+  String statusAtendimento;
+
+  String prontuarioId;
+  String nomeMae;
+  DateTime dataNascimento;
+
+  bool isolamento;
+  String tipoIsolamento;
 
   List<BillingItem> prescriptions;
 
@@ -69,15 +84,30 @@ class Patient {
     required this.bedId,
     required this.insurance,
     required this.riskLevel,
+
     this.observation = "",
     this.medicalHistory = "",
     this.evolution = "",
     this.exams = "",
     this.medication = "",
     this.doctorName,
+
     this.discharged = false,
+    this.internado = false,
+
+    // 🔥 só um campo livre (SEM REGRA)
+    this.statusAtendimento = "",
+
+    this.prontuarioId = "",
+    this.nomeMae = "",
+    DateTime? dataNascimento,
+
+    this.isolamento = false,
+    this.tipoIsolamento = "",
+
     List<BillingItem>? prescriptions,
-  }) : prescriptions = prescriptions ?? [];
+  })  : dataNascimento = dataNascimento ?? DateTime.now(),
+        prescriptions = prescriptions ?? [];
 }
 
 class Doctor {
@@ -94,8 +124,6 @@ class Doctor {
 
 class Insurance {
   String name;
-
-  // 👇 padronizado para funcionar no seu sistema atual
   String planType;
   double consultationPrice;
   double discount;
@@ -106,4 +134,30 @@ class Insurance {
     required this.consultationPrice,
     required this.discount,
   });
+}
+
+class Prontuario {
+  String idProntuario;
+  String pacienteCpf;
+
+  List<String> evolucaoMedica;
+  List<String> evolucaoEnfermagem;
+  List<String> evolucaoMultidisciplinar;
+
+  List<BillingItem> prescricoes;
+  List<String> exames;
+
+  Prontuario({
+    required this.idProntuario,
+    required this.pacienteCpf,
+    List<String>? evolucaoMedica,
+    List<String>? evolucaoEnfermagem,
+    List<String>? evolucaoMultidisciplinar,
+    List<BillingItem>? prescricoes,
+    List<String>? exames,
+  })  : evolucaoMedica = evolucaoMedica ?? [],
+        evolucaoEnfermagem = evolucaoEnfermagem ?? [],
+        evolucaoMultidisciplinar = evolucaoMultidisciplinar ?? [],
+        prescricoes = prescricoes ?? [],
+        exames = exames ?? [];
 }

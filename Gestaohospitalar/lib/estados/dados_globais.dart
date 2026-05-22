@@ -57,3 +57,7 @@ class DadosGlobais {
 
   static List<Insurance> convenios = [];
 }
+class SessaoUsuario {
+  static String? usuario;
+  static String? perfil; // admin | medico | enfermagem
+}

@@ -6,6 +6,8 @@ import 'tela_estoque.dart';
 import 'tela_faturamento.dart';
 import '../estados/dados_globais.dart';
 import 'tela_cadastro_medicos.dart';
+import 'tela_farmacia.dart';
+import 'tela_atendimento_medico.dart';
 
 class TelaPainel extends StatefulWidget {
   const TelaPainel({super.key});
@@ -15,172 +17,185 @@ class TelaPainel extends StatefulWidget {
 }
 
 class _TelaPainelState extends State<TelaPainel> {
-
   int _selectedIndex = 0;
+
+  void _mostrarTriagem(String nivel, String titulo) {
+    final lista = DadosGlobais.pacientes
+    .where((p) =>
+        p.riskLevel == nivel &&
+        p.discharged == false)
+    .toList();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Triagem - $titulo"),
+        content: SizedBox(
+          width: 420,
+          child: lista.isEmpty
+              ? const Text("Nenhum paciente nesta classificação")
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: lista.length,
+                  itemBuilder: (context, i) {
+                    final p = lista[i];
+
+                    return Card(
+                      child: ListTile(
+                        title: Text(p.name),
+                        subtitle: Text(
+                          "Leito: ${p.bedId} | Status: ${p.statusAtendimento}",
+                        ),
+
+                        // ✅ BOTÃO DE ALTA ADICIONADO AQUI
+                        trailing: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              p.statusAtendimento = "alta";
+                              p.discharged = true;
+                            });
+
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Dar Alta"),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("MONGE - GESTÃO HOSPITALAR"),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Login do Usuário"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-
-                        TextField(
-                          decoration: InputDecoration(labelText: "Usuário"),
-                        ),
-
-                        TextField(
-                          obscureText: true,
-                          decoration: InputDecoration(labelText: "Senha"),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancelar"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Entrar"),
-                      ),
-                    ],
-                  ),
-                );
-
-              },
-            ),
-          ),
-        ],
       ),
 
       body: Row(
         children: [
-
           NavigationRail(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) {
               setState(() => _selectedIndex = i);
             },
-            extended: MediaQuery.of(context).size.width > 1000,
+            extended: false,
+            labelType: NavigationRailLabelType.none,
             destinations: const [
-
               NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
+                icon: Tooltip(message: "Início", child: Icon(Icons.dashboard)),
                 label: Text("Início"),
               ),
-
               NavigationRailDestination(
-                icon: Icon(Icons.people),
+                icon: Tooltip(message: "Farmácia", child: Icon(Icons.local_pharmacy)),
+                label: Text("Farmácia"),
+              ),
+              NavigationRailDestination(
+                icon: Tooltip(message: "Pacientes", child: Icon(Icons.people)),
                 label: Text("Pacientes"),
               ),
-
               NavigationRailDestination(
-                icon: Icon(Icons.medical_services),
+                icon: Tooltip(message: "Médicos", child: Icon(Icons.medical_services)),
                 label: Text("Médicos"),
               ),
-
               NavigationRailDestination(
-                icon: Icon(Icons.bed),
+                icon: Tooltip(message: "Leitos", child: Icon(Icons.bed)),
                 label: Text("Leitos"),
               ),
-
               NavigationRailDestination(
-                icon: Icon(Icons.inventory),
+                icon: Tooltip(message: "Estoque", child: Icon(Icons.inventory)),
                 label: Text("Estoque"),
               ),
-
               NavigationRailDestination(
-                icon: Icon(Icons.attach_money),
+                icon: Tooltip(message: "Faturamento", child: Icon(Icons.attach_money)),
                 label: Text("Faturamento"),
+              ),
+              NavigationRailDestination(
+                icon: Tooltip(
+                  message: "Atendimento",
+                  child: Icon(Icons.healing),
+                ),
+                label: Text("Atendimento"),
               ),
             ],
           ),
 
           const VerticalDivider(width: 1),
 
-          Expanded(
-            child: _getPage(_selectedIndex),
-          ),
+          Expanded(child: _getPage(_selectedIndex)),
         ],
       ),
     );
   }
 
   Widget _getPage(int index) {
-
     switch (index) {
-
       case 0:
         return _dashboard();
-
       case 1:
-        return const TelaPacientes();
-
+        return const TelaFarmacia();
       case 2:
-        return const TelaCadastroMedicos();
-
+        return const TelaPacientes();
       case 3:
-        return const TelaMapaLeitos();
-
+        return const TelaCadastroMedicos();
       case 4:
-        return const TelaEstoque();
-
+        return const TelaMapaLeitos();
       case 5:
+        return const TelaEstoque();
+      case 6:
         return const TelaFaturamento();
-
+      case 7:
+        return const TelaAtendimentoMedico();
       default:
         return _dashboard();
     }
   }
 
   Widget _dashboard() {
-
-    int emergencia = DadosGlobais.pacientes
-        .where((p) => p.riskLevel == "Emergência")
+    int emergencia =
+    DadosGlobais.pacientes
+        .where((p) =>
+            p.riskLevel == "Emergência" &&
+            p.discharged == false)
         .length;
 
-    int urgencia = DadosGlobais.pacientes
-        .where((p) => p.riskLevel == "Urgência")
+int urgencia =
+    DadosGlobais.pacientes
+        .where((p) =>
+            p.riskLevel == "Urgência" &&
+            p.discharged == false)
         .length;
 
-    int poucoUrgente = DadosGlobais.pacientes
-        .where((p) => p.riskLevel == "Pouco Urgente")
+int poucoUrgente =
+    DadosGlobais.pacientes
+        .where((p) =>
+            p.riskLevel == "Pouco Urgente" &&
+            p.discharged == false)
         .length;
 
-    int naoUrgente = DadosGlobais.pacientes
-        .where((p) => p.riskLevel == "Não Urgente")
+int naoUrgente =
+    DadosGlobais.pacientes
+        .where((p) =>
+            p.riskLevel == "Não Urgente" &&
+            p.discharged == false)
         .length;
 
     return Padding(
       padding: const EdgeInsets.all(20),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           const Text(
             "Painel Geral",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 20),
@@ -188,11 +203,22 @@ class _TelaPainelState extends State<TelaPainel> {
           Wrap(
             spacing: 12,
             children: [
-
-              _card("Emergência", emergencia, Colors.red),
-              _card("Urgência", urgencia, Colors.orange),
-              _card("Pouco Urgente", poucoUrgente, Colors.yellow),
-              _card("Não Urgente", naoUrgente, Colors.green),
+              GestureDetector(
+                onTap: () => _mostrarTriagem("Emergência", "Emergência"),
+                child: _card("Emergência", emergencia, Colors.red),
+              ),
+              GestureDetector(
+                onTap: () => _mostrarTriagem("Urgência", "Urgência"),
+                child: _card("Urgência", urgencia, Colors.orange),
+              ),
+              GestureDetector(
+                onTap: () => _mostrarTriagem("Pouco Urgente", "Pouco Urgente"),
+                child: _card("Pouco Urgente", poucoUrgente, Colors.yellow),
+              ),
+              GestureDetector(
+                onTap: () => _mostrarTriagem("Não Urgente", "Não Urgente"),
+                child: _card("Não Urgente", naoUrgente, Colors.green),
+              ),
             ],
           ),
 
@@ -201,31 +227,20 @@ class _TelaPainelState extends State<TelaPainel> {
           Wrap(
             spacing: 12,
             children: [
-
               ElevatedButton.icon(
-                onPressed: () {
-                  setState(() => _selectedIndex = 1);
-                },
+                onPressed: () => setState(() => _selectedIndex = 2),
                 icon: const Icon(Icons.person_add),
-                label: const Text("Cadastrar Paciente"),
+                label: const Text("Paciente"),
               ),
-
               ElevatedButton.icon(
-                onPressed: () {
-                  _showMedicalForm();
-                },
+                onPressed: () => setState(() => _selectedIndex = 3),
                 icon: const Icon(Icons.medical_services),
-                label: const Text("Atendimento Médico"),
+                label: const Text("Médico"),
               ),
-
               ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Cadastro de convênio (em breve)"),
-                    ),
-                  );
-                },
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Convênio em breve")),
+                ),
                 icon: const Icon(Icons.business),
                 label: const Text("Convênio"),
               ),
@@ -236,136 +251,20 @@ class _TelaPainelState extends State<TelaPainel> {
     );
   }
 
-  void _showMedicalForm() {
-
-    String? selectedPatient;
-    final medicineCtrl = TextEditingController();
-    bool alta = false;
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-
-            return AlertDialog(
-              title: const Text("Atendimento Médico"),
-
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-
-                  DropdownButton<String>(
-                    value: selectedPatient,
-                    hint: const Text("Selecionar Paciente"),
-                    isExpanded: true,
-
-                    items: DadosGlobais.pacientes.map((p) {
-
-                      return DropdownMenuItem(
-                        value: p.name,
-                        child: Text(p.name),
-                      );
-
-                    }).toList(),
-
-                    onChanged: (val) {
-                      setStateDialog(() {
-                        selectedPatient = val;
-                      });
-                    },
-                  ),
-
-                  TextField(
-                    controller: medicineCtrl,
-                    decoration: const InputDecoration(
-                      labelText: "Medicamento",
-                    ),
-                  ),
-
-                  SwitchListTile(
-                    title: const Text("Dar Alta Médica"),
-                    value: alta,
-                    onChanged: (val) {
-                      setStateDialog(() {
-                        alta = val;
-                      });
-                    },
-                  ),
-                ],
-              ),
-
-              actions: [
-
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text("Cancelar"),
-                ),
-
-                ElevatedButton(
-                  onPressed: selectedPatient == null
-                      ? null
-                      : () {
-
-                          final paciente =
-                              DadosGlobais.pacientes.firstWhere(
-                            (p) => p.name == selectedPatient,
-                          );
-
-                          paciente.medicalHistory =
-                              "${paciente.medicalHistory}\nMedicamento: ${medicineCtrl.text}";
-
-                          paciente.medication = medicineCtrl.text;
-
-                          paciente.discharged = alta;
-
-                          setState(() {});
-
-                          Navigator.pop(ctx);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Atendimento registrado"),
-                            ),
-                          );
-                        },
-
-                  child: const Text("Salvar"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Widget _card(String title, int value, Color color) {
-
     return Container(
       width: 170,
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color),
       ),
-
       child: Column(
         children: [
-
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
+          Text(title,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-
           Text(
             "$value",
             style: TextStyle(
