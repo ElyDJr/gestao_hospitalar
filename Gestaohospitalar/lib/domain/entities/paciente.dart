@@ -1,19 +1,38 @@
-//classe e seus atributos
-class Paciente {
-  int? id;
+import 'entitie.dart';
+
+class Paciente extends Entitie {
   String? nome;
-  int? cpf;
+  String? cpf;
   String? sexo;
   DateTime? nascimento;
   String? alergias;
   String? tipoSanguineo;
   String? historicoClinico;
-  int? telefone;
+  String? telefone;
   String? rua;
-	String? numeroCasa;
-	String? bairro;
-	String? cidade;
-	String? estado;
-	int? cep;
-	String? nomeResponsavel;
+  int? numeroCasa;
+  String? bairro;
+  String? cidade;
+  String? estado;
+  String? cep;
+  String? nomeResponsavel;
+
+  Paciente({
+    super.id, // Corresponde ao id_paciente
+    this.nome,
+    this.cpf,
+    this.sexo,
+    this.nascimento,
+    this.alergias,
+    this.tipoSanguineo,
+    this.historicoClinico,
+    this.telefone,
+    this.rua,
+    this.numeroCasa,
+    this.bairro,
+    this.cidade,
+    this.estado,
+    this.cep,
+    this.nomeResponsavel,
+  });
 }
