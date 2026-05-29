@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
-import 'data/resources/database_helper.dart'; // Ajuste se a sua pasta for resources ou datasources
+import 'data/resources/database_provider.dart'; // Ajuste se a sua pasta for resources ou datasources
 import 'pages/tela_painel.dart';
 
 void main() {
@@ -24,7 +24,7 @@ class MongeApp extends StatelessWidget {
       ),
       // Usamos o FutureBuilder para esperar o arquivo .db carregar no navegador
       home: FutureBuilder<Database>(
-        future: DatabaseHelper.instance.database,
+        future: DatabaseProvider.instance.database,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
