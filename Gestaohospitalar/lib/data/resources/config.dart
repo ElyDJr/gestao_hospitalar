@@ -2,8 +2,6 @@
 
 class Config {
   static const String sql = '''
-
-//meu banco aqui
 -- SQLite armazena tudo em um arquivo de banco único, portanto "CREATE DATABASE" e "USE" não são utilizados aqui.
 
 CREATE TABLE convenio(

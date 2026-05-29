@@ -1,4 +1,4 @@
-// lib/presentation/pages/tela_pacientes.dart
+// lib/pages/tela_paciente.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../domain/entities/paciente.dart';
@@ -31,7 +31,7 @@ class _TelaPacienteState extends State<TelaPaciente> {
   final _estadoCtrl = TextEditingController();
   final _cepCtrl = TextEditingController();
   final _responsavelCtrl = TextEditingController();
-  
+
   String _sexoSelecionado = 'Masculino';
   DateTime? _dataNascimento;
 
@@ -72,7 +72,8 @@ class _TelaPacienteState extends State<TelaPaciente> {
     if (escolhida != null && escolhida != _dataNascimento) {
       setState(() {
         _dataNascimento = escolhida;
-        _nascimentoCtrl.text = "${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}";
+        _nascimentoCtrl.text =
+            "${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}";
       });
     }
   }
@@ -130,11 +131,15 @@ class _TelaPacienteState extends State<TelaPaciente> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.assignment_ind, color: Colors.teal, size: 28),
+                            Icon(Icons.assignment_ind,
+                                color: Colors.teal, size: 28),
                             SizedBox(width: 8),
                             Text(
                               "Ficha de Registro Geral de Paciente",
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.teal),
                             ),
                           ],
                         ),
@@ -145,32 +150,46 @@ class _TelaPacienteState extends State<TelaPaciente> {
                       ],
                     ),
                     const Divider(height: 30),
-                    
+
                     // Corpo rolável com grid duplo para caber tudo na Web
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("1. Identificação Pessoal", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const Text("1. Identificação Pessoal",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey)),
                             const SizedBox(height: 12),
-                            
                             TextFormField(
                               controller: _nomeCtrl,
-                              decoration: const InputDecoration(labelText: "Nome Completo *", prefixIcon: Icon(Icons.person), border: OutlineInputBorder()),
-                              validator: (v) => v == null || v.isEmpty ? "Campo obrigatório" : null,
+                              decoration: const InputDecoration(
+                                  labelText: "Nome Completo *",
+                                  prefixIcon: Icon(Icons.person),
+                                  border: OutlineInputBorder()),
+                              validator: (v) => v == null || v.isEmpty
+                                  ? "Campo obrigatório"
+                                  : null,
                             ),
                             const SizedBox(height: 16),
-
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller: _cpfCtrl,
                                     keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly], // APENAS NÚMEROS
-                                    decoration: const InputDecoration(labelText: "CPF (Apenas números) *", prefixIcon: Icon(Icons.badge), border: OutlineInputBorder()),
-                                    validator: (v) => v == null || v.length != 11 ? "CPF inválido (Digite 11 dígitos)" : null,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ], // APENAS NÚMEROS
+                                    decoration: const InputDecoration(
+                                        labelText: "CPF (Apenas números) *",
+                                        prefixIcon: Icon(Icons.badge),
+                                        border: OutlineInputBorder()),
+                                    validator: (v) =>
+                                        v == null || v.length != 11
+                                            ? "CPF inválido (Digite 11 dígitos)"
+                                            : null,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -178,14 +197,18 @@ class _TelaPacienteState extends State<TelaPaciente> {
                                   child: TextFormField(
                                     controller: _telefoneCtrl,
                                     keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly], // APENAS NÚMEROS
-                                    decoration: const InputDecoration(labelText: "Telefone de Contato", prefixIcon: Icon(Icons.phone), border: OutlineInputBorder()),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ], // APENAS NÚMEROS
+                                    decoration: const InputDecoration(
+                                        labelText: "Telefone de Contato",
+                                        prefixIcon: Icon(Icons.phone),
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             Row(
                               children: [
                                 Expanded(
@@ -194,42 +217,63 @@ class _TelaPacienteState extends State<TelaPaciente> {
                                     readOnly: true,
                                     onTap: () async {
                                       await _selecionarData(context);
-                                      setModalState(() {}); // Atualiza o texto do input no modal
+                                      setModalState(
+                                          () {}); // Atualiza o texto do input no modal
                                     },
-                                    decoration: const InputDecoration(labelText: "Data de Nascimento *", prefixIcon: Icon(Icons.calendar_today), border: OutlineInputBorder()),
-                                    validator: (v) => v == null || v.isEmpty ? "Selecione a data" : null,
+                                    decoration: const InputDecoration(
+                                        labelText: "Data de Nascimento *",
+                                        prefixIcon: Icon(Icons.calendar_today),
+                                        border: OutlineInputBorder()),
+                                    validator: (v) => v == null || v.isEmpty
+                                        ? "Selecione a data"
+                                        : null,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     value: _sexoSelecionado,
-                                    decoration: const InputDecoration(labelText: "Sexo Biológico", border: OutlineInputBorder()),
-                                    items: const ['Masculino', 'Feminino', 'Outro']
-                                        .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                                    onChanged: (v) => setModalState(() => _sexoSelecionado = v!),
+                                    decoration: const InputDecoration(
+                                        labelText: "Sexo Biológico",
+                                        border: OutlineInputBorder()),
+                                    items: const [
+                                      'Masculino',
+                                      'Feminino',
+                                      'Outro'
+                                    ]
+                                        .map((s) => DropdownMenuItem(
+                                            value: s, child: Text(s)))
+                                        .toList(),
+                                    onChanged: (v) => setModalState(
+                                        () => _sexoSelecionado = v!),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             TextFormField(
                               controller: _responsavelCtrl,
-                              decoration: const InputDecoration(labelText: "Nome do Responsável Legal (Se menor ou incapaz)", prefixIcon: Icon(Icons.family_restroom), border: OutlineInputBorder()),
+                              decoration: const InputDecoration(
+                                  labelText:
+                                      "Nome do Responsável Legal (Se menor ou incapaz)",
+                                  prefixIcon: Icon(Icons.family_restroom),
+                                  border: OutlineInputBorder()),
                             ),
-
                             const SizedBox(height: 24),
-                            const Text("2. Endereço e Localização", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const Text("2. Endereço e Localização",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey)),
                             const SizedBox(height: 12),
-
                             Row(
                               children: [
                                 Expanded(
                                   flex: 3,
                                   child: TextFormField(
                                     controller: _ruaCtrl,
-                                    decoration: const InputDecoration(labelText: "Rua / Logradouro", border: OutlineInputBorder()),
+                                    decoration: const InputDecoration(
+                                        labelText: "Rua / Logradouro",
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -238,40 +282,50 @@ class _TelaPacienteState extends State<TelaPaciente> {
                                   child: TextFormField(
                                     controller: _numeroCasaCtrl,
                                     keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly], // APENAS NÚMEROS
-                                    decoration: const InputDecoration(labelText: "Nº", border: OutlineInputBorder()),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ], // APENAS NÚMEROS
+                                    decoration: const InputDecoration(
+                                        labelText: "Nº",
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller: _bairroCtrl,
-                                    decoration: const InputDecoration(labelText: "Bairro", border: OutlineInputBorder()),
+                                    decoration: const InputDecoration(
+                                        labelText: "Bairro",
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: TextFormField(
                                     controller: _cidadeCtrl,
-                                    decoration: const InputDecoration(labelText: "Cidade", border: OutlineInputBorder()),
+                                    decoration: const InputDecoration(
+                                        labelText: "Cidade",
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller: _estadoCtrl,
-                                    maxLength: 2, // Limita a sigla do estado (Ex: SP, MG)
-                                    decoration: const InputDecoration(labelText: "Estado (UF)", border: OutlineInputBorder(), counterText: ""),
+                                    maxLength:
+                                        2, // Limita a sigla do estado (Ex: SP, MG)
+                                    decoration: const InputDecoration(
+                                        labelText: "Estado (UF)",
+                                        border: OutlineInputBorder(),
+                                        counterText: ""),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -279,47 +333,62 @@ class _TelaPacienteState extends State<TelaPaciente> {
                                   child: TextFormField(
                                     controller: _cepCtrl,
                                     keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly], // APENAS NÚMEROS
-                                    decoration: const InputDecoration(labelText: "CEP (Apenas números)", border: OutlineInputBorder()),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ], // APENAS NÚMEROS
+                                    decoration: const InputDecoration(
+                                        labelText: "CEP (Apenas números)",
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 24),
-                            const Text("3. Ficha Clínica Inicial", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const Text("3. Ficha Clínica Inicial",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey)),
                             const SizedBox(height: 12),
-
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
                                     controller: _tipoSanguineoCtrl,
-                                    decoration: const InputDecoration(labelText: "Tipo Sanguíneo (Ex: A+, O-)", prefixIcon: Icon(Icons.bloodtype), border: OutlineInputBorder()),
+                                    decoration: const InputDecoration(
+                                        labelText:
+                                            "Tipo Sanguíneo (Ex: A+, O-)",
+                                        prefixIcon: Icon(Icons.bloodtype),
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: TextFormField(
                                     controller: _alergiasCtrl,
-                                    decoration: const InputDecoration(labelText: "Alergias Conhecidas", prefixIcon: Icon(Icons.warning_amber), border: OutlineInputBorder()),
+                                    decoration: const InputDecoration(
+                                        labelText: "Alergias Conhecidas",
+                                        prefixIcon: Icon(Icons.warning_amber),
+                                        border: OutlineInputBorder()),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-
                             TextFormField(
                               controller: _historicoCtrl,
                               maxLines: 3,
-                              decoration: const InputDecoration(labelText: "Histórico Clínico Pregressor / Comorbidades", alignLabelWithHint: true, border: OutlineInputBorder()),
+                              decoration: const InputDecoration(
+                                  labelText:
+                                      "Histórico Clínico Pregressor / Comorbidades",
+                                  alignLabelWithHint: true,
+                                  border: OutlineInputBorder()),
                             ),
                             const SizedBox(height: 20),
                           ],
                         ),
                       ),
                     ),
-                    
+
                     const Divider(),
                     // Botões de Ação do Prontuário
                     Row(
@@ -327,46 +396,92 @@ class _TelaPacienteState extends State<TelaPaciente> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                          child: const Text("Cancelar",
+                              style: TextStyle(color: Colors.grey)),
                         ),
                         const SizedBox(width: 16),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
                           ),
                           icon: const Icon(Icons.save),
                           label: const Text("Salvar Prontuário"),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              // Cria o objeto Entidade pura mapeando os tipos corretos
-                              final novoPaciente = Paciente(
-                                nome: _nomeCtrl.text,
-                                cpf: _cpfCtrl.text,
-                                sexo: _sexoSelecionado,
-                                nascimento: _dataNascimento,
-                                alergias: _alergiasCtrl.text.isEmpty ? null : _alergiasCtrl.text,
-                                tipoSanguineo: _tipoSanguineoCtrl.text.isEmpty ? null : _tipoSanguineoCtrl.text,
-                                historicoClinico: _historicoCtrl.text.isEmpty ? null : _historicoCtrl.text,
-                                telefone: _telefoneCtrl.text.isEmpty ? null : _telefoneCtrl.text,
-                                rua: _ruaCtrl.text.isEmpty ? null : _ruaCtrl.text,
-                                numeroCasa: _numeroCasaCtrl.text.isEmpty ? null : int.tryParse(_numeroCasaCtrl.text),
-                                bairro: _bairroCtrl.text.isEmpty ? null : _bairroCtrl.text,
-                                cidade: _cidadeCtrl.text.isEmpty ? null : _cidadeCtrl.text,
-                                estado: _estadoCtrl.text.isEmpty ? null : _estadoCtrl.text,
-                                cep: _cepCtrl.text.isEmpty ? null : _cepCtrl.text,
-                                nomeResponsavel: _responsavelCtrl.text.isEmpty ? null : _responsavelCtrl.text,
-                              );
-
-                              // Salva no banco de dados através do Service
-                              await widget.service.salvarPaciente(novoPaciente);
-                              
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Paciente registrado com sucesso no SQLite!'), backgroundColor: Colors.teal),
+                              try {
+                                // Cria o objeto Entidade pura mapeando os tipos corretos
+                                final novoPaciente = Paciente(
+                                  nome: _nomeCtrl.text,
+                                  cpf: _cpfCtrl.text,
+                                  // ✅ Converte para MAIÚSCULO para bater com o banco de dados
+                                  sexo: _sexoSelecionado.toUpperCase(),
+                                  nascimento: _dataNascimento,
+                                  alergias: _alergiasCtrl.text.isEmpty
+                                      ? null
+                                      : _alergiasCtrl.text,
+                                  tipoSanguineo: _tipoSanguineoCtrl.text.isEmpty
+                                      ? null
+                                      : _tipoSanguineoCtrl.text,
+                                  historicoClinico: _historicoCtrl.text.isEmpty
+                                      ? null
+                                      : _historicoCtrl.text,
+                                  telefone: _telefoneCtrl.text.isEmpty
+                                      ? null
+                                      : _telefoneCtrl.text,
+                                  rua: _ruaCtrl.text.isEmpty
+                                      ? null
+                                      : _ruaCtrl.text,
+                                  numeroCasa: _numeroCasaCtrl.text.isEmpty
+                                      ? null
+                                      : int.tryParse(_numeroCasaCtrl.text),
+                                  bairro: _bairroCtrl.text.isEmpty
+                                      ? null
+                                      : _bairroCtrl.text,
+                                  cidade: _cidadeCtrl.text.isEmpty
+                                      ? null
+                                      : _cidadeCtrl.text,
+                                  estado: _estadoCtrl.text.isEmpty
+                                      ? null
+                                      : _estadoCtrl.text,
+                                  // ✅ Garante que o CEP só seja salvo se tiver exatamente 8 números
+                                  cep: _cepCtrl.text.length == 8
+                                      ? _cepCtrl.text
+                                      : null,
+                                  nomeResponsavel: _responsavelCtrl.text.isEmpty
+                                      ? null
+                                      : _responsavelCtrl.text,
                                 );
+
+                                // Salva no banco de dados através do Service
+                                await widget.service
+                                    .salvarPaciente(novoPaciente);
+
+                                if (context.mounted) {
+                                  Navigator.pop(context); // Fecha o modal
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Paciente registrado com sucesso no SQLite!'),
+                                        backgroundColor: Colors.teal),
+                                  );
+                                }
+                              } catch (e) {
+                                // 🚨 CAPTURA E EXIBE O ERRO DO BANCO DE DADOS NA TELA
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Erro ao salvar no banco: $e'),
+                                      backgroundColor: Colors.red,
+                                      duration: const Duration(
+                                          seconds:
+                                              6), // Fica 6 segundos na tela
+                                    ),
+                                  );
+                                }
                               }
                             }
                           },
@@ -389,7 +504,9 @@ class _TelaPacienteState extends State<TelaPaciente> {
       listenable: widget.service,
       builder: (context, _) {
         if (widget.service.isLoading) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.teal)));
+          return const Scaffold(
+              body:
+                  Center(child: CircularProgressIndicator(color: Colors.teal)));
         }
 
         final lista = widget.service.pacientes;
@@ -404,7 +521,8 @@ class _TelaPacienteState extends State<TelaPaciente> {
             onPressed: _abrirFormularioCadastro,
             backgroundColor: Colors.teal,
             icon: const Icon(Icons.person_add, color: Colors.white),
-            label: const Text("Registrar Novo Paciente", style: TextStyle(color: Colors.white)),
+            label: const Text("Registrar Novo Paciente",
+                style: TextStyle(color: Colors.white)),
           ),
           body: lista.isEmpty
               ? const Center(
@@ -413,7 +531,9 @@ class _TelaPacienteState extends State<TelaPaciente> {
                     children: [
                       Icon(Icons.folder_open, size: 60, color: Colors.grey),
                       SizedBox(height: 16),
-                      Text("Nenhum prontuário encontrado no banco de dados local.", style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text(
+                          "Nenhum prontuário encontrado no banco de dados local.",
+                          style: TextStyle(fontSize: 16, color: Colors.grey)),
                     ],
                   ),
                 )
@@ -430,20 +550,27 @@ class _TelaPacienteState extends State<TelaPaciente> {
                           backgroundColor: Colors.teal,
                           child: Icon(Icons.person, color: Colors.white),
                         ),
-                        title: Text(p.nome ?? 'Sem Nome', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text("CPF: ${p.cpf} | Cidade: ${p.cidade ?? 'Não Informada'}"),
+                        title: Text(p.nome ?? 'Sem Nome',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            "CPF: ${p.cpf} | Cidade: ${p.cidade ?? 'Não Informada'}"),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (p.tipoSanguineo != null)
                               Chip(
                                 label: Text(p.tipoSanguineo!),
-                                backgroundColor: Colors.red.withValues(alpha: 0.1),
-                                labelStyle: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                                backgroundColor:
+                                    Colors.red.withValues(alpha: 0.1),
+                                labelStyle: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold),
                               ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                              icon: const Icon(Icons.delete_outline,
+                                  color: Colors.red),
                               onPressed: () async {
                                 if (p.id != null) {
                                   await widget.service.deletarPaciente(p.id!);
