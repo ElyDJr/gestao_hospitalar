@@ -1,13 +1,22 @@
 // lib/domain/services/paciente_service.dart
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import '../entities/paciente.dart';
 import '../repository/entitie_repository.dart';
 import '../../data/repositories/generic_repository_impl.dart';
 
-class PacienteService {
+// O "with ChangeNotifier" faz o seu Service conseguir atualizar as telas!
+class PacienteService with ChangeNotifier {
   final EntitieRepository<Paciente> _pacienteRepository;
 
-  // O construtor recebe o banco de dados e configura o repositório genérico para "paciente"
+  List<Paciente> _pacientes = [];
+  bool _isLoading = false;
+
+  // Variáveis para a tela ler os dados seguros
+  List<Paciente> get pacientes => _pacientes;
+  bool get isLoading => _isLoading;
+
+  // O construtor configura o repositório genérico uma única vez
   PacienteService(Database db)
       : _pacienteRepository = GenericRepositoryImpl<Paciente>(
           db: db,
@@ -16,14 +25,23 @@ class PacienteService {
           toMap: (p) => p.toMap(),
         );
 
-  // Busca todos os pacientes do banco para listar na tela
-  Future<List<Paciente>> listarTodos() async {
-    return await _pacienteRepository.findAll();
+  // 1. BUSCAR DO BANCO
+  Future<void> carregarPacientes() async {
+    _isLoading = true;
+    notifyListeners(); // Avisa a tela para mostrar o símbolo de "carregando"
+
+    try {
+      _pacientes = await _pacienteRepository.findAll();
+    } catch (e) {
+      debugPrint("Erro ao buscar pacientes: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners(); // Avisa a tela que os dados chegaram para ela desenhar a lista
+    }
   }
 
-  // Regra para salvar ou atualizar um paciente
+  // 2. SALVAR NO BANCO
   Future<void> salvarPaciente(Paciente paciente) async {
-    // Exemplo de regra de negócio que você pode colocar no Service:
     if (paciente.nome == null || paciente.nome!.isEmpty) {
       throw Exception("O nome do paciente é obrigatório.");
     }
@@ -33,10 +51,14 @@ class PacienteService {
     } else {
       await _pacienteRepository.update(paciente);
     }
+    
+    // Após salvar, busca a lista atualizada do banco automaticamente!
+    await carregarPacientes(); 
   }
 
-  // Deleta um paciente pelo ID
+  // 3. EXCLUIR DO BANCO
   Future<void> deletarPaciente(int id) async {
     await _pacienteRepository.delete(id);
+    await carregarPacientes(); // Atualiza a lista após deletar
   }
 }
