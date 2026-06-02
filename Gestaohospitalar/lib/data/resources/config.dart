@@ -6,6 +6,7 @@ class Config {
 
 CREATE TABLE convenio(
     id_convenio INTEGER PRIMARY KEY AUTOINCREMENT,
+    ativo INTEGER DEFAULT 1,
     nome_convenio TEXT UNIQUE,
     tipo_leito TEXT CHECK (tipo_leito IN ('COMUM', 'PRIVADO', 'PREMIUM')),
     cobre_internacao INTEGER DEFAULT 1 CHECK (cobre_internacao IN (0, 1)),

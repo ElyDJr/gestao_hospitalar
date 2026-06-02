@@ -143,7 +143,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                       children: [
                         Expanded(child: TextFormField(controller: _nascimentoCtrl, readOnly: true, onTap: () => _selecionarData(context), decoration: const InputDecoration(labelText: "Nascimento *", prefixIcon: Icon(Icons.calendar_today), border: OutlineInputBorder()), validator: (v) => v == null || v.isEmpty ? "Selecione" : null)),
                         const SizedBox(width: 16),
-                        Expanded(child: DropdownButtonFormField<String>(value: _sexoSelecionado, decoration: const InputDecoration(labelText: "Sexo Biológico", border: OutlineInputBorder()), items: const ['Masculino', 'Feminino', 'Outro'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(), onChanged: (v) => setState(() => _sexoSelecionado = v!))),
+                        Expanded(child: DropdownButtonFormField<String>(initialValue: _sexoSelecionado, decoration: const InputDecoration(labelText: "Sexo Biológico", border: OutlineInputBorder()), items: const ['Masculino', 'Feminino', 'Outro'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(), onChanged: (v) => setState(() => _sexoSelecionado = v!))),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -175,7 +175,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    const Text("3. Ficha Clínica Inicial", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const Text("3. Ficha Clinical Inicial", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 12),
                     Row(
                       children: [

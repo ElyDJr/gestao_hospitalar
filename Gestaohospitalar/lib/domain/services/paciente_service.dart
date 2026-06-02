@@ -5,49 +5,65 @@ import '../entities/paciente.dart';
 import '../repository/entitie_repository.dart';
 import '../../data/repositories/generic_repository_impl.dart';
 
-class PacienteService extends ChangeNotifier {
-  late final EntitieRepository<Paciente> _repository;
-  
-  List<Paciente> _pacientes = [];
-  List<Paciente> get pacientes => _pacientes;
+class PacienteService with ChangeNotifier {
+  final EntitieRepository<Paciente> _pacienteRepository;
 
+  List<Paciente> _pacientes = [];
   bool _isLoading = false;
+
+  List<Paciente> get pacientes => _pacientes;
   bool get isLoading => _isLoading;
 
-  PacienteService(Database db) {
-    _repository = GenericRepositoryImpl<Paciente>(
-      db: db,
-      tableName: 'paciente',
-      fromMap: (map) => Paciente.fromMap(map),
-      toMap: (paciente) => paciente.toMap(),
-    );
-  }
+  PacienteService(Database db)
+      : _pacienteRepository = GenericRepositoryImpl<Paciente>(
+          db: db,
+          tableName: 'paciente',
+          fromMap: Paciente.fromMap,
+          toMap: (p) => p.toMap(),
+        );
 
+  // 1. BUSCAR DO BANCO (Filtrando os Ativos)
   Future<void> carregarPacientes() async {
     _isLoading = true;
-    notifyListeners();
+    notifyListeners(); 
 
-    final todos = await _repository.findAll();
-    // ✅ O SEGREDO DO SOFT DELETE: A lista da tela só recebe quem está ATIVO
-    _pacientes = todos.where((p) => p.ativo != 0).toList();
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      final todos = await _pacienteRepository.findAll();
+      // ✅ Soft Delete: Exibe apenas pacientes que NÃO estão arquivados (ativo != 0)
+      _pacientes = todos.where((p) => p.ativo != 0).toList();
+    } catch (e) {
+      debugPrint("Erro ao buscar pacientes: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners(); 
+    }
   }
 
+  // 2. SALVAR NO BANCO
   Future<void> salvarPaciente(Paciente paciente) async {
-    if (paciente.id == null) {
-      await _repository.create(paciente);
-    } else {
-      await _repository.update(paciente); // Se tiver ID, ele faz UPDATE
+    if (paciente.nome == null || paciente.nome!.isEmpty) {
+      throw Exception("O nome do paciente é obrigatório.");
     }
+
+    if (paciente.id == null) {
+      await _pacienteRepository.create(paciente);
+    } else {
+      await _pacienteRepository.update(paciente);
+    }
+    
+    await carregarPacientes(); 
+  }
+
+  // 3. ARQUIVAR DO BANCO (Soft Delete)
+  Future<void> arquivarPaciente(Paciente paciente) async {
+    final pacienteArquivado = paciente.copyWith(ativo: 0);
+    await _pacienteRepository.update(pacienteArquivado);
     await carregarPacientes();
   }
 
-  // ✅ NOVA FUNÇÃO: Substitui o "deletar" físico
-  Future<void> arquivarPaciente(Paciente paciente) async {
-    // Usa o copyWith para mudar APENAS o status para zero (arquivado)
-    final pacienteArquivado = paciente.copyWith(ativo: 0);
-    await salvarPaciente(pacienteArquivado);
+  // 4. EXCLUIR DEFINITIVO
+  Future<void> deletarPaciente(int id) async {
+    await _pacienteRepository.delete(id);
+    await carregarPacientes(); 
   }
 }

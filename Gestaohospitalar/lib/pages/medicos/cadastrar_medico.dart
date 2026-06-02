@@ -1,6 +1,5 @@
 // lib/pages/medicos/cadastrar_medico.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../domain/entities/medico.dart';
 import '../../../domain/services/medico_service.dart';
 

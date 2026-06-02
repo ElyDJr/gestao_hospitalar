@@ -2,12 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'pacientes/listar_paciente.dart'; // Corrigido para a pasta no singular (paciente) se estiver assim
+import 'pacientes/listar_paciente.dart'; 
 import 'pacientes/cadastrar_paciente.dart';
 
-// ✅ Imports do módulo de Médicos
+// Imports do módulo de Médicos
 import 'medicos/listar_medico.dart';
 import 'medicos/cadastrar_medico.dart';
+
+// ✅ Imports corrigidos e vinculados do módulo de Convênios
+import 'convenios/listar_convenio.dart';
+import 'convenios/cadastrar_convenio.dart';
 
 import '../telas/tela_mapa_leitos.dart';
 import '../telas/tela_estoque.dart';
@@ -17,6 +21,7 @@ import '../telas/tela_atendimento_medico.dart';
 
 import '../domain/services/paciente_service.dart';
 import '../domain/services/medico_service.dart'; 
+import '../domain/services/convenio_service.dart';
 
 class Dashboard extends StatefulWidget {
   final Database database;
@@ -31,6 +36,7 @@ class _DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
   late PacienteService _pacienteService;
   late MedicoService _medicoService; 
+  late ConvenioService _convenioService;
 
   @override
   void initState() {
@@ -40,6 +46,9 @@ class _DashboardState extends State<Dashboard> {
 
     _medicoService = MedicoService(widget.database);
     _medicoService.carregarMedicos();
+
+    _convenioService = ConvenioService(widget.database);
+    _convenioService.carregarConvenios();
   }
 
   void _mostrarTriagem(String nivel, String titulo) {
@@ -67,7 +76,6 @@ class _DashboardState extends State<Dashboard> {
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
                               onPressed: () async {
-                                // ✅ A MÁGICA AQUI: Dar alta agora ARQUIVA o paciente em vez de excluir!
                                 if (p.id != null) {
                                   await _pacienteService.arquivarPaciente(p);
                                 }
@@ -102,6 +110,7 @@ class _DashboardState extends State<Dashboard> {
               setState(() => _selectedIndex = i);
               _pacienteService.carregarPacientes();
               _medicoService.carregarMedicos(); 
+              _convenioService.carregarConvenios(); // ✅ Força recarga ao navegar
             },
             extended: false,
             labelType: NavigationRailLabelType.none,
@@ -114,6 +123,7 @@ class _DashboardState extends State<Dashboard> {
               NavigationRailDestination(icon: Tooltip(message: "Estoque", child: Icon(Icons.inventory)), label: Text("Estoque")),
               NavigationRailDestination(icon: Tooltip(message: "Faturamento", child: Icon(Icons.attach_money)), label: Text("Faturamento")),
               NavigationRailDestination(icon: Tooltip(message: "Atendimento", child: Icon(Icons.healing)), label: Text("Atendimento")),
+              NavigationRailDestination(icon: Tooltip(message: "Convênios", child: Icon(Icons.business)), label: Text("Convênios")),
             ],
           ),
           const VerticalDivider(width: 1),
@@ -133,6 +143,7 @@ class _DashboardState extends State<Dashboard> {
       case 5: return const TelaEstoque();
       case 6: return const TelaFaturamento();
       case 7: return const TelaAtendimentoMedico();
+      case 8: return ListarConvenio(service: _convenioService); // ✅ Mapeamento da listagem na aba lateral!
       default: return _dashboard();
     }
   }
@@ -181,7 +192,10 @@ class _DashboardState extends State<Dashboard> {
                     label: const Text("Médico"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Convênio em breve"))),
+                    onPressed: () {
+                      // ✅ Atalho direto para inclusão rápida
+                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarConvenio(service: _convenioService));
+                    },
                     icon: const Icon(Icons.business),
                     label: const Text("Convênio"),
                   ),
