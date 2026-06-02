@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'pacientes/listar_paciente.dart';
+import 'pacientes/listar_paciente.dart'; // Corrigido para a pasta no singular (paciente) se estiver assim
 import 'pacientes/cadastrar_paciente.dart';
 
-// ✅ Imports do novo módulo de Médicos
+// ✅ Imports do módulo de Médicos
 import 'medicos/listar_medico.dart';
 import 'medicos/cadastrar_medico.dart';
 
@@ -16,7 +16,7 @@ import '../telas/tela_farmacia.dart';
 import '../telas/tela_atendimento_medico.dart';
 
 import '../domain/services/paciente_service.dart';
-import '../domain/services/medico_service.dart'; // ✅ Import do Service
+import '../domain/services/medico_service.dart'; 
 
 class Dashboard extends StatefulWidget {
   final Database database;
@@ -30,7 +30,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
   late PacienteService _pacienteService;
-  late MedicoService _medicoService; // ✅ Declaração do Service de Médicos
+  late MedicoService _medicoService; 
 
   @override
   void initState() {
@@ -38,7 +38,6 @@ class _DashboardState extends State<Dashboard> {
     _pacienteService = PacienteService(widget.database);
     _pacienteService.carregarPacientes();
 
-    // ✅ Inicialização
     _medicoService = MedicoService(widget.database);
     _medicoService.carregarMedicos();
   }
@@ -68,7 +67,10 @@ class _DashboardState extends State<Dashboard> {
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
                               onPressed: () async {
-                                if (p.id != null) await _pacienteService.deletarPaciente(p.id!);
+                                // ✅ A MÁGICA AQUI: Dar alta agora ARQUIVA o paciente em vez de excluir!
+                                if (p.id != null) {
+                                  await _pacienteService.arquivarPaciente(p);
+                                }
                                 if (context.mounted) Navigator.pop(context);
                               },
                               child: const Text("Dar Alta"),
@@ -99,7 +101,7 @@ class _DashboardState extends State<Dashboard> {
             onDestinationSelected: (i) {
               setState(() => _selectedIndex = i);
               _pacienteService.carregarPacientes();
-              _medicoService.carregarMedicos(); // Atualiza médicos ao navegar
+              _medicoService.carregarMedicos(); 
             },
             extended: false,
             labelType: NavigationRailLabelType.none,
@@ -107,7 +109,7 @@ class _DashboardState extends State<Dashboard> {
               NavigationRailDestination(icon: Tooltip(message: "Início", child: Icon(Icons.dashboard)), label: Text("Início")),
               NavigationRailDestination(icon: Tooltip(message: "Farmácia", child: Icon(Icons.local_pharmacy)), label: Text("Farmácia")),
               NavigationRailDestination(icon: Tooltip(message: "Pacientes", child: Icon(Icons.people)), label: Text("Pacientes")),
-              NavigationRailDestination(icon: Tooltip(message: "Médicos", child: Icon(Icons.medical_services)), label: Text("Médicos")), // Menu 3
+              NavigationRailDestination(icon: Tooltip(message: "Médicos", child: Icon(Icons.medical_services)), label: Text("Médicos")), 
               NavigationRailDestination(icon: Tooltip(message: "Leitos", child: Icon(Icons.bed)), label: Text("Leitos")),
               NavigationRailDestination(icon: Tooltip(message: "Estoque", child: Icon(Icons.inventory)), label: Text("Estoque")),
               NavigationRailDestination(icon: Tooltip(message: "Faturamento", child: Icon(Icons.attach_money)), label: Text("Faturamento")),
@@ -126,7 +128,7 @@ class _DashboardState extends State<Dashboard> {
       case 0: return _dashboard();
       case 1: return const TelaFarmacia();
       case 2: return ListarPaciente(service: _pacienteService);
-      case 3: return ListarMedico(service: _medicoService); // ✅ Carrega a lista de Médicos
+      case 3: return ListarMedico(service: _medicoService); 
       case 4: return const TelaMapaLeitos();
       case 5: return const TelaEstoque();
       case 6: return const TelaFaturamento();
@@ -172,7 +174,6 @@ class _DashboardState extends State<Dashboard> {
                     label: const Text("Paciente"),
                   ),
                   ElevatedButton.icon(
-                    // ✅ Abre o cadastro de Médico direto da Home
                     onPressed: () {
                       showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarMedico(service: _medicoService));
                     },

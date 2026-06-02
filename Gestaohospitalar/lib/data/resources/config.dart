@@ -22,6 +22,7 @@ CREATE TABLE especialidade (
 
 CREATE TABLE medico(
     id_medico INTEGER PRIMARY KEY AUTOINCREMENT,
+    ativo INTEGER DEFAULT 1,
     id_especialidade INTEGER NOT NULL,
     nome TEXT NOT NULL,
     telefone TEXT,
@@ -33,6 +34,7 @@ CREATE TABLE medico(
 
 CREATE TABLE paciente(
     id_paciente INTEGER PRIMARY KEY AUTOINCREMENT,
+    ativo INTEGER DEFAULT 1,
     nome TEXT,
     cpf TEXT UNIQUE CHECK (length(cpf) = 11),
     sexo TEXT CHECK (sexo IN ('MASCULINO', 'FEMININO', 'OUTRO')),

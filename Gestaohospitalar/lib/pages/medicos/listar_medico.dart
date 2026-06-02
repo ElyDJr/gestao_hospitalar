@@ -1,6 +1,7 @@
 // lib/pages/medicos/listar_medico.dart
 import 'package:flutter/material.dart';
 import '../../../domain/services/medico_service.dart';
+import '../../../domain/entities/medico.dart'; // Importante importar a entidade
 import 'cadastrar_medico.dart';
 
 class ListarMedico extends StatefulWidget {
@@ -28,12 +29,16 @@ class _ListarMedicoState extends State<ListarMedico> {
     super.dispose();
   }
 
-  void _abrirFormularioCadastro() {
+  // ✅ CORREÇÃO AQUI: Garanta que o nome do parâmetro seja o mesmo do construtor do CadastrarMedico
+  void _abrirFormularioCadastro({Medico? medicoParaEditar}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CadastrarMedico(service: widget.service),
+      builder: (context) => CadastrarMedico(
+        service: widget.service,
+        medicoEdicao: medicoParaEditar, // <--- Aqui passamos o objeto Medico, não o Widget
+      ),
     );
   }
 
@@ -42,7 +47,9 @@ class _ListarMedicoState extends State<ListarMedico> {
     return ListenableBuilder(
       listenable: widget.service,
       builder: (context, _) {
-        if (widget.service.isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.teal)));
+        if (widget.service.isLoading) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.teal)));
+        }
 
         final listaFiltrada = widget.service.medicos.where((m) {
           final nome = m.nome?.toLowerCase() ?? '';
@@ -68,7 +75,9 @@ class _ListarMedicoState extends State<ListarMedico> {
                     fillColor: Colors.white,
                     filled: true,
                     prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                    suffixIcon: _termoBusca.isNotEmpty ? IconButton(icon: const Icon(Icons.clear, color: Colors.grey), onPressed: () { _buscaCtrl.clear(); setState(() => _termoBusca = ''); }) : null,
+                    suffixIcon: _termoBusca.isNotEmpty 
+                        ? IconButton(icon: const Icon(Icons.clear, color: Colors.grey), onPressed: () { _buscaCtrl.clear(); setState(() => _termoBusca = ''); }) 
+                        : null,
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                   ),
@@ -77,7 +86,7 @@ class _ListarMedicoState extends State<ListarMedico> {
             ),
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: _abrirFormularioCadastro,
+            onPressed: () => _abrirFormularioCadastro(),
             backgroundColor: Colors.teal,
             icon: const Icon(Icons.person_add, color: Colors.white),
             label: const Text("Novo Médico", style: TextStyle(color: Colors.white)),
@@ -96,11 +105,39 @@ class _ListarMedicoState extends State<ListarMedico> {
                         leading: const CircleAvatar(backgroundColor: Colors.teal, child: Icon(Icons.medical_services, color: Colors.white)),
                         title: Text(m.nome ?? 'Sem Nome', style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text("CRM: ${m.crm} | Contato: ${m.telefone ?? 'Não informado'}"),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          onPressed: () async {
-                            if (m.id != null) await widget.service.deletarMedico(m.id!);
-                          },
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              tooltip: "Editar Médico",
+                              onPressed: () => _abrirFormularioCadastro(medicoParaEditar: m),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.archive_outlined, color: Colors.orange),
+                              tooltip: "Arquivar Médico",
+                              onPressed: () async {
+                                final confirmar = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Arquivar Médico?"),
+                                    content: Text("O registro do Dr(a). ${m.nome} ficará inativo."),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancelar")),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: const Text("Arquivar"),
+                                      ),
+                                    ],
+                                  )
+                                );
+                                if (confirmar == true) {
+                                  await widget.service.arquivarMedico(m);
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );

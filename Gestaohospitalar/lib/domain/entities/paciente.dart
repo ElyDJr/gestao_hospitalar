@@ -1,24 +1,27 @@
+// lib/domain/entities/paciente.dart
 import 'entitie.dart';
 
 class Paciente extends Entitie {
-  String? nome;
-  String? cpf;
-  String? sexo;
-  DateTime? nascimento;
-  String? alergias;
-  String? tipoSanguineo;
-  String? historicoClinico;
-  String? telefone;
-  String? rua;
-  int? numeroCasa;
-  String? bairro;
-  String? cidade;
-  String? estado;
-  String? cep;
-  String? nomeResponsavel;
+  final int? ativo; // 1 para Ativo, 0 para Arquivado
+  final String? nome;
+  final String? cpf;
+  final String? sexo;
+  final DateTime? nascimento;
+  final String? alergias;
+  final String? tipoSanguineo;
+  final String? historicoClinico;
+  final String? telefone;
+  final String? rua;
+  final int? numeroCasa;
+  final String? bairro;
+  final String? cidade;
+  final String? estado;
+  final String? cep;
+  final String? nomeResponsavel;
 
   Paciente({
-    super.id, // Corresponde ao id_paciente
+    super.id,
+    this.ativo = 1, // Por padrão, todo paciente nasce ativo
     this.nome,
     this.cpf,
     this.sexo,
@@ -36,37 +39,37 @@ class Paciente extends Entitie {
     this.nomeResponsavel,
   });
 
-
-  // MÁGICA 1: Transforma a linha do banco de volta em Objeto Dart
-  factory Paciente.fromMap(Map<String, dynamic> map) {
+  // Método mágico para duplicar o objeto mudando apenas 1 informação
+  Paciente copyWith({int? ativo}) {
     return Paciente(
-      id: map['id_paciente'] as int?,
-      nome: map['nome'] as String?,
-      cpf: map['cpf'] as String?,
-      sexo: map['sexo'] as String?,
-      nascimento: map['nascimento'] != null ? DateTime.parse(map['nascimento'] as String) : null,
-      alergias: map['alergias'] as String?,
-      tipoSanguineo: map['tipo_sanguineo'] as String?,
-      historicoClinico: map['historico_clinico'] as String?,
-      telefone: map['telefone'] as String?,
-      rua: map['rua'] as String?,
-      numeroCasa: map['numero_casa'] as int?,
-      bairro: map['bairro'] as String?,
-      cidade: map['cidade'] as String?,
-      estado: map['estado'] as String?,
-      cep: map['cep'] as String?,
-      nomeResponsavel: map['nome_responsavel'] as String?,
+      id: id,
+      ativo: ativo ?? this.ativo,
+      nome: nome,
+      cpf: cpf,
+      sexo: sexo,
+      nascimento: nascimento,
+      alergias: alergias,
+      tipoSanguineo: tipoSanguineo,
+      historicoClinico: historicoClinico,
+      telefone: telefone,
+      rua: rua,
+      numeroCasa: numeroCasa,
+      bairro: bairro,
+      cidade: cidade,
+      estado: estado,
+      cep: cep,
+      nomeResponsavel: nomeResponsavel,
     );
   }
 
-  // MÁGICA 2: Transforma as variáveis do Dart em formato Map para o SQLite salvar
   Map<String, dynamic> toMap() {
     return {
-      if (id != null) 'id_paciente': id,
+      'id_paciente': id,
+      'ativo': ativo ?? 1, // Salva no banco
       'nome': nome,
       'cpf': cpf,
       'sexo': sexo,
-      'nascimento': nascimento?.toIso8601String(),
+      'nascimento': nascimento != null ? "${nascimento!.year}-${nascimento!.month.toString().padLeft(2, '0')}-${nascimento!.day.toString().padLeft(2, '0')}" : null,
       'alergias': alergias,
       'tipo_sanguineo': tipoSanguineo,
       'historico_clinico': historicoClinico,
@@ -80,7 +83,26 @@ class Paciente extends Entitie {
       'nome_responsavel': nomeResponsavel,
     };
   }
+
+  factory Paciente.fromMap(Map<String, dynamic> map) {
+    return Paciente(
+      id: map['id_paciente'],
+      ativo: map['ativo'], // Lê do banco
+      nome: map['nome'],
+      cpf: map['cpf'],
+      sexo: map['sexo'],
+      nascimento: map['nascimento'] != null ? DateTime.tryParse(map['nascimento']) : null,
+      alergias: map['alergias'],
+      tipoSanguineo: map['tipo_sanguineo'],
+      historicoClinico: map['historico_clinico'],
+      telefone: map['telefone'],
+      rua: map['rua'],
+      numeroCasa: map['numero_casa'],
+      bairro: map['bairro'],
+      cidade: map['cidade'],
+      estado: map['estado'],
+      cep: map['cep'],
+      nomeResponsavel: map['nome_responsavel'],
+    );
+  }
 }
-
-
-

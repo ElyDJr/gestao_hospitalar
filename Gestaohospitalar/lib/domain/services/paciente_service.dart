@@ -5,60 +5,49 @@ import '../entities/paciente.dart';
 import '../repository/entitie_repository.dart';
 import '../../data/repositories/generic_repository_impl.dart';
 
-// O "with ChangeNotifier" faz o seu Service conseguir atualizar as telas!
-class PacienteService with ChangeNotifier {
-  final EntitieRepository<Paciente> _pacienteRepository;
-
+class PacienteService extends ChangeNotifier {
+  late final EntitieRepository<Paciente> _repository;
+  
   List<Paciente> _pacientes = [];
-  bool _isLoading = false;
-
-  // Variáveis para a tela ler os dados seguros
   List<Paciente> get pacientes => _pacientes;
+
+  bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // O construtor configura o repositório genérico uma única vez
-  PacienteService(Database db)
-      : _pacienteRepository = GenericRepositoryImpl<Paciente>(
-          db: db,
-          tableName: 'paciente',
-          fromMap: Paciente.fromMap,
-          toMap: (p) => p.toMap(),
-        );
-
-  // 1. BUSCAR DO BANCO
-  Future<void> carregarPacientes() async {
-    _isLoading = true;
-    notifyListeners(); // Avisa a tela para mostrar o símbolo de "carregando"
-
-    try {
-      _pacientes = await _pacienteRepository.findAll();
-    } catch (e) {
-      debugPrint("Erro ao buscar pacientes: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners(); // Avisa a tela que os dados chegaram para ela desenhar a lista
-    }
+  PacienteService(Database db) {
+    _repository = GenericRepositoryImpl<Paciente>(
+      db: db,
+      tableName: 'paciente',
+      fromMap: (map) => Paciente.fromMap(map),
+      toMap: (paciente) => paciente.toMap(),
+    );
   }
 
-  // 2. SALVAR NO BANCO
-  Future<void> salvarPaciente(Paciente paciente) async {
-    if (paciente.nome == null || paciente.nome!.isEmpty) {
-      throw Exception("O nome do paciente é obrigatório.");
-    }
+  Future<void> carregarPacientes() async {
+    _isLoading = true;
+    notifyListeners();
 
+    final todos = await _repository.findAll();
+    // ✅ O SEGREDO DO SOFT DELETE: A lista da tela só recebe quem está ATIVO
+    _pacientes = todos.where((p) => p.ativo != 0).toList();
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> salvarPaciente(Paciente paciente) async {
     if (paciente.id == null) {
-      await _pacienteRepository.create(paciente);
+      await _repository.create(paciente);
     } else {
-      await _pacienteRepository.update(paciente);
+      await _repository.update(paciente); // Se tiver ID, ele faz UPDATE
     }
-    
-    // Após salvar, busca a lista atualizada do banco automaticamente!
     await carregarPacientes();
   }
 
-  // 3. EXCLUIR DO BANCO
-  Future<void> deletarPaciente(int id) async {
-    await _pacienteRepository.delete(id);
-    await carregarPacientes(); // Atualiza a lista após deletar
+  // ✅ NOVA FUNÇÃO: Substitui o "deletar" físico
+  Future<void> arquivarPaciente(Paciente paciente) async {
+    // Usa o copyWith para mudar APENAS o status para zero (arquivado)
+    final pacienteArquivado = paciente.copyWith(ativo: 0);
+    await salvarPaciente(pacienteArquivado);
   }
 }
