@@ -1,64 +1,68 @@
 // lib/data/resources/database_provider.dart
-import 'package:flutter/foundation.dart'; // Importante: Traz o kIsWeb (suporte para Web)
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'config.dart';
 
 class DatabaseProvider {
-  // 1. Criação do Singleton (para o main.dart conseguir acessar via .instance)
   static final DatabaseProvider instance = DatabaseProvider._init();
   Database? _database;
 
   DatabaseProvider._init();
 
-  // 2. Getter assíncrono do banco de dados
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB();
-    return _database!;
+    return _database!; //se já existe, retorna o banco
   }
 
-  // 3. Inicialização inteligente (Web e Desktop)
   Future<Database> _initDB() async {
-    late DatabaseFactory databaseFactory;
-
-    if (kIsWeb) {
-      // Usa o driver Web (IndexedDB)
-      databaseFactory = databaseFactoryFfiWeb;
-    } else {
-      // Usa o driver Desktop (Windows/Mac/Linux)
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-
+    late DatabaseFactory factory;
     String path = 'db_internacao.db';
-    
-    // Se não for web, salva no disco físico do PC
-    if (!kIsWeb) {
-      path = join(await databaseFactory.getDatabasesPath(), path);
+
+    // 1. Configura o motor do banco dependendo de onde está rodando
+    if (kIsWeb) {
+      factory =
+          databaseFactoryFfiWeb; //pra caso for rodar em web, cria um banco em memória (salva em binario)
+    } else {
+      sqfliteFfiInit();
+      factory = databaseFactoryFfi;
+
+      // Monta o caminho físico no Windows e imprime no terminal para você achar facilmente
+      final dbPath = await factory.getDatabasesPath();
+      path = join(dbPath, path);
+
+      debugPrint('\n==================================================');
+      debugPrint('🗄️ ARQUIVO DO BANCO DE DADOS (ABRA NO SEU GERENCIADOR):');
+      debugPrint(path);
+      debugPrint('==================================================\n');
     }
 
-    // 4. Abre o banco e cria as tabelas se ele não existir
-    return await databaseFactory.openDatabase(
+    // 2. Abre o banco. Se não existir, ele cria automaticamente disparando o onCreate
+    return await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: 1,
         onCreate: (db, version) async {
+          debugPrint(
+              "⚙️ Banco não encontrado. Criando tabelas a partir do config.dart...");
           await _create(db);
+        },
+        onOpen: (db) {
+          debugPrint(
+              "✅ Conexão com o banco de dados estabelecida com sucesso!");
         },
       ),
     );
   }
 
-  // 5. Execução do Script SQL consertada
+  // 3. Execução do Script SQL limpa e sem redundâncias
   Future<void> _create(Database db) async {
-    // Separa a String gigante do config.dart pelo ponto e vírgula ';'
     final scripts = Config.sql.split(';');
-    
+
     for (var script in scripts) {
       if (script.trim().isNotEmpty) {
-        // Executa tabela por tabela individualmente
         await db.execute(script);
       }
     }
