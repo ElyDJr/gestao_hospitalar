@@ -53,7 +53,7 @@ class PacienteService with ChangeNotifier {
     }
     
     // Após salvar, busca a lista atualizada do banco automaticamente!
-    await carregarPacientes(); 
+    await carregarPacientes();
   }
 
   // 3. EXCLUIR DO BANCO

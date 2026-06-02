@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'data/resources/database_provider.dart'; // Ajuste se a sua pasta for resources ou datasources
-import 'pages/tela_painel.dart';
+import 'pages/dashboard.dart';
 
 void main() {
   // Garante que o motor do Flutter esteja pronto antes de carregar o banco na Web
@@ -44,7 +44,7 @@ class MongeApp extends StatelessWidget {
           }
 
           // ✅ ERRO RESOLVIDO: Passando a conexão com o banco para a TelaPainel
-          return TelaPainel(database: snapshot.data!);
+          return Dashboard(database: snapshot.data!);
         },
       ),
     );
