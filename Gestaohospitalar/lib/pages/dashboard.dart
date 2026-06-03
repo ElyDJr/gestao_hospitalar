@@ -1,5 +1,7 @@
 // lib/pages/dashboard.dart
 import 'package:flutter/material.dart';
+import 'package:gestaohospitalar01/domain/entities/paciente.dart';
+import 'package:gestaohospitalar01/domain/services/triagem_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'pacientes/listar_paciente.dart'; 
@@ -12,6 +14,10 @@ import 'medicos/cadastrar_medico.dart';
 // ✅ Imports corrigidos e vinculados do módulo de Convênios
 import 'convenios/listar_convenio.dart';
 import 'convenios/cadastrar_convenio.dart';
+
+//Imports da triagem
+import '../domain/services/triagem_service.dart';
+import 'triagem/realizar_triagem.dart'; // A pasta que você acabou de criar
 
 import '../telas/tela_mapa_leitos.dart';
 import '../telas/tela_estoque.dart';
@@ -38,6 +44,7 @@ class _DashboardState extends State<Dashboard> {
   late MedicoService _medicoService; 
   late ConvenioService _convenioService;
 
+  late TriagemService _triagemService;
   @override
   void initState() {
     super.initState();
@@ -49,61 +56,131 @@ class _DashboardState extends State<Dashboard> {
 
     _convenioService = ConvenioService(widget.database);
     _convenioService.carregarConvenios();
+
+    _triagemService = TriagemService(widget.database); // ✅ Inicializa o serviço de triagem
   }
 
   void _mostrarTriagem(String nivel, String titulo) {
-    final lista = _pacienteService.pacientes.where((p) => p.historicoClinico == nivel).toList();
+    // Ordenado por ID (quem entrou primeiro na fila)
+    final lista = _pacienteService.pacientes
+        .where((p) => p.historicoClinico == nivel)
+        .toList()..sort((a, b) => a.id!.compareTo(b.id!));
+
     showDialog(
       context: context,
-      builder: (_) => ListenableBuilder(
-        listenable: _pacienteService,
-        builder: (context, _) {
-          return AlertDialog(
-            title: Text("Triagem - $titulo"),
-            content: SizedBox(
-              width: 420,
-              child: lista.isEmpty
-                  ? const Text("Nenhum paciente nesta classificação")
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: lista.length,
-                      itemBuilder: (context, i) {
-                        final p = lista[i];
-                        return Card(
-                          child: ListTile(
-                            title: Text(p.nome ?? 'Sem Nome'),
-                            subtitle: Text("CPF: ${p.cpf ?? 'Não informado'}"),
-                            trailing: ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                              onPressed: () async {
-                                // 1. Arquiva no banco
-                                if (p.id != null) {
-                                  await _pacienteService.arquivarPaciente(p);
-                                }
-                                
-                                // 2. Fecha o dialog e mostra a mensagem
-                                if (context.mounted) {
-                                  Navigator.pop(context); // Fecha a telinha da triagem
-                                  
-                                  // ✅ A MENSAGEM VEM AQUI, DEPOIS DE FECHAR O DIALOG!
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Alta realizada! O prontuário de ${p.nome} foi arquivado.'),
-                                      backgroundColor: Colors.green,
-                                      duration: const Duration(seconds: 3), // Opcional: tempo da mensagem
-                                    ),
-                                  );
-                                }
-                              },
-                              child: const Text("Dar Alta"), // O child continua intacto aqui
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+      builder: (_) => AlertDialog(
+        title: Text("Fila: $titulo"),
+        content: SizedBox(
+          width: 400,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: lista.length,
+            itemBuilder: (context, i) {
+              final p = lista[i];
+              return Card(
+                child: ListTile(
+                  leading: CircleAvatar(child: Text("${i + 1}")), // Numeração da fila
+                  title: Text(p.nome ?? 'Sem Nome'),
+                  onTap: () {
+                    Navigator.pop(context); // Fecha a lista
+                    _abrirProntuarioMedico(p); // Abre a ficha completa
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _abrirProntuarioMedico(Paciente p) async {
+    final triagem = await _triagemService.buscarTriagemPorPaciente(p.id!);
+    final condutaCtrl = TextEditingController(text: triagem?.observacoes ?? '');
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context, isScrollControlled: true,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(24),
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: Column(
+          children: [
+            Text("Prontuário: ${p.nome}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Divider(),
+            // Exibição dos dados do Paciente
+            Text("CPF: ${p.cpf} | Nascimento: ${p.nascimento?.day}/${p.nascimento?.month}/${p.nascimento?.year}"),
+            const SizedBox(height: 10),
+            // Exibição da Triagem
+            if (triagem != null) Card(
+              child: Padding(padding: const EdgeInsets.all(12), child: Column(
+                children: [
+                  Text("Queixa: ${triagem.queixa}"),
+                  Text("Sinais: PA ${triagem.pressao} | Temp ${triagem.temperatura}°C | Sat ${triagem.saturacao}%"),
+                ],
+              )),
             ),
-          );
-        },
+            const SizedBox(height: 20),
+            Expanded(
+              child: TextFormField(
+                controller: condutaCtrl, maxLines: 6,
+                decoration: const InputDecoration(labelText: "Conduta Médica / Evolução", border: OutlineInputBorder()),
+              ),
+            ),
+           // Botões de decisão final
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    onPressed: () async {
+                      if (triagem != null) {
+                        // ✅ CRIA UMA CÓPIA ATUALIZADA (Sem erro de setter)
+                        final triagemAtualizada = triagem.copyWith(
+                          observacoes: condutaCtrl.text,
+                          internacao: 'NAO'
+                        );
+                        
+                        await _triagemService.salvarTriagem(triagemAtualizada);
+                        await _pacienteService.arquivarPaciente(p);
+                        
+                        if (mounted) {
+                          Navigator.pop(context); // Fecha o modal
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Alta concedida com sucesso!")));
+                        }
+                      }
+                    },
+                    child: const Text("Dar Alta", style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    onPressed: () async {
+                      if (triagem != null) {
+                        // ✅ CRIA UMA CÓPIA ATUALIZADA (Sem erro de setter)
+                        final triagemAtualizada = triagem.copyWith(
+                          observacoes: condutaCtrl.text,
+                          internacao: 'SIM'
+                        );
+                        
+                        await _triagemService.salvarTriagem(triagemAtualizada);
+                        
+                        if (mounted) {
+                          Navigator.pop(context); // Fecha o modal
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Paciente encaminhado para internação.")));
+                        }
+                      }
+                    },
+                    child: const Text("Internar", style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -151,7 +228,7 @@ class _DashboardState extends State<Dashboard> {
     switch (index) {
       case 0: return _dashboard();
       case 1: return const TelaFarmacia();
-      case 2: return ListarPaciente(service: _pacienteService);
+      case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService); // 👈 Atualize esta linha
       case 3: return ListarMedico(service: _medicoService); 
       case 4: return const TelaMapaLeitos();
       case 5: return const TelaEstoque();
@@ -193,7 +270,10 @@ class _DashboardState extends State<Dashboard> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarPaciente(service: _pacienteService));
+                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarPaciente(
+                          service: _pacienteService, 
+                          convenioService: _convenioService // 👈 Adicione isso
+                        ));
                     },
                     icon: const Icon(Icons.person_add),
                     label: const Text("Paciente"),
@@ -212,6 +292,13 @@ class _DashboardState extends State<Dashboard> {
                     },
                     icon: const Icon(Icons.business),
                     label: const Text("Convênio"),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService));
+                    },
+                    icon: const Icon(Icons.favorite), // Ícone de coração/sinais vitais
+                    label: const Text("Triagem"),
                   ),
                 ],
               ),

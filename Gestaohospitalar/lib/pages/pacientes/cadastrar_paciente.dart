@@ -1,14 +1,17 @@
-// lib/pages/paciente/cadastrar_paciente.dart
+// lib/pages/pacientes/cadastrar_paciente.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../domain/entities/paciente.dart';
 import '../../../domain/services/paciente_service.dart';
+import '../../../domain/services/convenio_service.dart';
+import '../convenios/cadastrar_convenio.dart'; // ✅ Import para abrir o cadastro rápido
 
 class CadastrarPaciente extends StatefulWidget {
   final PacienteService service;
-  final Paciente? pacienteEdicao; // ✅ SE VIER PREENCHIDO, É MODO DE EDIÇÃO
+  final ConvenioService convenioService;
+  final Paciente? pacienteEdicao;
 
-  const CadastrarPaciente({super.key, required this.service, this.pacienteEdicao});
+  const CadastrarPaciente({super.key, required this.service, required this.convenioService, this.pacienteEdicao});
 
   @override
   State<CadastrarPaciente> createState() => _CadastrarPacienteState();
@@ -35,10 +38,16 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
   String _sexoSelecionado = 'Masculino';
   DateTime? _dataNascimento;
 
+  int? _idConvenioSelecionado;
+  final _carteiraCtrl = TextEditingController();
+  final _validadeCtrl = TextEditingController();
+  DateTime? _validadeCarteira;
+
   @override
   void initState() {
     super.initState();
-    // ✅ MÁGICA DA EDIÇÃO: Se for para editar, preenchemos os campos!
+    widget.convenioService.carregarConvenios();
+
     if (widget.pacienteEdicao != null) {
       final p = widget.pacienteEdicao!;
       _nomeCtrl.text = p.nome ?? '';
@@ -55,15 +64,30 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
       _cepCtrl.text = p.cep ?? '';
       _responsavelCtrl.text = p.nomeResponsavel ?? '';
       
-      if (p.sexo != null) {
-        // Converte "MASCULINO" do banco para "Masculino" do Dropdown
-        _sexoSelecionado = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
-      }
-
+      if (p.sexo != null) _sexoSelecionado = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
+      
       _dataNascimento = p.nascimento;
       if (_dataNascimento != null) {
         _nascimentoCtrl.text = "${_dataNascimento!.day.toString().padLeft(2, '0')}/${_dataNascimento!.month.toString().padLeft(2, '0')}/${_dataNascimento!.year}";
       }
+
+      _carregarConvenio(p.id!);
+    }
+  }
+
+  Future<void> _carregarConvenio(int idPaciente) async {
+    final vinculo = await widget.service.buscarVinculoConvenio(idPaciente);
+    if (vinculo != null && mounted) {
+      setState(() {
+        _idConvenioSelecionado = vinculo['id_convenio'];
+        _carteiraCtrl.text = vinculo['numero_carteira'] ?? '';
+        if (vinculo['validade'] != null) {
+          _validadeCarteira = DateTime.tryParse(vinculo['validade']);
+          if (_validadeCarteira != null) {
+            _validadeCtrl.text = "${_validadeCarteira!.day.toString().padLeft(2, '0')}/${_validadeCarteira!.month.toString().padLeft(2, '0')}/${_validadeCarteira!.year}";
+          }
+        }
+      });
     }
   }
 
@@ -73,6 +97,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
     _tipoSanguineoCtrl.dispose(); _historicoCtrl.dispose(); _telefoneCtrl.dispose(); _ruaCtrl.dispose();
     _numeroCasaCtrl.dispose(); _bairroCtrl.dispose(); _cidadeCtrl.dispose(); _estadoCtrl.dispose();
     _cepCtrl.dispose(); _responsavelCtrl.dispose();
+    _carteiraCtrl.dispose(); _validadeCtrl.dispose();
     super.dispose();
   }
 
@@ -89,12 +114,25 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
     }
   }
 
+  Future<void> _selecionarValidade(BuildContext context) async {
+    final DateTime? escolhida = await showDatePicker(
+      context: context, initialDate: _validadeCarteira ?? DateTime.now(),
+      firstDate: DateTime.now(), lastDate: DateTime(2100),
+    );
+    if (escolhida != null) {
+      setState(() {
+        _validadeCarteira = escolhida;
+        _validadeCtrl.text = "${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEdicao = widget.pacienteEdicao != null;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
+      height: MediaQuery.of(context).size.height * 0.88,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
@@ -175,7 +213,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    const Text("3. Ficha Clinical Inicial", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const Text("3. Ficha Clínica Inicial", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -186,6 +224,72 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(controller: _historicoCtrl, maxLines: 3, decoration: const InputDecoration(labelText: "Histórico Clínico", alignLabelWithHint: true, border: OutlineInputBorder())),
+                    
+                    const SizedBox(height: 24),
+                    const Text("4. Cobertura de Saúde (Opcional)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 12),
+                    
+                    // ✅ AQUI ESTÁ A IMPLEMENTAÇÃO DO BOTÃO DE "+" DO LADO DO CONVÊNIO
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ListenableBuilder(
+                            listenable: widget.convenioService,
+                            builder: (context, _) {
+                              return DropdownButtonFormField<int>(
+                                value: _idConvenioSelecionado,
+                                decoration: const InputDecoration(labelText: "Convênio", border: OutlineInputBorder(), prefixIcon: Icon(Icons.business)),
+                                items: [
+                                  const DropdownMenuItem<int>(value: null, child: Text("Nenhum / Particular")),
+                                  ...widget.convenioService.convenios.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nomeConvenio ?? '')))
+                                ],
+                                onChanged: (v) => setState(() => _idConvenioSelecionado = v),
+                              );
+                            }
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          height: 56, // Mesma altura do Dropdown
+                          decoration: BoxDecoration(
+                            color: Colors.teal,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            tooltip: "Adicionar Novo Convênio Rápido",
+                            onPressed: () {
+                              // Abre o modal do convênio sem fechar o modal do paciente!
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => CadastrarConvenio(service: widget.convenioService),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    if (_idConvenioSelecionado != null) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(child: TextFormField(controller: _carteiraCtrl, decoration: const InputDecoration(labelText: "Nº da Carteira", border: OutlineInputBorder()))),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _validadeCtrl, 
+                              readOnly: true, 
+                              onTap: () => _selecionarValidade(context), 
+                              decoration: const InputDecoration(labelText: "Validade *", prefixIcon: Icon(Icons.calendar_today), border: OutlineInputBorder()),
+                            )
+                          ),
+                        ],
+                      )
+                    ],
                   ],
                 ),
               ),
@@ -202,10 +306,19 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                   label: Text(isEdicao ? "Atualizar Paciente" : "Salvar Prontuário"),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+
+                      // ✅ AQUI ESTÁ A CORREÇÃO DO ERRO DO SQL: EXIGIR A VALIDADE!
+                      if (_idConvenioSelecionado != null && _validadeCarteira == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Por favor, informe a validade da carteira do convênio!'), backgroundColor: Colors.red)
+                        );
+                        return; // Trava a execução para não quebrar o banco
+                      }
+
                       try {
                         final novoPaciente = Paciente(
-                          id: widget.pacienteEdicao?.id, // ✅ SE TIVER ID, O SERVICE FAZ UPDATE!
-                          ativo: widget.pacienteEdicao?.ativo ?? 1, // Mantém ativo
+                          id: widget.pacienteEdicao?.id, 
+                          ativo: widget.pacienteEdicao?.ativo ?? 1, 
                           nome: _nomeCtrl.text,
                           cpf: _cpfCtrl.text,
                           sexo: _sexoSelecionado.toUpperCase(), 
@@ -223,7 +336,13 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                           nomeResponsavel: _responsavelCtrl.text.isEmpty ? null : _responsavelCtrl.text,
                         );
 
-                        await widget.service.salvarPaciente(novoPaciente);
+                        await widget.service.salvarPaciente(
+                          novoPaciente, 
+                          idConvenio: _idConvenioSelecionado,
+                          numeroCarteira: _carteiraCtrl.text.isEmpty ? null : _carteiraCtrl.text,
+                          validade: _validadeCarteira,
+                        );
+
                         if (context.mounted) {
                           Navigator.pop(context); 
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isEdicao ? 'Paciente atualizado!' : 'Cadastrado com sucesso!'), backgroundColor: isEdicao ? Colors.blue : Colors.teal));

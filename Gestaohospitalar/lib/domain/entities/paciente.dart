@@ -39,26 +39,44 @@ class Paciente extends Entitie {
     this.nomeResponsavel,
   });
 
-  // Método mágico para duplicar o objeto mudando apenas 1 informação
-  Paciente copyWith({int? ativo}) {
+  // ✅ Método mágico agora aceita atualizar QUALQUER atributo
+  Paciente copyWith({
+    int? id,
+    int? ativo,
+    String? nome,
+    String? cpf,
+    String? sexo,
+    DateTime? nascimento,
+    String? alergias,
+    String? tipoSanguineo,
+    String? historicoClinico,
+    String? telefone,
+    String? rua,
+    int? numeroCasa,
+    String? bairro,
+    String? cidade,
+    String? estado,
+    String? cep,
+    String? nomeResponsavel,
+  }) {
     return Paciente(
-      id: id,
+      id: id ?? this.id,
       ativo: ativo ?? this.ativo,
-      nome: nome,
-      cpf: cpf,
-      sexo: sexo,
-      nascimento: nascimento,
-      alergias: alergias,
-      tipoSanguineo: tipoSanguineo,
-      historicoClinico: historicoClinico,
-      telefone: telefone,
-      rua: rua,
-      numeroCasa: numeroCasa,
-      bairro: bairro,
-      cidade: cidade,
-      estado: estado,
-      cep: cep,
-      nomeResponsavel: nomeResponsavel,
+      nome: nome ?? this.nome,
+      cpf: cpf ?? this.cpf,
+      sexo: sexo ?? this.sexo,
+      nascimento: nascimento ?? this.nascimento,
+      alergias: alergias ?? this.alergias,
+      tipoSanguineo: tipoSanguineo ?? this.tipoSanguineo,
+      historicoClinico: historicoClinico ?? this.historicoClinico, // ✅ Agora ele recebe o valor novo da Triagem!
+      telefone: telefone ?? this.telefone,
+      rua: rua ?? this.rua,
+      numeroCasa: numeroCasa ?? this.numeroCasa,
+      bairro: bairro ?? this.bairro,
+      cidade: cidade ?? this.cidade,
+      estado: estado ?? this.estado,
+      cep: cep ?? this.cep,
+      nomeResponsavel: nomeResponsavel ?? this.nomeResponsavel,
     );
   }
 
