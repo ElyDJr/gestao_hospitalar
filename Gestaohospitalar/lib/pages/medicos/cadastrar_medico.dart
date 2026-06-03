@@ -44,10 +44,25 @@ class _CadastrarMedicoState extends State<CadastrarMedico> {
   @override
   Widget build(BuildContext context) {
     final isEdicao = widget.medicoEdicao != null;
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+
+
+
+
+   return Container(
+  // ✅ Ocupa toda a altura do painel lateral
+  height: double.infinity,
+
+  padding: const EdgeInsets.all(24),
+
+  // ✅ Remove as bordas arredondadas do BottomSheet
+  // porque agora ele será exibido como painel lateral
+  decoration: const BoxDecoration(
+    color: Colors.white,
+  ),
+    
+    
+    
+    
       child: Form(
         key: _formKey,
         child: Column(

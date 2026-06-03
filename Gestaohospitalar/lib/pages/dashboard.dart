@@ -16,7 +16,6 @@ import 'convenios/listar_convenio.dart';
 import 'convenios/cadastrar_convenio.dart';
 
 //Imports da triagem
-import '../domain/services/triagem_service.dart';
 import 'triagem/realizar_triagem.dart'; // A pasta que você acabou de criar
 
 import '../telas/tela_mapa_leitos.dart';
@@ -233,7 +232,7 @@ class _DashboardState extends State<Dashboard> {
       case 4: return const TelaMapaLeitos();
       case 5: return const TelaEstoque();
       case 6: return const TelaFaturamento();
-      case 7: return const TelaAtendimentoMedico();
+      case 7: return TelaAtendimentoMedico(database: widget.database);
       case 8: return ListarConvenio(service: _convenioService); // ✅ Mapeamento da listagem na aba lateral!
       default: return _dashboard();
     }
@@ -244,9 +243,41 @@ class _DashboardState extends State<Dashboard> {
       listenable: _pacienteService,
       builder: (context, _) {
         int emergencia = _pacienteService.pacientes.where((p) => p.historicoClinico == "Emergência").length;
-        int urgencia = _pacienteService.pacientes.where((p) => p.historicoClinico == "Urgência").length;
+        int muitoUrgente = _pacienteService.pacientes.where((p) => p.historicoClinico == "Muito Urgente").length;
+        int urgente = _pacienteService.pacientes.where((p) => p.historicoClinico == "Urgente").length;
         int poucoUrgente = _pacienteService.pacientes.where((p) => p.historicoClinico == "Pouco Urgente").length;
         int naoUrgente = _pacienteService.pacientes.where((p) => p.historicoClinico == "Não Urgente").length;
+
+        // Função auxiliar para simplificar a chamada do diálogo lateral
+        void abrirDialogoLateral(Widget content) {
+          showGeneralDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierLabel: "Cadastro",
+            barrierColor: Colors.black54,
+            transitionDuration: const Duration(milliseconds: 300),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(animation),
+                child: child,
+              );
+            },
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Material(
+                  elevation: 10,
+                  color: Colors.white,
+                  child: Container(
+                    width: 550,
+                    height: double.infinity,
+                    child: content,
+                  ),
+                ),
+              );
+            },
+          );
+        }
 
         return Padding(
           padding: const EdgeInsets.all(20),
@@ -258,10 +289,11 @@ class _DashboardState extends State<Dashboard> {
               Wrap(
                 spacing: 12,
                 children: [
-                  GestureDetector(onTap: () => _mostrarTriagem("Emergência", "Emergência"), child: _card("Emergência", emergencia, Colors.red)),
-                  GestureDetector(onTap: () => _mostrarTriagem("Urgência", "Urgência"), child: _card("Urgência", urgencia, Colors.orange)),
-                  GestureDetector(onTap: () => _mostrarTriagem("Pouco Urgente", "Pouco Urgente"), child: _card("Pouco Urgente", poucoUrgente, Colors.yellow[700]!)),
-                  GestureDetector(onTap: () => _mostrarTriagem("Não Urgente", "Não Urgente"), child: _card("Não Urgente", naoUrgente, Colors.green)),
+                  GestureDetector(onTap: () => _mostrarTriagem("Emergência", "Emergência"), child: _card("🔴 Emergência", emergencia, Colors.red)),
+                  GestureDetector(onTap: () => _mostrarTriagem("Muito Urgente", "Muito Urgente"), child: _card("🟠 Muito Urgente", muitoUrgente, Colors.orange)),
+                  GestureDetector(onTap: () => _mostrarTriagem("Urgente", "Urgente"), child: _card("🟡 Urgente", urgente, Colors.yellow[700]!)),
+                  GestureDetector(onTap: () => _mostrarTriagem("Pouco Urgente", "Pouco Urgente"), child: _card("🟢 Pouco Urgente", poucoUrgente, Colors.green)),
+                  GestureDetector(onTap: () => _mostrarTriagem("Não Urgente", "Não Urgente"), child: _card("🔵 Não Urgente", naoUrgente, Colors.blue)),
                 ],
               ),
               const SizedBox(height: 30),
@@ -269,35 +301,23 @@ class _DashboardState extends State<Dashboard> {
                 spacing: 12,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarPaciente(
-                          service: _pacienteService, 
-                          convenioService: _convenioService // 👈 Adicione isso
-                        ));
-                    },
+                    onPressed: () => abrirDialogoLateral(CadastrarPaciente(service: _pacienteService, convenioService: _convenioService)),
                     icon: const Icon(Icons.person_add),
                     label: const Text("Paciente"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarMedico(service: _medicoService));
-                    },
+                    onPressed: () => abrirDialogoLateral(CadastrarMedico(service: _medicoService)),
                     icon: const Icon(Icons.medical_services),
                     label: const Text("Médico"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      // ✅ Atalho direto para inclusão rápida
-                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => CadastrarConvenio(service: _convenioService));
-                    },
+                    onPressed: () => abrirDialogoLateral(CadastrarConvenio(service: _convenioService)),
                     icon: const Icon(Icons.business),
                     label: const Text("Convênio"),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService));
-                    },
-                    icon: const Icon(Icons.favorite), // Ícone de coração/sinais vitais
+                    onPressed: () => abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)),
+                    icon: const Icon(Icons.favorite),
                     label: const Text("Triagem"),
                   ),
                 ],

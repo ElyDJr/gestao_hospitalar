@@ -238,7 +238,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                             listenable: widget.convenioService,
                             builder: (context, _) {
                               return DropdownButtonFormField<int>(
-                                value: _idConvenioSelecionado,
+                                initialValue: _idConvenioSelecionado,
                                 decoration: const InputDecoration(labelText: "Convênio", border: OutlineInputBorder(), prefixIcon: Icon(Icons.business)),
                                 items: [
                                   const DropdownMenuItem<int>(value: null, child: Text("Nenhum / Particular")),

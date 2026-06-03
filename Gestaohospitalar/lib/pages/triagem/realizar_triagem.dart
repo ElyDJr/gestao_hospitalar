@@ -49,10 +49,10 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
   }
 
   String _mapearParaFila(String risco) {
-    if (risco == 'VERMELHO') return 'Emergência';
-    if (risco == 'LARANJA' || risco == 'AMARELO') return 'Urgência';
-    if (risco == 'VERDE') return 'Pouco Urgente';
-    return 'Não Urgente'; // AZUL
+  if (risco == 'VERMELHO') return 'Emergência';
+  if (risco == 'LARANJA' || risco == 'AMARELO') return 'Urgência';
+  if (risco == 'VERDE') return 'Pouco Urgente';
+  return 'Não Urgente'; // AZUL
   }
 
   // ✅ Função nova e limpa: Salva a triagem como pendente para o médico
