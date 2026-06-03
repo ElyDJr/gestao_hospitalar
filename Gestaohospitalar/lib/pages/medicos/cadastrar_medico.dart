@@ -62,8 +62,9 @@ class _CadastrarMedicoState extends State<CadastrarMedico> {
               TextFormField(controller: _honorarioCtrl, decoration: const InputDecoration(labelText: "Honorário", prefixIcon: Icon(Icons.attach_money), border: OutlineInputBorder())),
             ]))),
             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: isEdicao ? Colors.blue : Colors.teal, foregroundColor: Colors.white, minimumSize: const Size(double.infinity, 50)),
               icon: Icon(isEdicao ? Icons.update : Icons.save),
-              label: Text(isEdicao ? "Atualizar" : "Salvar"),
+              label: Text(isEdicao ? "Atualizar Médico" : "Salvar Médico"),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   final medico = Medico(
@@ -73,10 +74,20 @@ class _CadastrarMedicoState extends State<CadastrarMedico> {
                     crm: _crmCtrl.text,
                     telefone: _telefoneCtrl.text,
                     email: _emailCtrl.text,
-                    honorario: double.tryParse(_honorarioCtrl.text),
+                    honorario: double.tryParse(_honorarioCtrl.text.replaceAll(',', '.')),
                   );
                   await widget.service.salvarMedicoComEspecialidade(medico, _especialidadeCtrl.text);
-                  if (context.mounted) Navigator.pop(context);
+                  
+                  // ✅ MENSAGEM DE SUCESSO AQUI
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isEdicao ? 'Médico atualizado com sucesso!' : 'Médico cadastrado com sucesso!'),
+                        backgroundColor: isEdicao ? Colors.blue : Colors.teal,
+                      )
+                    );
+                  }
                 }
               },
             )

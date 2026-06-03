@@ -76,12 +76,26 @@ class _DashboardState extends State<Dashboard> {
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
                               onPressed: () async {
+                                // 1. Arquiva no banco
                                 if (p.id != null) {
                                   await _pacienteService.arquivarPaciente(p);
                                 }
-                                if (context.mounted) Navigator.pop(context);
+                                
+                                // 2. Fecha o dialog e mostra a mensagem
+                                if (context.mounted) {
+                                  Navigator.pop(context); // Fecha a telinha da triagem
+                                  
+                                  // ✅ A MENSAGEM VEM AQUI, DEPOIS DE FECHAR O DIALOG!
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Alta realizada! O prontuário de ${p.nome} foi arquivado.'),
+                                      backgroundColor: Colors.green,
+                                      duration: const Duration(seconds: 3), // Opcional: tempo da mensagem
+                                    ),
+                                  );
+                                }
                               },
-                              child: const Text("Dar Alta"),
+                              child: const Text("Dar Alta"), // O child continua intacto aqui
                             ),
                           ),
                         );

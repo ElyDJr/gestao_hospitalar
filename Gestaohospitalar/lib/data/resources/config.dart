@@ -12,7 +12,7 @@ CREATE TABLE convenio(
     cobre_internacao INTEGER DEFAULT 1 CHECK (cobre_internacao IN (0, 1)),
     cobre_exames INTEGER DEFAULT 1 CHECK (cobre_exames IN (0, 1)),
     cobre_cirurgia INTEGER DEFAULT 1 CHECK (cobre_cirurgia IN (0, 1)),
-    limite_medicamento REAL, 
+    limite_medicamento REAL,
     percentual_cobertura REAL
 );
 

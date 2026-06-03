@@ -142,7 +142,10 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isEdicao ? Colors.blue : Colors.teal,
+                    foregroundColor: Colors.white
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
@@ -158,7 +161,17 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
                           percentualCobertura: double.tryParse(_coberturaCtrl.text),
                         );
                         await widget.service.salvarConvenio(novoConvenio);
-                        if (context.mounted) Navigator.pop(context);
+                        
+                        // ✅ MENSAGEM DE SUCESSO AQUI
+                        if (context.mounted) {
+                          Navigator.pop(context); // Fecha a tela
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(isEdicao ? 'Convênio atualizado com sucesso!' : 'Convênio cadastrado com sucesso!'),
+                              backgroundColor: isEdicao ? Colors.blue : Colors.teal
+                            )
+                          );
+                        }
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red));
@@ -166,7 +179,7 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
                       }
                     }
                   },
-                  child: const Text("Salvar Convênio"),
+                  child: Text(isEdicao ? "Atualizar Convênio" : "Salvar Convênio"),
                 ),
               ],
             )

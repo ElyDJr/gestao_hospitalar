@@ -168,6 +168,13 @@ class _ListarConvenioState extends State<ListarConvenio> {
                                 );
                                 if (confirmar == true) {
                                   await widget.service.arquivarConvenio(c);
+                                  
+                                  // ✅ MENSAGEM DE ARQUIVAMENTO AQUI
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('${c.nomeConvenio} foi arquivado!'), backgroundColor: Colors.orange)
+                                    );
+                                  }
                                 }
                               },
                             ),

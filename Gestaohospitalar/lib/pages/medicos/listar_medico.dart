@@ -134,6 +134,13 @@ class _ListarMedicoState extends State<ListarMedico> {
                                 );
                                 if (confirmar == true) {
                                   await widget.service.arquivarMedico(m);
+                                  
+                                  // ✅ MENSAGEM DE ARQUIVAMENTO AQUI
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Dr(a). ${m.nome} arquivado(a) com sucesso!'), backgroundColor: Colors.orange)
+                                    );
+                                  }
                                 }
                               },
                             ),

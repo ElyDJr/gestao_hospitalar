@@ -174,6 +174,13 @@ class _ListarPacienteState extends State<ListarPaciente> {
                                 );
                                 if (confirmar == true) {
                                   await widget.service.arquivarPaciente(p);
+                                  
+                                  // ✅ MENSAGEM DE ARQUIVAMENTO AQUI
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Prontuário de ${p.nome} arquivado!'), backgroundColor: Colors.orange)
+                                    );
+                                  }
                                 }
                               },
                             ),
