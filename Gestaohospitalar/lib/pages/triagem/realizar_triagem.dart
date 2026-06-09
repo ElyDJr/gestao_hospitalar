@@ -48,54 +48,76 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
     }
   }
 
-  String _mapearParaFila(String risco) {
-    if (risco == 'VERMELHO') return 'Emergência';
-    if (risco == 'LARANJA') return 'Muito Urgente'; // ✅ Corrigido
-    if (risco == 'AMARELO') return 'Urgente';       // ✅ Corrigido
-    if (risco == 'VERDE') return 'Pouco Urgente';
-    return 'Não Urgente'; // AZUL
-  }
+  // Future<void> _enviarParaFilaMedica() async {
+  //   if (_formKey.currentState!.validate() && _pacienteSelecionado != null) {
+  //     try {
+  //       final triagem = Triagem(
+  //         idPaciente: _pacienteSelecionado!.id!,
+  //         pressao: _pressaoCtrl.text,
+  //         temperatura: double.tryParse(_tempCtrl.text),
+  //         frequenciaCardiaca: int.tryParse(_fcCtrl.text),
+  //         saturacao: int.tryParse(_satCtrl.text),
+  //         escalaDor: int.tryParse(_dorCtrl.text),
+  //         risco: _riscoSelecionado, // O risco está sendo salvo APENAS aqui
+  //         queixa: _queixaCtrl.text,
+  //         alergias: _alergiasCtrl.text,
+  //         observacoes: _obsCtrl.text,
+  //         internacao: null, 
+  //       );
 
-  // ✅ Função nova e limpa: Salva a triagem como pendente para o médico
+  //       // 1. Salva a Ficha de Triagem (Tabela triagem)
+  //       await widget.triagemService.salvarTriagem(triagem);
+
+  //       // O salvamento no pacienteService foi removido para não alterar o histórico do paciente.
+        
+  //       if (mounted) {
+  //         Navigator.pop(context);
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text('${_pacienteSelecionado!.nome} entrou na fila de atendimento!'), 
+  //             backgroundColor: Colors.teal
+  //           )
+  //         );
+  //       }
+  //     } catch (e) {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red)
+  //         );
+  //       }
+  //     }
+  //   } else if (_pacienteSelecionado == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Selecione um paciente!'), backgroundColor: Colors.red)
+  //     );
+  //   }
+  // }
+
   Future<void> _enviarParaFilaMedica() async {
     if (_formKey.currentState!.validate() && _pacienteSelecionado != null) {
       try {
         final triagem = Triagem(
           idPaciente: _pacienteSelecionado!.id!,
-          pressao: _pressaoCtrl.text,
-          temperatura: double.tryParse(_tempCtrl.text),
-          frequenciaCardiaca: int.tryParse(_fcCtrl.text),
-          saturacao: int.tryParse(_satCtrl.text),
-          escalaDor: int.tryParse(_dorCtrl.text),
-          risco: _riscoSelecionado,
+          // ... (seus campos de sinais vitais)
+          risco: _riscoSelecionado, // AQUI está o risco real
           queixa: _queixaCtrl.text,
-          alergias: _alergiasCtrl.text,
-          observacoes: _obsCtrl.text,
-          internacao: null, // ✅ AGUARDANDO MÉDICO (No banco fica NULL)
+          internacao: 'NAO', 
         );
 
-        // 1. Salva a Ficha de Triagem
+        // Salva APENAS na tabela de Triagem
         await widget.triagemService.salvarTriagem(triagem);
-
-        // 2. Atualiza o Paciente para aparecer nos cards coloridos da Dashboard
-        final pacienteAtualizado = _pacienteSelecionado!.copyWith(
-          historicoClinico: _mapearParaFila(_riscoSelecionado),
-        );
-        await widget.pacienteService.salvarPaciente(pacienteAtualizado);
         
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${_pacienteSelecionado!.nome} entrou na fila de atendimento!'), backgroundColor: Colors.teal)
+            const SnackBar(content: Text('Triagem realizada com sucesso!'), backgroundColor: Colors.teal)
           );
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red));
+        // ... tratamento de erro
       }
-    } else if (_pacienteSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione um paciente!'), backgroundColor: Colors.red));
     }
-  }
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +132,7 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(children: [Icon(Icons.medical_information, color: Colors.teal, size: 28), SizedBox(width: 8), Text("Classificação de Risco (Enfermagem)", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal))]),
+                const Row(children: [Icon(Icons.medical_information, color: Colors.teal, size: 28), SizedBox(width: 8), Text("Classificação de Risco", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal))]),
                 IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))
               ],
             ),
@@ -186,13 +208,11 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
               children: [
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar", style: TextStyle(color: Colors.grey))),
                 const SizedBox(width: 16),
-                
-                // ✅ Botão único final da Enfermagem
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(backgroundColor: _obterCorRisco(_riscoSelecionado), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text("Enviar p/ Fila Médica"),
-                  onPressed: _enviarParaFilaMedica, // Chama a nova função
+                  onPressed: _enviarParaFilaMedica,
                 ),
               ],
             )

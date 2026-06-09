@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../entities/triagem.dart';
 import '../repository/entitie_repository.dart';
 import '../../data/repositories/generic_repository_impl.dart';
+import '../../data/resources/database_provider.dart';
 
 
 
@@ -43,4 +44,26 @@ class TriagemService with ChangeNotifier {
     }
     return null;
   }
+
+  // Adicione ao TriagemService
+Future<List<Map<String, dynamic>>> buscarFilaTriagem() async {
+  final db = await DatabaseProvider.instance.database;
+  
+  // Consulta unindo as duas tabelas
+  // Filtramos por pacientes que ainda não foram internados (assumindo que 'internacao' na triagem é NULL ou 'NAO')
+  return await db.rawQuery('''
+    SELECT t.*, p.nome, p.cpf 
+    FROM triagem t
+    JOIN paciente p ON t.id_paciente = p.id_paciente
+    WHERE t.internacao IS NULL OR t.internacao = 'NAO'
+    ORDER BY CASE t.risco 
+      WHEN 'VERMELHO' THEN 1 
+      WHEN 'LARANJA' THEN 2 
+      WHEN 'AMARELO' THEN 3 
+      WHEN 'VERDE' THEN 4 
+      WHEN 'AZUL' THEN 5 
+      ELSE 6 END
+    ''');
+  }
+
 }

@@ -298,10 +298,6 @@ static const String mockData = '''
   INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (5, 5, 'SUS00000', '2099-12-31');
     
   INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (1, 'VERDE', 'Dor de cabeça', 'NAO');
-  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (2, 'LARANJA', 'Dor abdominal', 'SIM');
-  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (3, 'VERMELHO', 'Dor no peito', 'SIM');
-  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (4, 'AZUL', 'Check-up', 'NAO');
-  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (5, 'AMARELO', 'Febre alta', 'NAO');
 
   INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (1, 1, 1, '2026-06-07 09:00', 'AGENDADO');
   INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (2, 2, 2, '2026-06-07 10:00', 'CONFIRMADO');

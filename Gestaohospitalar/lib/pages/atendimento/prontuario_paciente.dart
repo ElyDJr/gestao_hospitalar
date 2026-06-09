@@ -5,6 +5,7 @@ import '../../domain/entities/internacao.dart';
 import '../../domain/services/leito_service.dart';
 import '../../domain/services/internacao_service.dart';
 import '../../domain/services/paciente_service.dart';
+import 'registrar_internacao.dart';
 
 class ProntuarioPaciente extends StatefulWidget {
   final Paciente paciente;
@@ -162,12 +163,18 @@ class _ProntuarioPacienteState extends State<ProntuarioPaciente> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ElevatedButton(
-              onPressed: () { /* Lógica de Alta */ },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text('Dar Alta'),
-            ),
-            ElevatedButton(
-              onPressed: _abrirDialogInternacao, // Chama o Dialog criado acima
+              // 🟢 NAVEGAÇÃO PARA A NOVA TELA
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegistrarInternacao(
+                      paciente: widget.paciente,
+                      pacienteService: widget.pacienteService,
+                    ),
+                  ),
+                );
+              }, 
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               child: const Text('Encaminhar p/ Internação'),
             ),

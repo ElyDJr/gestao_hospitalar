@@ -1,9 +1,9 @@
 class Leito {
   final int? id;
   final String? numero;
-  final String? ala; // Substitui o 'tipo'
+  final String? ala;
   final DateTime? dataHigienizacao;
-  final String? situacao; // Substitui o 'status' (VAGO, OCUPADO, HIGIENIZACAO)
+  final String? situacao;
 
   Leito({
     this.id,
@@ -13,7 +13,6 @@ class Leito {
     this.situacao,
   });
 
-  // Converte a classe para o formato que o SQLite entende (snake_case)
   Map<String, dynamic> toMap() {
     return {
       'id_leito': id,
@@ -24,7 +23,6 @@ class Leito {
     };
   }
 
-  // Converte o retorno do SQLite para a classe Dart
   factory Leito.fromMap(Map<String, dynamic> map) {
     return Leito(
       id: map['id_leito'],
@@ -36,4 +34,14 @@ class Leito {
       situacao: map['situacao'],
     );
   }
+
+  // 🟢 ADICIONE ESTAS LINHAS AQUI (Sobrescrita de Igualdade)
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Leito && other.id == id; // Dois leitos são o mesmo se o ID for igual
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

@@ -35,7 +35,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
   final _cepCtrl = TextEditingController();
   final _responsavelCtrl = TextEditingController();
   
-  String _sexoSelecionado = 'Masculino';
+  String _sexoSelecionado = '';
   DateTime? _dataNascimento;
 
   int? _idConvenioSelecionado;

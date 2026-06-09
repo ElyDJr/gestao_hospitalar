@@ -22,7 +22,7 @@ class Internacao {
       'id_internacao': id,
       'id_prontuario': idProntuario,
       'id_leito': idLeito,
-      'data_entrada': dataEntrada?.toIso8601String(),
+      'data_entrada': dataEntrada?.toIso8601String(), // Converte DateTime para String no formato ISO
       'data_alta': dataAlta?.toIso8601String(),
       'isolamento': isolamento,
       'status_internacao': statusInternacao,

@@ -19,6 +19,8 @@ class _TelaLoginState extends State<TelaLogin> {
   final user = TextEditingController();
   final pass = TextEditingController();
 
+  String tipoAcesso = "MEDICO";
+
   @override
   void dispose() {
     user.dispose();
@@ -42,7 +44,7 @@ class _TelaLoginState extends State<TelaLogin> {
     }
 
     // 1. Administrador (Acesso Total)
-    if (usuarioDigitado == 'admin') {
+    if (tipoAcesso == 'ADMIN') {
       if (senhaDigitada == '123456') { 
         if (!mounted) return;
         Navigator.pushReplacement(
@@ -181,50 +183,107 @@ class _TelaLoginState extends State<TelaLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "LOGIN HOSPITAL",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
-              ),
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: user,
-                decoration: const InputDecoration(
-                  labelText: "Usuário ou CRM",
-                  border: OutlineInputBorder(),
+      // Removido o background do Scaffold para não conflitar com o fundo customizado
+      body: Stack(
+        children: [
+          // ─── CAMADA 1: LOGO GRANDE DE FUNDO ───
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: const AssetImage('assets/images/monge2.jpeg'), // Seu logo
+                fit: BoxFit.contain, // Mantém a proporção do logo sem cortar nas bordas
+                colorFilter: ColorFilter.mode(
+                  Colors.white.withValues(alpha: 0.08), // 0.08 deixa bem suave (estilo marca d'água)
+                  BlendMode.dstATop,
                 ),
               ),
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: pass,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Senha",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 45),
-                ),
-                onPressed: _login,
-                child: const Text("Entrar"),
-              ),
-            ],
+            ),
           ),
-        ),
+          
+          // ─── CAMADA 2: FORMULÁRIO DE LOGIN (NA FRENTE) ───
+          Center(
+            child: SingleChildScrollView( // Evita erro de quebra de layout ao abrir o teclado
+              child: SizedBox(
+                width: 300,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      tipoAcesso == "ADMIN" ? "LOGIN ADMINISTRADOR" : "LOGIN MÉDICO",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Radio<String>(
+                          value: "MEDICO",
+                          groupValue: tipoAcesso,
+                          onChanged: (value) {
+                            setState(() {
+                              tipoAcesso = value!;
+                            });
+                          },
+                        ),
+                        const Text("Médico"),
+                        const SizedBox(width: 20),
+                        Radio<String>(
+                          value: "ADMIN",
+                          groupValue: tipoAcesso,
+                          onChanged: (value) {
+                            setState(() {
+                              tipoAcesso = value!;
+                            });
+                          },
+                        ),
+                        const Text("Administrador"),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: user,
+                      decoration: InputDecoration(
+                        labelText: tipoAcesso == "ADMIN" ? "Usuário" : "CRM",
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.8), // Fundo levemente branco nos inputs para facilitar a leitura
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: pass,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Senha",
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      onPressed: _login,
+                      child: const Text("Entrar"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
