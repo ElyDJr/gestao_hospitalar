@@ -168,7 +168,7 @@ class _TelaAtendimentoMedicoState extends State<TelaAtendimentoMedico> {
                             title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Text("Triagem: ${p.riskLevel.toUpperCase()}"),
                             selected: pacienteSelecionado == p,
-                            selectedTileColor: Colors.teal.withOpacity(0.1),
+                            selectedTileColor: Colors.teal.withValues(alpha: 0.1),
                             selectedColor: Colors.teal,
                             onTap: () => _selecionarPaciente(p),
                           );

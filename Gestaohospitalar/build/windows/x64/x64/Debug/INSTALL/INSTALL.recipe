@@ -11,6 +11,12 @@
       <FullPath>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\printing\Debug\printing_plugin.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
+      <FullPath>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\sqlite3_flutter_libs\Debug\sqlite3.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\sqlite3_flutter_libs\Debug\sqlite3_flutter_libs_plugin.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
       <FullPath>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\runner\Debug\gestaohospitalar01.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>

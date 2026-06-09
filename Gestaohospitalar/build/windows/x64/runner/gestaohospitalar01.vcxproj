@@ -71,7 +71,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -94,10 +94,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_HAS_EXCEPTIONS=0;FLUTTER_VERSION=\"0.1.0+1\";FLUTTER_VERSION_MAJOR=0;FLUTTER_VERSION_MINOR=1;FLUTTER_VERSION_PATCH=0;FLUTTER_VERSION_BUILD=1;NOMINMAX;UNICODE;_UNICODE;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -105,7 +105,7 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\flutter\Debug\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Debug\printing_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\flutter\Debug\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Debug\printing_plugin.lib;..\plugins\sqlite3_flutter_libs\Debug\sqlite3_flutter_libs_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -123,7 +123,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DisableSpecificWarnings>"4100"</DisableSpecificWarnings>
@@ -147,10 +147,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_EXCEPTIONS=0;FLUTTER_VERSION=\"0.1.0+1\";FLUTTER_VERSION_MAJOR=0;FLUTTER_VERSION_MINOR=1;FLUTTER_VERSION_PATCH=0;FLUTTER_VERSION_BUILD=1;NOMINMAX;UNICODE;_UNICODE;CMAKE_INTDIR=\"Profile\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -158,7 +158,7 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\flutter\Profile\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Profile\printing_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\flutter\Profile\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Profile\printing_plugin.lib;..\plugins\sqlite3_flutter_libs\Profile\sqlite3_flutter_libs_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -176,7 +176,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DisableSpecificWarnings>"4100"</DisableSpecificWarnings>
@@ -200,10 +200,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_EXCEPTIONS=0;FLUTTER_VERSION=\"0.1.0+1\";FLUTTER_VERSION_MAJOR=0;FLUTTER_VERSION_MINOR=1;FLUTTER_VERSION_PATCH=0;FLUTTER_VERSION_BUILD=1;NOMINMAX;UNICODE;_UNICODE;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\cpp_client_wrapper\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\printing\windows\include;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\.plugin_symlinks\sqlite3_flutter_libs\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -211,7 +211,7 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\flutter\Release\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Release\printing_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>..\flutter\Release\flutter_wrapper_app.lib;dwmapi.lib;..\plugins\printing\Release\printing_plugin.lib;..\plugins\sqlite3_flutter_libs\Release\sqlite3_flutter_libs_plugin.lib;C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\windows\flutter\ephemeral\flutter_windows.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -300,6 +300,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ProjectReference Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\printing\printing_plugin.vcxproj">
       <Project>{496DFE53-50FA-3AA0-B39B-9DC74F72E888}</Project>
       <Name>printing_plugin</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\sqlite3_flutter_libs\sqlite3_flutter_libs_plugin.vcxproj">
+      <Project>{BE31E70A-A028-3E29-A82D-E5CB0FD06333}</Project>
+      <Name>sqlite3_flutter_libs_plugin</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -156,7 +156,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\runner\ALL_BUILD.vcxproj">
+    <ProjectReference Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\plugins\sqlite3_flutter_libs\ALL_BUILD.vcxproj">
       <Project>{FBA3C921-341B-3C32-B9AD-DDCC34EB80EB}</Project>
       <Name>ALL_BUILD</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

@@ -98,7 +98,11 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
       try {
         final triagem = Triagem(
           idPaciente: _pacienteSelecionado!.id!,
-          // ... (seus campos de sinais vitais)
+          pressao: _pressaoCtrl.text,
+          temperatura: double.tryParse(_tempCtrl.text),
+          frequenciaCardiaca: int.tryParse(_fcCtrl.text),
+          saturacao: int.tryParse(_satCtrl.text),
+          escalaDor: int.tryParse(_dorCtrl.text),
           risco: _riscoSelecionado, // AQUI está o risco real
           queixa: _queixaCtrl.text,
           internacao: 'NAO', 

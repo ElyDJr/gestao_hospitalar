@@ -7,14 +7,18 @@ import 'package:sqflite/sqflite.dart';
 // PACIENTES
 import 'pacientes/listar_paciente.dart';
 import 'pacientes/cadastrar_paciente.dart';
+
 // MEDICOS
 import 'medicos/listar_medico.dart';
 import 'medicos/cadastrar_medico.dart';
+
 // CONVENIO
 import 'convenios/listar_convenio.dart';
 import 'convenios/cadastrar_convenio.dart';
+
 // TRIAGEM
 import 'triagem/realizar_triagem.dart';
+
 // ATENDIMENTO
 import 'atendimento/registrar_internacao.dart';
 
@@ -23,10 +27,12 @@ import '../telas/tela_estoque.dart';
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_farmacia.dart';
 import '../telas/tela_atendimento_medico.dart';
+import '../telas/tela_login.dart'; 
 
 import '../domain/services/paciente_service.dart';
-import '../domain/services/medico_service.dart';
+import '../domain/services/medico_service.dart'; 
 import '../domain/services/convenio_service.dart';
+
 
 class Dashboard extends StatefulWidget {
   final Database database;
@@ -48,24 +54,24 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    // super.initState();
-    // _pacienteService = PacienteService(widget.database);
-    // _pacienteService.carregarPacientes();
-
-    // _medicoService = MedicoService(widget.database);
-    // _medicoService.carregarMedicos();
-
-    // _convenioService = ConvenioService(widget.database);
-    // _convenioService.carregarConvenios();
-
-    // _triagemService = TriagemService(widget.database);
-    // _carregarFila();
-
     super.initState();
     _pacienteService = PacienteService(widget.database);
+    _pacienteService.carregarPacientes();
+
     _medicoService = MedicoService(widget.database);
+    _medicoService.carregarMedicos();
+
     _convenioService = ConvenioService(widget.database);
+    _convenioService.carregarConvenios();
+
     _triagemService = TriagemService(widget.database);
+    _carregarFila();
+
+    super.initState();
+    // _pacienteService = PacienteService(widget.database);
+    // _medicoService = MedicoService(widget.database);
+    // _convenioService = ConvenioService(widget.database);
+    // _triagemService = TriagemService(widget.database);
     
     _carregarDadosIniciais();
   }
@@ -134,7 +140,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             Text("Prontuário: ${p.nome}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const Divider(),
-            Text("CPF: ${p.cpf}"),
+            Text("CPF: ${p.cpf}  | Nascimento: ${p.nascimento?.day}/${p.nascimento?.month}/${p.nascimento?.year}"),
             const SizedBox(height: 20),
             if (triagem != null)
               Card(
@@ -143,7 +149,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Column(
                     children: [
                       Text("Queixa: ${triagem.queixa}"),
-                      Text("Sinais: PA ${triagem.pressao} | Temp ${triagem.temperatura}°C"),
+                      Text("Sinais: PA ${triagem.pressao} | Temp ${triagem.temperatura}°C | Sat ${triagem.saturacao}%"),
                     ],
                   ),
                 ),
@@ -209,24 +215,48 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("MONGE - GESTÃO HOSPITALAR"), backgroundColor: Colors.teal, foregroundColor: Colors.white),
+      appBar: AppBar(title: const Text("MONGE - GESTÃO HOSPITALAR"), backgroundColor: Colors.teal, foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+      icon: const Icon(Icons.logout), // Ícone de porta/saída
+      tooltip: 'Sair do Sistema',
+      onPressed: () {
+        // Redireciona para a tela de login limpando a memória de telas anteriores
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TelaLogin(database: widget.database),
+          ),
+          (route) => false, // Garante que o usuário não consiga "voltar" sem logar
+        );
+      },
+    ),
+    const SizedBox(width: 16), // Dá um espaço elegante até a borda da tela
+        ],
+      ),
+      
       body: Row(
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) {
               setState(() => _selectedIndex = i);
+              _pacienteService.carregarPacientes();
+              _medicoService.carregarMedicos();
+              _convenioService.carregarConvenios();
             },
+            extended: false,
+            labelType: NavigationRailLabelType.none,
             destinations: const [
-              NavigationRailDestination(icon: Icon(Icons.dashboard), label: Text("Início")),
-              NavigationRailDestination(icon: Icon(Icons.local_pharmacy), label: Text("Farmácia")),
-              NavigationRailDestination(icon: Icon(Icons.people), label: Text("Pacientes")),
-              NavigationRailDestination(icon: Icon(Icons.medical_services), label: Text("Médicos")),
-              NavigationRailDestination(icon: Icon(Icons.bed), label: Text("Leitos")),
-              NavigationRailDestination(icon: Icon(Icons.inventory), label: Text("Estoque")),
-              NavigationRailDestination(icon: Icon(Icons.attach_money), label: Text("Faturamento")),
-              NavigationRailDestination(icon: Icon(Icons.healing), label: Text("Atendimento")),
-              NavigationRailDestination(icon: Icon(Icons.business), label: Text("Convênios")),
+              NavigationRailDestination(icon: Tooltip(message: "Início", child: Icon(Icons.dashboard)), label: Text("Início")),
+              NavigationRailDestination(icon: Tooltip(message: "Farmácia", child: Icon(Icons.local_pharmacy)), label: Text("Farmácia")),
+              NavigationRailDestination(icon: Tooltip(message: "Pacientes", child: Icon(Icons.people)), label: Text("Pacientes")),
+              NavigationRailDestination(icon: Tooltip(message: "Médicos", child: Icon(Icons.medical_services)), label: Text("Médicos")),
+              NavigationRailDestination(icon: Tooltip(message: "Leitos", child: Icon(Icons.bed)), label: Text("Leitos")),
+              NavigationRailDestination(icon: Tooltip(message: "Estoque", child: Icon(Icons.inventory)), label: Text("Estoque")),
+              NavigationRailDestination(icon: Tooltip(message: "Faturamento", child: Icon(Icons.attach_money)), label: Text("Faturamento")),
+              NavigationRailDestination(icon: Tooltip(message: "Atendimento", child: Icon(Icons.healing)), label: Text("Atendimento")),
+              NavigationRailDestination(icon: Tooltip(message: "Convênios", child: Icon(Icons.business)), label: Text("Convênios")),
             ],
           ),
           const VerticalDivider(width: 1),
@@ -239,14 +269,19 @@ class _DashboardState extends State<Dashboard> {
   Widget _getPage(int index) {
     switch (index) {
       case 0: return _dashboard();
-      case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
-      case 3: return ListarMedico(service: _medicoService);
+      case 1: return const TelaFarmacia();
+      case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService); // 👈 Atualize esta linha
+      case 3: return ListarMedico(service: _medicoService); 
       case 4: return const TelaMapaLeitos();
+      case 5: return const TelaEstoque();
+      case 6: return const TelaFaturamento();
+      case 7: return TelaAtendimentoMedico(database: widget.database);
+      case 8: return ListarConvenio(service: _convenioService); // ✅ Mapeamento da listagem na aba lateral!
       default: return _dashboard();
     }
   }
 
-  Widget _dashboard() {
+  Widget _dashboard() { //ver aqui pq tem que buscar na tabela triagem
     // Calcula as contagens baseadas na FILA DE TRIAGEM real
     int emergencia = _filaTriagem.where((t) => t['risco'] == "VERMELHO").length;
     int muitoUrgente = _filaTriagem.where((t) => t['risco'] == "LARANJA").length;
@@ -254,12 +289,43 @@ class _DashboardState extends State<Dashboard> {
     int poucoUrgente = _filaTriagem.where((t) => t['risco'] == "VERDE").length;
     int naoUrgente = _filaTriagem.where((t) => t['risco'] == "AZUL").length;
 
+  //ABRE MENU LATERAL PARA CADASTRO
+  Future<void> abrirDialogoLateral(Widget content) async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Cadastro",
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(animation),
+          child: child,
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Material(
+            elevation: 10,
+            color: Colors.white,
+            child: SizedBox(
+              width: 550,
+              height: double.infinity,
+              child: content,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Painel Geral (Triagem Ativa)", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text("Painel Geral", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
@@ -272,14 +338,35 @@ class _DashboardState extends State<Dashboard> {
             ],
           ),
           const SizedBox(height: 30),
-          ElevatedButton.icon(
-            onPressed: () async {
-               // Quando fechar o cadastro de triagem, recarrega a fila
-              await Navigator.push(context, MaterialPageRoute(builder: (_) => RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)));
-              _carregarFila();
-            },
-            icon: const Icon(Icons.favorite),
-            label: const Text("Nova Triagem"),
+          Wrap(
+            spacing: 12,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await abrirDialogoLateral(CadastrarPaciente(service: _pacienteService, convenioService: _convenioService));
+                  _pacienteService.carregarPacientes(); // Atualiza pacientes
+                },
+                label: const Text("Paciente"),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => abrirDialogoLateral(CadastrarMedico(service: _medicoService)),
+                icon: const Icon(Icons.medical_services),
+                label: const Text("Médico"),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => abrirDialogoLateral(CadastrarConvenio(service: _convenioService)),
+                icon: const Icon(Icons.business),
+                label: const Text("Convênio"),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService));
+                  _carregarFila();
+                },
+                icon: const Icon(Icons.favorite),
+                label: const Text("Triagem"),
+              ),
+            ],
           ),
         ],
       ),

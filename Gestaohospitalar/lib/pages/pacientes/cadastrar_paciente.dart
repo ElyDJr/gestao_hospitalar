@@ -35,7 +35,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
   final _cepCtrl = TextEditingController();
   final _responsavelCtrl = TextEditingController();
   
-  String _sexoSelecionado = '';
+  String ? _sexoSelecionado;
   DateTime? _dataNascimento;
 
   int? _idConvenioSelecionado;
@@ -64,7 +64,13 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
       _cepCtrl.text = p.cep ?? '';
       _responsavelCtrl.text = p.nomeResponsavel ?? '';
       
-      if (p.sexo != null) _sexoSelecionado = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
+      // 🟢 Substitua a linha do sexo por este bloco seguro:
+      if (p.sexo != null && p.sexo!.isNotEmpty) {
+        String s = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
+        if (['Masculino', 'Feminino', 'Outro'].contains(s)) {
+          _sexoSelecionado = s;
+        }
+      }
       
       _dataNascimento = p.nascimento;
       if (_dataNascimento != null) {
@@ -321,7 +327,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                           ativo: widget.pacienteEdicao?.ativo ?? 1, 
                           nome: _nomeCtrl.text,
                           cpf: _cpfCtrl.text,
-                          sexo: _sexoSelecionado.toUpperCase(), 
+                          sexo: _sexoSelecionado, 
                           nascimento: _dataNascimento,
                           alergias: _alergiasCtrl.text.isEmpty ? null : _alergiasCtrl.text,
                           tipoSanguineo: _tipoSanguineoCtrl.text.isEmpty ? null : _tipoSanguineoCtrl.text,

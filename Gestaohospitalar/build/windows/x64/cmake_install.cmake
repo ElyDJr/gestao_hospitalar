@@ -47,6 +47,11 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/cmake_install.cmake")
+endif()
+
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Runtime" OR NOT CMAKE_INSTALL_COMPONENT)
   if(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
     list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
@@ -152,7 +157,7 @@ endif()
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Runtime" OR NOT CMAKE_INSTALL_COMPONENT)
   if(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
     list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/pdfium.dll")
+     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/pdfium.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/sqlite3_flutter_libs_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug/sqlite3.dll")
     if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
       message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
     endif()
@@ -162,10 +167,12 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Runtime" OR NOT CMAKE_INSTALL_COMPONENT)
     file(INSTALL DESTINATION "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Debug" TYPE FILE FILES
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/Debug/printing_plugin.dll"
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-src/bin/pdfium.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Debug/sqlite3_flutter_libs_plugin.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Debug/sqlite3.dll"
       )
   elseif(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Pp][Rr][Oo][Ff][Ii][Ll][Ee])$")
     list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/pdfium.dll")
+     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/pdfium.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/sqlite3_flutter_libs_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile/sqlite3.dll")
     if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
       message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
     endif()
@@ -175,10 +182,12 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Runtime" OR NOT CMAKE_INSTALL_COMPONENT)
     file(INSTALL DESTINATION "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Profile" TYPE FILE FILES
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/Profile/printing_plugin.dll"
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-src/bin/pdfium.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Profile/sqlite3_flutter_libs_plugin.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Profile/sqlite3.dll"
       )
   elseif(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
     list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/pdfium.dll")
+     "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/printing_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/pdfium.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/sqlite3_flutter_libs_plugin.dll;C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release/sqlite3.dll")
     if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
       message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
     endif()
@@ -188,6 +197,8 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Runtime" OR NOT CMAKE_INSTALL_COMPONENT)
     file(INSTALL DESTINATION "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/runner/Release" TYPE FILE FILES
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/Release/printing_plugin.dll"
       "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-src/bin/pdfium.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Release/sqlite3_flutter_libs_plugin.dll"
+      "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/Release/sqlite3.dll"
       )
   endif()
 endif()

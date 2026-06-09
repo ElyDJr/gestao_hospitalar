@@ -115,7 +115,7 @@ class _TelaMedicoState extends State<TelaMedico> {
           // ─── CARD DE IDENTIFICAÇÃO DO MÉDICO ───
           Container(
             width: double.infinity,
-            color: Colors.teal.withOpacity(0.1),
+            color: Colors.teal.withValues(alpha: 0.1),
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
@@ -259,7 +259,7 @@ class _TelaMedicoState extends State<TelaMedico> {
                                             // 🟢 CHIP ATUALIZADO: Exibe a classificação exata com a cor correspondente
                                             Chip(
                                               label: Text(paciente.riskLevel.toUpperCase()),
-                                              backgroundColor: corManchester.withOpacity(0.12),
+                                              backgroundColor: corManchester.withValues(alpha: 0.12),
                                               side: BorderSide(color: corManchester, width: 1.5),
                                               labelStyle: TextStyle(color: corManchester, fontWeight: FontWeight.bold, fontSize: 11),
                                               padding: EdgeInsets.zero,

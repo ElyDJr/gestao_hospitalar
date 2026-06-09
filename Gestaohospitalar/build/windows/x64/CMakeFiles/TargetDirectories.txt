@@ -11,3 +11,7 @@ C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/window
 C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/CMakeFiles/printing_plugin.dir
 C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/CMakeFiles/INSTALL.dir
 C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/printing/CMakeFiles/ALL_BUILD.dir
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/CMakeFiles/sqlite3_flutter_libs_plugin.dir
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/CMakeFiles/sqlite3.dir
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/CMakeFiles/INSTALL.dir
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/plugins/sqlite3_flutter_libs/CMakeFiles/ALL_BUILD.dir
