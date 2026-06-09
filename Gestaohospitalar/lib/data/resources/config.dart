@@ -246,4 +246,76 @@ CREATE TABLE log_prontuario(
     FOREIGN KEY (id_prontuario) REFERENCES prontuario(id_prontuario)
 );
 ''';
+
+static const String mockData = '''
+    
+  INSERT INTO convenio (nome_convenio, tipo_leito, cobre_internacao, cobre_exames, cobre_cirurgia, limite_medicamento, percentual_cobertura) VALUES ('Unimed', 'PREMIUM', 1, 1, 1, 5000.0, 100.0);
+  INSERT INTO convenio (nome_convenio, tipo_leito, cobre_internacao, cobre_exames, cobre_cirurgia, limite_medicamento, percentual_cobertura) VALUES ('SulAmérica', 'PRIVADO', 1, 1, 1, 3000.0, 90.0);
+  INSERT INTO convenio (nome_convenio, tipo_leito, cobre_internacao, cobre_exames, cobre_cirurgia, limite_medicamento, percentual_cobertura) VALUES ('Bradesco Saúde', 'COMUM', 1, 1, 0, 2000.0, 80.0);
+  INSERT INTO convenio (nome_convenio, tipo_leito, cobre_internacao, cobre_exames, cobre_cirurgia, limite_medicamento, percentual_cobertura) VALUES ('Amil', 'PRIVADO', 1, 1, 1, 4000.0, 95.0);
+  INSERT INTO convenio (nome_convenio, tipo_leito, cobre_internacao, cobre_exames, cobre_cirurgia, limite_medicamento, percentual_cobertura) VALUES ('SUS', 'COMUM', 1, 1, 1, 0.0, 100.0);
+    
+  INSERT INTO especialidade (descricao_especialidade) VALUES ('Cardiologia');
+  INSERT INTO especialidade (descricao_especialidade) VALUES ('Pediatria');
+  INSERT INTO especialidade (descricao_especialidade) VALUES ('Clínica Geral');
+  INSERT INTO especialidade (descricao_especialidade) VALUES ('Ortopedia');
+  INSERT INTO especialidade (descricao_especialidade) VALUES ('Neurologia');
+
+  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 101', 'Consultorio', 'LIVRE');
+  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 102', 'Consultorio', 'OCUPADA');
+  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 103', 'Exames', 'LIVRE');
+  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 104', 'Cirurgia', 'MANUTENCAO');
+  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 105', 'Emergencia', 'LIVRE');
+
+  INSERT INTO exame (nome, valor, descricao) VALUES ('Hemograma', 50.0, 'Exame de sangue'), ('Raio-X Torax', 150.0, 'Imagem');
+  INSERT INTO exame (nome, valor, descricao) VALUES ('Eletrocardiograma', 200.0, 'Coracao'), ('Ultrassom', 300.0, 'Imagem'), ('Tomografia', 600.0, 'Imagem'); 
+    
+  INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Dipirona 500mg', 'MEDICAMENTO', 100, 1.5), ('Luvas', 'EPI', 500, 0.5);
+  INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Seringa 10ml', 'DESCARTAVEL', 200, 0.8), ('Detergente', 'LIMPEZA', 20, 10.0), ('Gaze', 'INSUMO', 300, 0.3);  
+  
+  INSERT INTO leito (numero, ala, situacao) VALUES ('101', 'Ala A', 'VAGO');
+  INSERT INTO leito (numero, ala, situacao) VALUES ('102', 'Ala A', 'OCUPADO');
+  INSERT INTO leito (numero, ala, situacao) VALUES ('201', 'Ala B', 'HIGIENIZACAO');
+  INSERT INTO leito (numero, ala, situacao) VALUES ('202', 'Ala B', 'VAGO');
+  INSERT INTO leito (numero, ala, situacao) VALUES ('301', 'Ala C', 'VAGO');
+
+  INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (1, 'Dr. Roberto Santos', 'CRM12345', 500.0);
+  INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (2, 'Dra. Maria Silva', 'CRM23456', 450.0);
+  INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (3, 'Dr. Carlos Souza', 'CRM34567', 400.0);
+  INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (4, 'Dra. Ana Pereira', 'CRM45678', 550.0);
+  INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (5, 'Dr. Jorge Lima', 'CRM56789', 600.0);
+  
+  INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('João da Silva', '11111111111', 'MASCULINO', '1985-05-15', 'Nenhuma', 'O+');
+  INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Maria Oliveira', '22222222222', 'FEMININO', '1990-08-20', 'Penicilina', 'A+');
+  INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Pedro Santos', '33333333333', 'MASCULINO', '1970-01-10', 'Nenhuma', 'B-');
+  INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Ana Costa', '44444444444', 'FEMININO', '2005-12-05', 'Nenhuma', 'AB+');
+  INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Lucas Rocha', '55555555555', 'MASCULINO', '1995-03-22', 'Iodo', 'O-');
+
+  INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (1, 1, 'UN123456', '2026-12-31');
+  INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (2, 2, 'SL987654', '2025-06-30');
+  INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (3, 3, 'BR112233', '2027-01-01');
+  INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (4, 4, 'AM445566', '2025-10-15');
+  INSERT INTO paciente_convenio (id_paciente, id_convenio, numero_carteira, validade) VALUES (5, 5, 'SUS00000', '2099-12-31');
+    
+  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (1, 'VERDE', 'Dor de cabeça', 'NAO');
+  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (2, 'LARANJA', 'Dor abdominal', 'SIM');
+  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (3, 'VERMELHO', 'Dor no peito', 'SIM');
+  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (4, 'AZUL', 'Check-up', 'NAO');
+  INSERT INTO triagem (id_paciente, risco, queixa, internacao) VALUES (5, 'AMARELO', 'Febre alta', 'NAO');
+
+  INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (1, 1, 1, '2026-06-07 09:00', 'AGENDADO');
+  INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (2, 2, 2, '2026-06-07 10:00', 'CONFIRMADO');
+  INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (3, 3, 5, '2026-06-07 11:00', 'CONFIRMADO');
+  INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (4, 4, 3, '2026-06-07 14:00', 'AGENDADO');
+  INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (5, 5, 1, '2026-06-07 15:00', 'AGENDADO');  
+
+  INSERT INTO medicamento (id_almoxarifado, principio_ativo) VALUES (1, 'Dipirona');
+
+  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (1, 1, 1, 'BAIXO', 'NAO')
+  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (2, 2, 2, 'MEDIO', 'SIM')
+  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (3, 3, 3, 'ALTO', 'SIM')
+  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (4, 4, 4, 'BAIXO', 'NAO')
+  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (5, 5, 5, 'BAIXO', 'NAO')
+
+  ''';
 }

@@ -88,9 +88,9 @@ class _TelaLoginState extends State<TelaLogin> {
                 // 🕵️‍♂️ Descobre sozinho qual nome você deu para a coluna de ID
                 final chaveId = primeiroRegistro.keys.firstWhere(
                   (k) => k.toLowerCase() == 'id' || 
-                         k.toLowerCase() == 'idespecialidade' || 
-                         k.toLowerCase() == 'id_especialidade' || 
-                         k.toLowerCase().contains('cod'),
+                        k.toLowerCase() == 'idespecialidade' || 
+                        k.toLowerCase() == 'id_especialidade' || 
+                        k.toLowerCase().contains('cod'),
                   orElse: () => primeiroRegistro.keys.first,
                 );
 

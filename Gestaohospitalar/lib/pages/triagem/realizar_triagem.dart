@@ -49,10 +49,11 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
   }
 
   String _mapearParaFila(String risco) {
-  if (risco == 'VERMELHO') return 'Emergência';
-  if (risco == 'LARANJA' || risco == 'AMARELO') return 'Urgência';
-  if (risco == 'VERDE') return 'Pouco Urgente';
-  return 'Não Urgente'; // AZUL
+    if (risco == 'VERMELHO') return 'Emergência';
+    if (risco == 'LARANJA') return 'Muito Urgente'; // ✅ Corrigido
+    if (risco == 'AMARELO') return 'Urgente';       // ✅ Corrigido
+    if (risco == 'VERDE') return 'Pouco Urgente';
+    return 'Não Urgente'; // AZUL
   }
 
   // ✅ Função nova e limpa: Salva a triagem como pendente para o médico
@@ -121,7 +122,7 @@ class _RealizarTriagemState extends State<RealizarTriagem> {
                   children: [
                     DropdownButtonFormField<Paciente>(
                       decoration: const InputDecoration(labelText: "Paciente *", prefixIcon: Icon(Icons.person), border: OutlineInputBorder()),
-                      items: widget.pacienteService.pacientes.map((p) => DropdownMenuItem(value: p, child: Text("${p.nome} (CPF: ${p.cpf})"))).toList(),
+                      items: widget.pacienteService.pacientes.map((p) => DropdownMenuItem(value: p, child: Text("${p.nome}"))).toList(),
                       onChanged: (p) {
                         setState(() {
                           _pacienteSelecionado = p;
