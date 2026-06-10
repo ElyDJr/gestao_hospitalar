@@ -1,188 +1,131 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/paciente.dart';
-import '../../domain/entities/leito.dart';
-import '../../domain/entities/internacao.dart';
-import '../../domain/services/leito_service.dart';
-import '../../domain/services/internacao_service.dart';
-import '../../domain/services/paciente_service.dart';
-import 'registrar_internacao.dart';
 
-class ProntuarioPaciente extends StatefulWidget {
+DateTime _dataEntrada = DateTime.now();
+
+class ProntuarioForm extends StatefulWidget {
   final Paciente paciente;
-  final PacienteService pacienteService;
-  
-  const ProntuarioPaciente({
-    super.key, 
-    required this.paciente,
-    required this.pacienteService, // 🟢 NOVA LINHA
-  });
+  final Map<String, dynamic> triagem; // Dados vindos da tabela triagem
+  final dynamic database;
+
+  const ProntuarioForm({super.key, required this.paciente, required this.triagem, required this.database});
 
   @override
-  State<ProntuarioPaciente> createState() => _ProntuarioPacienteState();
+  State<ProntuarioForm> createState() => _ProntuarioFormState();
 }
 
-class _ProntuarioPacienteState extends State<ProntuarioPaciente> {
-  final LeitoService _leitoService = LeitoService();
-  final InternacaoService _internacaoService = InternacaoService();
-  //final PacienteService _pacienteService = PacienteService(GenericRepositoryImpl());
-
-  // 🟢 A MÁGICA ACONTECE AQUI: O Dialog de Internação
-  void _abrirDialogInternacao() {
-    Leito? leitoSelecionado;
-    bool necessitaIsolamento = false;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        // StatefulBuilder é necessário para atualizar o dropdown e o checkbox dentro do Dialog
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: Text('Internar ${widget.paciente.nome}'),
-              content: FutureBuilder<List<Leito>>(
-                future: _leitoService.listarLeitosDisponiveis(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-                  
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text("Nenhum leito disponível no momento.", style: TextStyle(color: Colors.red));
-                  }
-
-                  final leitos = snapshot.data!;
-
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // RF06: Seleção do Leito
-                      DropdownButtonFormField<Leito>(
-                        decoration: const InputDecoration(labelText: 'Selecione o Leito'),
-                        initialValue: leitoSelecionado,
-                        items: leitos.map((leito) {
-                          return DropdownMenuItem(
-                            value: leito,
-                            child: Text('Leito ${leito.numero} - Ala: ${leito.ala}'),
-                          );
-                        }).toList(),
-                        onChanged: (Leito? novoLeito) {
-                          setStateDialog(() {
-                            leitoSelecionado = novoLeito;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // RF07: Necessita Isolamento?
-                      CheckboxListTile(
-                        title: const Text("Necessita de Isolamento?"),
-                        value: necessitaIsolamento,
-                        onChanged: (bool? valor) {
-                          setStateDialog(() {
-                            necessitaIsolamento = valor ?? false;
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: leitoSelecionado == null
-                      ? null // Desabilita o botão se não escolher leito
-                      : () => _confirmarInternacao(leitoSelecionado!.id!, necessitaIsolamento),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                  child: const Text('Confirmar Internação', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> _confirmarInternacao(int idLeito, bool isolamento) async {
-    try {
-      // 1. Aqui você salvaria o Prontuario primeiro para pegar o ID dele.
-      // Supondo que você já tem o ID do prontuário (vou usar 1 como exemplo didático)
-      int idProntuario = 1; 
-
-      // 2. Criar o objeto de Internação
-      final novaInternacao = Internacao(
-        idProntuario: idProntuario,
-        idLeito: idLeito,
-        dataEntrada: DateTime.now(), // Passa DateTime puro, o toMap cuida do resto
-        statusInternacao: 'ATIVA',
-        isolamento: isolamento ? 'SIM' : 'NAO', // Converte booleano para SQL
-      );
-
-      // 3. Salvar no banco
-      await _internacaoService.registrarInternacao(novaInternacao);
-
-      // 4. RN14: Atualizar o status do leito para OCUPADO
-      await _leitoService.atualizarStatusLeito(idLeito, 'OCUPADO');
-
-      // 5. Tirar o paciente da fila da Dashboard (limpando a urgência/historicoClinico)
-      final pacienteAtualizado = widget.paciente.copyWith(historicoClinico: 'Internado');
-
-      await widget.pacienteService.salvarPaciente(pacienteAtualizado);
-      // Força a atualização global dos pacientes para a Dashboard sumir com o card
-      await widget.pacienteService.carregarPacientes();
-
-      if (mounted) {
-        Navigator.pop(context); // Fecha o Dialog
-        Navigator.pop(context); // Fecha o Prontuário e volta pra Dashboard
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Paciente internado com sucesso!'), backgroundColor: Colors.green),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return; // 🟢 CORREÇÃO: Aqui no catch também!
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao internar: $e'), backgroundColor: Colors.red),
-      );
-    }
-  }
+class _ProntuarioFormState extends State<ProntuarioForm> {
+  final _evolucaoCtrl = TextEditingController();
+  String _internacao = 'NAO'; // Estado do toggle
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Prontuário - ${widget.paciente.nome}')),
-      body: const Center(
-        // Aqui vai o layout do seu prontuário (campos de queixa, prescrição, etc)
-        child: Text("Conteúdo do Prontuário aqui"),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      appBar: AppBar(title: const Text("Prontuário Médico")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
-            ElevatedButton(
-              // 🟢 NAVEGAÇÃO PARA A NOVA TELA
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RegistrarInternacao(
-                      paciente: widget.paciente,
-                      pacienteService: widget.pacienteService,
-                    ),
-                  ),
-                );
-              }, 
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text('Encaminhar p/ Internação'),
+
+
+            _buildCard("Data de Entrada", [
+              Text(
+                "${_dataEntrada.day.toString().padLeft(2, '0')}/${_dataEntrada.month.toString().padLeft(2, '0')}/${_dataEntrada.year} "
+                "${_dataEntrada.hour.toString().padLeft(2, '0')}:${_dataEntrada.minute.toString().padLeft(2, '0')}",
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ]),
+
+            // 1. DADOS DO PACIENTE
+            _buildCard("Dados do Paciente", [
+              Text("Nome: ${widget.paciente.nome}"),
+              Text("CPF: ${widget.paciente.cpf}"),
+              Text("Nascimento: ${widget.paciente.nascimento.toString().split(' ')[0]}"),
+            ]),
+
+            // 2. DADOS DA TRIAGEM (Sinais Vitais)
+            _buildCard("Sinais Vitais (Triagem)", [
+              Text("Pressão: ${widget.triagem['pressao']}"),
+              Text("Temperatura: ${widget.triagem['temperatura']}°C"),
+              Text("Saturação: ${widget.triagem['saturacao']}%"),
+              Text("Queixa: ${widget.triagem['queixa']}"),
+            ]),
+
+            // 3. EVOLUÇÃO E CONDUTA
+            TextFormField(
+              controller: _evolucaoCtrl,
+              maxLines: 5,
+              decoration: const InputDecoration(labelText: "Evolução/Conduta", border: OutlineInputBorder()),
             ),
+
+            // 4. DEFINIÇÃO DE INTERNAÇÃO
+            const SizedBox(height: 20),
+            const Text("Necessita de Internação?", style: TextStyle(fontWeight: FontWeight.bold)),
+            Row(
+              children: [
+                Expanded(child: RadioListTile(title: const Text("Não"), value: 'NAO', groupValue: _internacao, onChanged: (v) => setState(() => _internacao = v!))),
+                Expanded(child: RadioListTile(title: const Text("Sim"), value: 'SIM', groupValue: _internacao, onChanged: (v) => setState(() => _internacao = v!))),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+              onPressed: _salvarProntuario,
+              child: const Text("Salvar Prontuário"),
+            )
           ],
         ),
       ),
     );
   }
-}
 
-  // Continua abaixo...
+  Widget _buildCard(String title, List<Widget> children) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 15),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal)),
+          const Divider(),
+          ...children
+        ]),
+      ),
+    );
+  }
+
+  void _salvarProntuario() async {
+    try {
+      // 1. Converter a data para formato compatível com SQLite (String ISO8601)
+      String dataIso = _dataEntrada.toIso8601String();
+
+      // 2. Preparar dados
+      final Map<String, dynamic> dadosProntuario = {
+        'id_paciente': widget.paciente.id,
+        'id_triagem': widget.triagem['id_triagem'],
+        'id_medico': 1, // FUTURO: Pegar do seu sistema de login
+        'risco_evasao': 'BAIXO', // Exemplo
+        'isolamento': 'NAO',     // Exemplo
+        'evolucao': _evolucaoCtrl.text,
+        'data_abertura': dataIso, // 🟢 AQUI ESTÁ A CORREÇÃO
+        'status_prontuario': 'ATIVO',
+      };
+
+      // 3. Inserir no banco
+      await widget.database.insert('prontuario', dadosProntuario);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Prontuário salvo!"), backgroundColor: Colors.green),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      // Log do erro completo para debug
+      debugPrint("ERRO AO SALVAR: $e"); 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao salvar prontuário: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+}

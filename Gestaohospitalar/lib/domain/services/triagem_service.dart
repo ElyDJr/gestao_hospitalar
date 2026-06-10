@@ -46,24 +46,36 @@ class TriagemService with ChangeNotifier {
   }
 
   // Adicione ao TriagemService
-Future<List<Map<String, dynamic>>> buscarFilaTriagem() async {
-  final db = await DatabaseProvider.instance.database;
-  
-  // Consulta unindo as duas tabelas
-  // Filtramos por pacientes que ainda não foram internados (assumindo que 'internacao' na triagem é NULL ou 'NAO')
-  return await db.rawQuery('''
-    SELECT t.*, p.nome, p.cpf 
-    FROM triagem t
-    JOIN paciente p ON t.id_paciente = p.id_paciente
-    WHERE t.internacao IS NULL OR t.internacao = 'NAO'
-    ORDER BY CASE t.risco 
-      WHEN 'VERMELHO' THEN 1 
-      WHEN 'LARANJA' THEN 2 
-      WHEN 'AMARELO' THEN 3 
-      WHEN 'VERDE' THEN 4 
-      WHEN 'AZUL' THEN 5 
-      ELSE 6 END
+  Future<List<Map<String, dynamic>>> buscarFilaTriagem() async {
+    final db = await DatabaseProvider.instance.database;
+    
+    // Consulta unindo as duas tabelas
+    // Filtramos por pacientes que ainda não foram internados (assumindo que 'internacao' na triagem é NULL ou 'NAO')
+    return await db.rawQuery('''
+      SELECT t.*, p.nome, p.cpf 
+      FROM triagem t
+      JOIN paciente p ON t.id_paciente = p.id_paciente
+      WHERE t.internacao IS NULL OR t.internacao = 'NAO'
+      ORDER BY CASE t.risco 
+        WHEN 'VERMELHO' THEN 1 
+        WHEN 'LARANJA' THEN 2 
+        WHEN 'AMARELO' THEN 3 
+        WHEN 'VERDE' THEN 4 
+        WHEN 'AZUL' THEN 5 
+        ELSE 6 END
+      ''');
+  }
+
+  // Busca fila de quem precisa de leito (Aguardando Alocação)
+  Future<List<Map<String, dynamic>>> buscarFilaAguardandoAlocacao() async {
+    final db = await DatabaseProvider.instance.database;
+    return await db.rawQuery('''
+      SELECT t.*, p.nome FROM triagem t
+      JOIN paciente p ON t.id_paciente = p.id_paciente
+      WHERE t.internacao = 'SIM' 
+      AND t.id_triagem NOT IN (SELECT id_triagem FROM internacao)
     ''');
+    //voltar aqui se eu precisar alterar de triagem pra prontuario
   }
 
 }
