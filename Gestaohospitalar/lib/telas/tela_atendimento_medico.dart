@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart'; 
 import '../modelos/modelos_hospitalares.dart';
 import '../domain/services/paciente_service.dart'; // 🟢 Seu service real
-import '../domain/entities/paciente.dart';        // 🟢 Sua entidade real
+// 🟢 Sua entidade real
 
 class TelaAtendimentoMedico extends StatefulWidget {
   final Database database; 

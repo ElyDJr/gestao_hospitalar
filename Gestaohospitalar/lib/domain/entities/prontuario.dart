@@ -1,24 +1,38 @@
-import 'entitie.dart';
-
-class Prontuario extends Entitie {
-  int idPaciente;
-  int idTriagem;
-  int idMedico;
-  String riscoEvasao;
-  String isolamento;
-  String? evolucao;
-  DateTime? dataAbertura;
-  String? statusProntuario;
+// lib/domain/entities/prontuario.dart
+class Prontuario {
+  final int? id;
+  final int idPaciente;
+  final int idTriagem;
+  final int idMedico;
+  final String riscoEvasao;
+  final String isolamento; // Aqui reside a informação definitiva
+  final String? evolucao;
+  final DateTime dataAbertura;
+  final String statusProntuario;
 
   Prontuario({
-    super.id, // Corresponde ao id_prontuario
+    this.id,
     required this.idPaciente,
     required this.idTriagem,
     required this.idMedico,
     required this.riscoEvasao,
     required this.isolamento,
     this.evolucao,
-    this.dataAbertura,
-    this.statusProntuario,
+    required this.dataAbertura,
+    required this.statusProntuario,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id_prontuario': id,
+      'id_paciente': idPaciente,
+      'id_triagem': idTriagem,
+      'id_medico': idMedico,
+      'risco_evasao': riscoEvasao,
+      'isolamento': isolamento,
+      'evolucao': evolucao,
+      'data_abertura': dataAbertura.toIso8601String(),
+      'status_prontuario': statusProntuario,
+    };
+  }
 }

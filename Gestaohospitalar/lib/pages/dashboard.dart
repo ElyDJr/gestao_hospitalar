@@ -22,12 +22,16 @@ import 'triagem/realizar_triagem.dart';
 // ATENDIMENTO
 import 'atendimento/registrar_internacao.dart';
 
+//DASHBOARD
+import 'login/tela_login.dart';
+
+
 import '../telas/tela_mapa_leitos.dart';
 import '../telas/tela_estoque.dart';
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_farmacia.dart';
 import '../telas/tela_atendimento_medico.dart';
-import '../telas/tela_login.dart'; 
+
 
 import '../domain/services/paciente_service.dart';
 import '../domain/services/medico_service.dart'; 
@@ -162,50 +166,142 @@ class _DashboardState extends State<Dashboard> {
                 decoration: const InputDecoration(labelText: "Conduta Médica / Evolução", border: OutlineInputBorder()),
               ),
             ),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: ElevatedButton(
+            //         style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            //         onPressed: () async {
+            //           if (triagem != null) {
+            //             final triagemAtualizada = triagem.copyWith(observacoes: condutaCtrl.text, internacao: 'NAO');
+            //             await _triagemService.salvarTriagem(triagemAtualizada);
+            //             await _pacienteService.arquivarPaciente(p);
+            //             if (mounted) {
+            //               Navigator.pop(context);
+            //               _carregarFila(); // Atualiza a fila
+            //               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Alta concedida!")));
+            //             }
+            //           }
+            //         },
+            //         child: const Text("Dar Alta", style: TextStyle(color: Colors.white)),
+            //       ),
+            //     ),
+            //     const SizedBox(width: 10),
+            //     Expanded(
+            //       child: ElevatedButton(
+            //         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            //         onPressed: () async {
+            //           if (triagem != null) {
+            //             final triagemAtualizada = triagem.copyWith(observacoes: condutaCtrl.text, internacao: 'SIM');
+            //             await _triagemService.salvarTriagem(triagemAtualizada);
+            //             if (mounted) {
+            //               Navigator.pop(context);
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (context) => RegistrarInternacao(paciente: p, pacienteService: _pacienteService),
+            //                 ),
+            //               );
+            //             }
+            //           }
+            //         },
+            //         child: const Text("Internar", style: TextStyle(color: Colors.white)),
+            //       ),
+            //     ),
+            //   ],
+            // )
+
             Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                    onPressed: () async {
-                      if (triagem != null) {
-                        final triagemAtualizada = triagem.copyWith(observacoes: condutaCtrl.text, internacao: 'NAO');
-                        await _triagemService.salvarTriagem(triagemAtualizada);
-                        await _pacienteService.arquivarPaciente(p);
-                        if (mounted) {
-                          Navigator.pop(context);
-                          _carregarFila(); // Atualiza a fila
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Alta concedida!")));
-                        }
-                      }
-                    },
-                    child: const Text("Dar Alta", style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                    onPressed: () async {
-                      if (triagem != null) {
-                        final triagemAtualizada = triagem.copyWith(observacoes: condutaCtrl.text, internacao: 'SIM');
-                        await _triagemService.salvarTriagem(triagemAtualizada);
-                        if (mounted) {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RegistrarInternacao(paciente: p, pacienteService: _pacienteService),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: const Text("Internar", style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ],
-            )
+    children: [
+      // ─── BOTÃO DAR ALTA ───
+      Expanded(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+          onPressed: () async {
+            if (triagem != null) {
+              try {
+                // 1. CRIAR O PRONTUÁRIO DE ALTA NO BANCO
+                // (Verifique se os nomes das colunas batem com a sua tabela 'prontuario')
+                await widget.database.insert('prontuario', {
+                  'id_paciente': p.id,
+                  'data_abertura': DateTime.now().toIso8601String(),
+                  'status_prontuario': 'ALTA', // Finalizado
+                  'observacoes': condutaCtrl.text,
+                });
+
+                // 2. ATUALIZAR A TRIAGEM PARA SUMIR DA FILA
+                final triagemAtualizada = triagem.copyWith(
+                  observacoes: condutaCtrl.text,
+                  internacao: 'ALTA' // 🟢 MUDAMOS DE 'NAO' PARA 'ALTA'
+                );
+                await _triagemService.salvarTriagem(triagemAtualizada);
+
+                // 🟢 REMOVIDO: _pacienteService.arquivarPaciente(p); 
+                // O paciente deve continuar existindo no banco do hospital!
+
+                if (mounted) {
+                  Navigator.pop(context); // Fecha o prontuário
+                  await _carregarFila(); // Atualiza os números da Dashboard imediatamente
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Alta médica concedida e Prontuário arquivado!"), backgroundColor: Colors.green)
+                  );
+                }
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro: $e"), backgroundColor: Colors.red));
+              }
+            }
+          },
+          child: const Text("Dar Alta", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+      const SizedBox(width: 10),
+      
+      // ─── BOTÃO INTERNAR ───
+      Expanded(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+          onPressed: () async {
+            if (triagem != null) {
+              try {
+                // 1. CRIAR O PRONTUÁRIO ATIVO PARA A INTERNAÇÃO
+                await widget.database.insert('prontuario', {
+                  'id_paciente': p.id,
+                  'data_abertura': DateTime.now().toIso8601String(),
+                  'status_prontuario': 'ATIVO', // 🟢 Precisa estar ativo para o leito puxar ele
+                  'observacoes': condutaCtrl.text,
+                });
+
+                // 2. ATUALIZAR A TRIAGEM PARA SUMIR DA FILA
+                final triagemAtualizada = triagem.copyWith(
+                  observacoes: condutaCtrl.text,
+                  internacao: 'SIM' // 'SIM' também faz ele sumir da fila inicial
+                );
+                await _triagemService.salvarTriagem(triagemAtualizada);
+
+                if (mounted) {
+                  Navigator.pop(context); // Fecha o painel
+                  
+                  // Navega para registrar a internação e aguarda voltar
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RegistrarInternacao(paciente: p, pacienteService: _pacienteService),
+                    ),
+                  );
+                  
+                  // Atualiza os cards da dashboard quando voltar da tela de internação
+                  await _carregarFila(); 
+                }
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro: $e"), backgroundColor: Colors.red));
+              }
+            }
+          },
+          child: const Text("Internar", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+    ],
+  )
           ],
         ),
       ),

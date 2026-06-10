@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import '../modelos/modelos_hospitalares.dart';
 import '../domain/services/paciente_service.dart'; 
-import '../domain/entities/paciente.dart';        
 
 class TelaMedico extends StatefulWidget {
   final Database database;
