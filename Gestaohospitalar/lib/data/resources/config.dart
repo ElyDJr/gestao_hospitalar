@@ -105,6 +105,7 @@ CREATE TABLE prontuario(
     id_paciente INTEGER NOT NULL,
     id_triagem INTEGER NOT NULL,
     id_medico INTEGER NOT NULL,
+    id_sala INTEGER,
     risco_evasao TEXT NOT NULL,
     isolamento TEXT NOT NULL,
     evolucao TEXT,
@@ -120,7 +121,7 @@ CREATE TABLE leito(
     numero TEXT,
     ala TEXT,
     data_higienizacao TEXT,
-    situacao TEXT CHECK (situacao IN ('VAGO', 'OCUPADO', 'HIGIENIZACAO'))
+    situacao TEXT DEFAULT 'VAGO' CHECK (situacao IN ('VAGO', 'OCUPADO', 'HIGIENIZACAO'))
 );
 
 CREATE TABLE internacao(
@@ -306,12 +307,5 @@ static const String mockData = '''
   INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (5, 5, 1, '2026-06-07 15:00', 'AGENDADO');  
 
   INSERT INTO medicamento (id_almoxarifado, principio_ativo) VALUES (1, 'Dipirona');
-
-  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (1, 1, 1, 'BAIXO', 'NAO')
-  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (2, 2, 2, 'MEDIO', 'SIM')
-  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (3, 3, 3, 'ALTO', 'SIM')
-  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (4, 4, 4, 'BAIXO', 'NAO')
-  INSERT INTO prontuario (id_paciente, id_triagem, id_medico, risco_evasao, isolamento) VALUES (5, 5, 5, 'BAIXO', 'NAO')
-
   ''';
 }

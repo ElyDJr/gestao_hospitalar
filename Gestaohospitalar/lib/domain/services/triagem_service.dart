@@ -21,13 +21,20 @@ class TriagemService with ChangeNotifier {
           toMap: (t) => t.toMap(),
         );
 
-  Future<void> salvarTriagem(Triagem triagem) async {
-    if (triagem.id == null) {
-      await _repository.create(triagem);
-    } else {
-      await _repository.update(triagem);
-    }
-    notifyListeners();
+  // Future<void> salvarTriagem(Triagem triagem) async {
+  //   if (triagem.id == null) {
+  //     await _repository.create(triagem);
+  //   } else {
+  //     await _repository.update(triagem);
+  //   }
+  //   notifyListeners();
+  // }
+
+  // Mude de Future<void> para Future<int>
+  Future<int> salvarTriagem(Triagem triagem) async {
+    final db = await DatabaseProvider.instance.database;
+    // O SQLite sempre retorna o ID do item inserido, então usamos o return
+    return await db.insert('triagem', triagem.toMap());
   }
 
   // Agora, como o 'db' está inicializado corretamente, o erro sumirá desta função:

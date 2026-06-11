@@ -4,6 +4,7 @@ class Prontuario {
   final int idPaciente;
   final int idTriagem;
   final int idMedico;
+  final int? idSala; //quando não for internar
   final String riscoEvasao;
   final String isolamento; // Aqui reside a informação definitiva
   final String? evolucao;
@@ -15,6 +16,7 @@ class Prontuario {
     required this.idPaciente,
     required this.idTriagem,
     required this.idMedico,
+    this.idSala,
     required this.riscoEvasao,
     required this.isolamento,
     this.evolucao,
@@ -28,6 +30,7 @@ class Prontuario {
       'id_paciente': idPaciente,
       'id_triagem': idTriagem,
       'id_medico': idMedico,
+      'id_sala': idSala,
       'risco_evasao': riscoEvasao,
       'isolamento': isolamento,
       'evolucao': evolucao,

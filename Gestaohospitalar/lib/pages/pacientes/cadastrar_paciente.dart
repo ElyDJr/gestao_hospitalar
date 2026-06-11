@@ -156,7 +156,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                     Icon(isEdicao ? Icons.edit : Icons.assignment_ind, color: Colors.teal, size: 28),
                     const SizedBox(width: 8),
                     Text(
-                      isEdicao ? "Editando Prontuário" : "Ficha de Registro Geral",
+                      isEdicao ? "Editar Paciente" : "Cadastrar Paciente",
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
                     ),
                   ],

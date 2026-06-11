@@ -76,7 +76,7 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
       );
 
       await _internacaoService.registrarInternacao(novaInternacao);
-      await _leitoService.atualizarStatusLeito(_leitoSelecionado!.id!, 'OCUPADO');
+      //await _leitoService.atualizarStatusLeito(_leitoSelecionado!.id!, 'OCUPADO');
 
       final pacienteAtualizado = widget.paciente.copyWith(historicoClinico: 'Internado');
       await widget.pacienteService.salvarPaciente(pacienteAtualizado);
