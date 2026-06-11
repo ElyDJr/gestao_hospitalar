@@ -23,7 +23,11 @@ import 'atendimento/encaminhamento_form.dart';
 //DASHBOARD
 import 'login/tela_login.dart';
 
-import '../telas/tela_mapa_leitos.dart';
+//LEITOS
+import 'leitos/mapa_leitos.dart';
+import 'leitos/cadastrar_leito.dart';
+import '../domain/services/leito_service.dart';
+
 import '../telas/tela_estoque.dart';
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_farmacia.dart';
@@ -48,6 +52,7 @@ class _DashboardState extends State<Dashboard> {
   late MedicoService _medicoService;
   late ConvenioService _convenioService;
   late TriagemService _triagemService;
+  late LeitoService _leitoService; 
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -66,13 +71,8 @@ class _DashboardState extends State<Dashboard> {
     _triagemService = TriagemService(widget.database);
     _carregarFila();
 
-    super.initState();
-    // _pacienteService = PacienteService(widget.database);
-    // _medicoService = MedicoService(widget.database);
-    // _convenioService = ConvenioService(widget.database);
-    // _triagemService = TriagemService(widget.database);
-
     _carregarDadosIniciais();
+    _leitoService = LeitoService();    
   }
 
   Future<void> _carregarFila() async {
@@ -242,7 +242,7 @@ class _DashboardState extends State<Dashboard> {
       case 3:
         return ListarMedico(service: _medicoService);
       case 4:
-        return const TelaMapaLeitos();
+        return const MapaLeitos();
       case 5:
         return const TelaEstoque();
       case 6:
@@ -367,6 +367,13 @@ class _DashboardState extends State<Dashboard> {
                 },
                 icon: const Icon(Icons.favorite),
                 label: const Text("Triagem"),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => abrirDialogoLateral(
+                    CadastrarLeito(leitoService: _leitoService)
+                ),
+                icon: const Icon(Icons.bed),
+                label: const Text("Leito"),
               ),
             ],
           ),

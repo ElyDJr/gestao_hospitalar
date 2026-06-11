@@ -2,6 +2,7 @@ class Leito {
   final int? id;
   final String? numero;
   final String? ala;
+  final String? andar;
   final DateTime? dataHigienizacao;
   final String? situacao;
 
@@ -9,6 +10,7 @@ class Leito {
     this.id,
     this.numero,
     this.ala,
+    this.andar,
     this.dataHigienizacao,
     this.situacao,
   });
@@ -18,6 +20,7 @@ class Leito {
       'id_leito': id,
       'numero': numero,
       'ala': ala,
+      'andar': andar,
       'data_higienizacao': dataHigienizacao?.toIso8601String(),
       'situacao': situacao,
     };
@@ -28,6 +31,7 @@ class Leito {
       id: map['id_leito'],
       numero: map['numero'],
       ala: map['ala'],
+      andar: map['andar'],
       dataHigienizacao: map['data_higienizacao'] != null 
           ? DateTime.parse(map['data_higienizacao']) 
           : null,

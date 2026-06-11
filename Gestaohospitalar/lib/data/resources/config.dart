@@ -120,6 +120,7 @@ CREATE TABLE leito(
     id_leito INTEGER PRIMARY KEY AUTOINCREMENT,
     numero TEXT,
     ala TEXT,
+    andar TEXT, 
     data_higienizacao TEXT,
     situacao TEXT DEFAULT 'VAGO' CHECK (situacao IN ('VAGO', 'OCUPADO', 'HIGIENIZACAO'))
 );
@@ -274,11 +275,9 @@ static const String mockData = '''
   INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Dipirona 500mg', 'MEDICAMENTO', 100, 1.5), ('Luvas', 'EPI', 500, 0.5);
   INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Seringa 10ml', 'DESCARTAVEL', 200, 0.8), ('Detergente', 'LIMPEZA', 20, 10.0), ('Gaze', 'INSUMO', 300, 0.3);  
   
-  INSERT INTO leito (numero, ala, situacao) VALUES ('101', 'Ala A', 'VAGO');
-  INSERT INTO leito (numero, ala, situacao) VALUES ('102', 'Ala A', 'OCUPADO');
-  INSERT INTO leito (numero, ala, situacao) VALUES ('201', 'Ala B', 'HIGIENIZACAO');
-  INSERT INTO leito (numero, ala, situacao) VALUES ('202', 'Ala B', 'VAGO');
-  INSERT INTO leito (numero, ala, situacao) VALUES ('301', 'Ala C', 'VAGO');
+  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('301', 'Pediatria', '2º Andar', 'VAGO');
+  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('101', 'Maternidade', '3º Andar', 'VAGO');
+  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('201', 'UTI', '4º Andar', 'HIGIENIZACAO');
 
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (1, 'Dr. Roberto Santos', 'CRM12345', 500.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (2, 'Dra. Maria Silva', 'CRM23456', 450.0);

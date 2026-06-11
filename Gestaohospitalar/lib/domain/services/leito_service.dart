@@ -13,25 +13,15 @@ class LeitoService {
     return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
   }
 
-  // Atualizar a situação do leito (ex: para 'OCUPADO' após internar)
-  // Future<void> atualizarStatusLeito(int idLeito, String novaSituacao) async {
-  //   final db = await DatabaseProvider.instance.database;
-  //   await db.update(
-  //     'leito',
-  //     {'situacao': novaSituacao},
-  //     where: 'id_leito = ?',
-  //     whereArgs: [idLeito],
-  //   );
-  // }
-
   Future<List<Map<String, dynamic>>> buscarMapaLeitos() async {
     final db = await DatabaseProvider.instance.database;
     
     return await db.rawQuery('''
       SELECT 
         l.id_leito, 
-        l.numero AS numero_leito,  -- Mapeia 'numero' para 'numero_leito'
-        l.situacao AS status_leito, -- Mapeia 'situacao' para 'status_leito'
+        l.numero AS numero_leito,
+        l.ala, l.andar, -- 🟢 ADICIONADO AQUI
+        l.situacao AS status_leito, 
         i.id_internacao,
         p.id_prontuario, p.evolucao, p.risco_evasao, p.isolamento, p.data_abertura,
         pac.id_paciente, pac.nome, pac.cpf,
@@ -55,4 +45,10 @@ class LeitoService {
       whereArgs: [idProntuario],
     );
   }
+
+  Future<void> cadastrarLeito(Leito leito) async { //lembrar de rever a necessidade
+    final db = await DatabaseProvider.instance.database;
+    await db.insert('leito', leito.toMap());
+  }
+
 }

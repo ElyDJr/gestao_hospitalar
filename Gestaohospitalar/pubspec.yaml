@@ -30,5 +30,5 @@ flutter:
   # A seção 'assets' foi removida. 
   # Se no futuro você for adicionar imagens (ex: logo do hospital), 
   # você deve recriar a seção assim:
-  # assets:
-  #   - assets/images/
+assets:
+  - assets/images/

@@ -85,4 +85,14 @@ class TriagemService with ChangeNotifier {
     //voltar aqui se eu precisar alterar de triagem pra prontuario
   }
 
+  Future<void> atualizarStatusLeito(int idLeito, String novaSituacao) async {
+    final db = await DatabaseProvider.instance.database;
+    await db.update(
+      'leito',
+      {'situacao': novaSituacao},
+      where: 'id_leito = ?',
+      whereArgs: [idLeito],
+    );
+  }
+
 }
