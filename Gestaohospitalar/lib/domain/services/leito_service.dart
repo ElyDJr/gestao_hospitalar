@@ -51,4 +51,25 @@ class LeitoService {
     await db.insert('leito', leito.toMap());
   }
 
+  Future<void> atualizarStatusLeito(int idLeito, String novaSituacao) async {
+    final db = await DatabaseProvider.instance.database;
+    await db.update(
+      'leito',
+      {'situacao': novaSituacao},
+      where: 'id_leito = ?',
+      whereArgs: [idLeito],
+    );
+  }
+
+  // 🟢 Retorna apenas os leitos desocupados para o formulário de encaminhamento
+  Future<List<Leito>> buscarLeitosDisponiveis() async {
+    final db = await DatabaseProvider.instance.database;
+    final List<Map<String, dynamic>> res = await db.query(
+      'leito',
+      where: 'situacao = ?',
+      whereArgs: ['VAGO'],
+      orderBy: 'numero',
+    );
+    return res.map((map) => Leito.fromMap(map)).toList();
+  }
 }

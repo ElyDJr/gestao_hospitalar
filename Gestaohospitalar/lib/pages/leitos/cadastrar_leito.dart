@@ -63,7 +63,7 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Ala Hospitalar'),
-                value: _alaSelecionada,
+                initialValue: _alaSelecionada,
                 items: _alas.map((a) => DropdownMenuItem(value: a, child: Text(a))).toList(),
                 onChanged: (val) => setState(() => _alaSelecionada = val),
                 validator: (value) => value == null ? 'Selecione a Ala' : null,

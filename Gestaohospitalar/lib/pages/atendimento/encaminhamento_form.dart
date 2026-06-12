@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/paciente.dart';
+import '../../domain/entities/leito.dart';
+import '../../domain/services/leito_service.dart';
+import '../dashboard_medico.dart'; 
+
 // Importe suas entidades e services aqui...
 
 class EncaminhamentoForm extends StatefulWidget {
@@ -18,6 +22,11 @@ class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
   String _tipoDestino = 'SALA';
   final String _riscoEvasao = 'BAIXO';
   final String _isolamento = 'NAO';
+
+  final LeitoService _leitoService = LeitoService();
+  List<Leito> _leitosDisponiveis = [];
+  // Leito? _leitoSelecionado;
+  // bool _exibirSelecaoLeito = false;
   
   // Variáveis de destino
   int? _idMedicoSelecionado;
@@ -30,11 +39,21 @@ class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
   void initState() {
     super.initState();
     _carregarMedicos(); // Busca os médicos do banco para o Select
+    _carregarLeitosDisponiveis(); // Busca os leitos disponíveis
   }
 
   Future<void> _carregarMedicos() async {
     final medicos = await widget.database.query('medico');
     setState(() => _medicos = medicos);
+  }
+
+  Future<void> _carregarLeitosDisponiveis() async {
+    // _leitosDisponiveis = await _leitoService.buscarLeitosDisponiveis();
+    // setState(() {});
+    final leitos = await _leitoService.buscarLeitosDisponiveis();
+    setState(() {
+      _leitosDisponiveis = leitos;
+    });
   }
 
   @override
@@ -106,10 +125,13 @@ class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
                     if (_tipoDestino == 'INTERNACAO')
                       DropdownButtonFormField<int>(
                         initialValue: _idLeitoSelecionado,
-                        items: const [
-                          DropdownMenuItem(value: 1, child: Text("Leito UTI - 01")),
-                          DropdownMenuItem(value: 2, child: Text("Leito Enfermaria - 05")),
-                        ],
+                        items: _leitosDisponiveis.map((leito) {
+                          return DropdownMenuItem<int>(
+                            value: leito.id, // ID que será salvo no banco
+                            // Mostra número, ala e andar (se existir)
+                            child: Text("Leito ${leito.numero} - ${leito.ala} (${leito.andar ?? ''})"),
+                          );
+                        }).toList(),
                         onChanged: (v) => setState(() => _idLeitoSelecionado = v),
                         decoration: const InputDecoration(labelText: "Selecione o Leito Vago *"),
                       ),
@@ -165,6 +187,13 @@ class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
           'id_leito': _idLeitoSelecionado,
           'data_entrada': DateTime.now().toIso8601String(),
         });
+
+        // 🟢 ATUALIZA O STATUS DO LEITO PARA 'OCUPADO' NO BANCO
+        await widget.database.rawUpdate(
+          'UPDATE leito SET situacao = ? WHERE id_leito = ?',
+          ['OCUPADO', _idLeitoSelecionado],
+        );
+        
       }
 
       String valorInternacao = (_tipoDestino == 'INTERNACAO') ? 'SIM' : 'NAO';

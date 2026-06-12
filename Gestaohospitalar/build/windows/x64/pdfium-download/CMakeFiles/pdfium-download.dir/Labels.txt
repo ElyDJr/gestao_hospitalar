@@ -1,0 +1,14 @@
+# Target labels
+ pdfium-download
+# Source files and their labels
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/pdfium-download
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/0fda18136448d6dcd38160705e21411f/pdfium-download.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/9df09c51b346431660ae008779cd8544/pdfium-download-complete.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-build.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-configure.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-download.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-install.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-mkdir.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-patch.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-test.rule
+C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-update.rule

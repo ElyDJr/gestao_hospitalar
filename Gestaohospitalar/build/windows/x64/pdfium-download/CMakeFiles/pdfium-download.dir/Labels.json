@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/pdfium-download"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/0fda18136448d6dcd38160705e21411f/pdfium-download.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/9df09c51b346431660ae008779cd8544/pdfium-download-complete.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-build.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-configure.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-download.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-install.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-patch.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-test.rule"
+		},
+		{
+			"file" : "C:/Users/Marin/\u00c1rea de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/d30877c19927fcdd1f8970e1a88871dc/pdfium-download-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"pdfium-download"
+		],
+		"name" : "pdfium-download"
+	}
+}

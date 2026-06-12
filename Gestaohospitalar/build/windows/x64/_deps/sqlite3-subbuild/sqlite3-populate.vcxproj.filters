@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\43f1a1e41316bde972b9e698b510b719\sqlite3-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\a95dbfd8e066bc31ed3f95622a05cf16\sqlite3-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\d92ceac1ceaaecf9c317b49fcbfbb4a3\sqlite3-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Marin\Área de Trabalho\gestao_hospitalar\Gestaohospitalar\build\windows\x64\_deps\sqlite3-subbuild\CMakeFiles\sqlite3-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2EA130A9-D758-3C33-8818-41DBB4DF212B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

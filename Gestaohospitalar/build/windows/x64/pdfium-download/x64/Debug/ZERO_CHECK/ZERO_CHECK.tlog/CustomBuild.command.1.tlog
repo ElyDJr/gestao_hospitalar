@@ -1,0 +1,10 @@
+^C:\USERS\MARIN\ÁREA DE TRABALHO\GESTAO_HOSPITALAR\GESTAOHOSPITALAR\BUILD\WINDOWS\X64\PDFIUM-DOWNLOAD\CMAKEFILES\0FDA18136448D6DCD38160705E21411F\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download" "-BC:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/pdfium-download.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
