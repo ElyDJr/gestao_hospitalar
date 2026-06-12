@@ -48,7 +48,7 @@ class _ListarConvenioState extends State<ListarConvenio> {
       builder: (context, _) {
         if (widget.service.isLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator(color: Colors.teal)),
+            body: Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 0, 150, 136))),
           );
         }
 
@@ -143,7 +143,7 @@ class _ListarConvenioState extends State<ListarConvenio> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              icon: const Icon(Icons.edit, color: Color.fromARGB(255, 33, 150, 243)),
                               tooltip: "Editar Convênio",
                               onPressed: () => _abrirFormularioCadastro(convenioParaEditar: c),
                             ),

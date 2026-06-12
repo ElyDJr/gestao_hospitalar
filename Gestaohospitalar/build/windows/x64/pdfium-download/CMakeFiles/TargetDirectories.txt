@@ -1,3 +1,0 @@
-C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/pdfium-download.dir
-C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/ALL_BUILD.dir
-C:/Users/Marin/Área de Trabalho/gestao_hospitalar/Gestaohospitalar/build/windows/x64/pdfium-download/CMakeFiles/ZERO_CHECK.dir

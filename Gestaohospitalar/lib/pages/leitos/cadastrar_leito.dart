@@ -45,7 +45,7 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastrar Leito'),
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color.fromRGBO(0, 150, 136, 1),
         foregroundColor: Colors.white,
       ),
       body: Padding(

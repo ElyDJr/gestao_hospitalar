@@ -6,9 +6,9 @@ class LeitoService {
   Future<List<Leito>> listarLeitosDisponiveis() async {
     final db = await DatabaseProvider.instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
-      'leito', // Nome exato da tabela no seu SQL
-      where: 'situacao = ?', // Nome correto da coluna
-      whereArgs: ['VAGO'],   // Valor correto definido no SQL
+      'leito',
+      where: 'situacao = ?',
+      whereArgs: ['VAGO'],
     );
     return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
   }
@@ -20,7 +20,7 @@ class LeitoService {
       SELECT 
         l.id_leito, 
         l.numero AS numero_leito,
-        l.ala, l.andar, -- 🟢 ADICIONADO AQUI
+        l.ala, l.andar,
         l.situacao AS status_leito, 
         i.id_internacao,
         p.id_prontuario, p.evolucao, p.risco_evasao, p.isolamento, p.data_abertura,
@@ -35,7 +35,6 @@ class LeitoService {
     ''');
   }
 
-  // Função para salvar a evolução médica
   Future<void> atualizarEvolucaoProntuario(int idProntuario, String novaEvolucao) async {
     final db = await DatabaseProvider.instance.database;
     await db.update(
@@ -46,7 +45,7 @@ class LeitoService {
     );
   }
 
-  Future<void> cadastrarLeito(Leito leito) async { //lembrar de rever a necessidade
+  Future<void> cadastrarLeito(Leito leito) async {
     final db = await DatabaseProvider.instance.database;
     await db.insert('leito', leito.toMap());
   }
@@ -61,7 +60,6 @@ class LeitoService {
     );
   }
 
-  // 🟢 Retorna apenas os leitos desocupados para o formulário de encaminhamento
   Future<List<Leito>> buscarLeitosDisponiveis() async {
     final db = await DatabaseProvider.instance.database;
     final List<Map<String, dynamic>> res = await db.query(
@@ -71,5 +69,45 @@ class LeitoService {
       orderBy: 'numero',
     );
     return res.map((map) => Leito.fromMap(map)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> listarExamesCatalogo() async {
+    final db = await DatabaseProvider.instance.database;
+    final List<Map<String, dynamic>> res = await db.query(
+      'exame', 
+      orderBy: 'nome',
+    );
+    return res;
+  }
+
+  // =========================================================================
+  // FUNÇÕES CORRIGIDAS: AGORA COM status_exame E id_medico
+  // =========================================================================
+
+  Future<List<Map<String, dynamic>>> listarExamesSolicitados(int idProntuario) async {
+    final db = await DatabaseProvider.instance.database;
+    
+    // Corrigido para buscar 'status_exame' e renomear para 'status' para a tela continuar funcionando
+    final List<Map<String, dynamic>> res = await db.rawQuery('''
+      SELECT se.id_exame, e.nome, se.status_exame AS status 
+      FROM solicitacao_exame se 
+      JOIN exame e ON se.id_exame = e.id_exame 
+      WHERE se.id_prontuario = ?
+    ''', [idProntuario]);
+
+    return res.map((item) => Map<String, dynamic>.from(item)).toList();
+  }
+
+  Future<void> solicitarNovoExame(int idProntuario, int idExame) async {
+    final db = await DatabaseProvider.instance.database;
+    
+    // Inserção corrigida com os campos exigidos pela sua classe SolicitacaoExame
+    await db.insert('solicitacao_exame', {
+      'id_prontuario': idProntuario,
+      'id_exame': idExame,
+      'id_medico': 1, // ID do médico (ajuste conforme o usuário logado se necessário)
+      'status_exame': 'SOLICITADO',
+      'data_solicitacao': DateTime.now().toIso8601String(),
+    });
   }
 }

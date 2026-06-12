@@ -16,6 +16,10 @@ import 'medicos/agenda_medica.dart';
 import 'convenios/listar_convenio.dart';
 import 'convenios/cadastrar_convenio.dart';
 
+// EXAMES
+import 'exames/cadastrar_exame.dart';
+import 'exames/listar_exame.dart'; 
+
 // TRIAGEM
 import 'triagem/realizar_triagem.dart';
 
@@ -28,6 +32,7 @@ import 'login/tela_login.dart';
 import 'leitos/mapa_leitos.dart';
 import 'leitos/cadastrar_leito.dart';
 import '../domain/services/leito_service.dart';
+import '../domain/services/exame_service.dart';
 
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_farmacia.dart';
@@ -52,7 +57,8 @@ class _DashboardState extends State<Dashboard> {
   late MedicoService _medicoService;
   late ConvenioService _convenioService;
   late TriagemService _triagemService;
-  late LeitoService _leitoService; 
+  late LeitoService _leitoService;
+  late ExameService _exameService;
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -69,10 +75,12 @@ class _DashboardState extends State<Dashboard> {
     _convenioService.carregarConvenios();
 
     _triagemService = TriagemService(widget.database);
-    _carregarFila();
+    _leitoService = LeitoService();
+    _exameService = ExameService();
+    _exameService.carregarExames();
 
+    _carregarFila();
     _carregarDadosIniciais();
-    _leitoService = LeitoService();    
   }
 
   Future<void> _carregarFila() async {
@@ -82,14 +90,12 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  // Carrega tudo que precisa ao abrir
   Future<void> _carregarDadosIniciais() async {
     await _pacienteService.carregarPacientes();
-    await _carregarFila(); // Carrega a triagem
+    await _carregarFila();
   }
 
   void _mostrarTriagem(String nivel, String titulo) {
-    // Filtra a fila pela cor selecionada
     final lista = _filaTriagem.where((t) => t['risco'] == nivel).toList();
 
     showDialog(
@@ -103,16 +109,12 @@ class _DashboardState extends State<Dashboard> {
             itemCount: lista.length,
             itemBuilder: (context, i) {
               final item = lista[i];
-              // Busca o objeto Paciente original para abrir o prontuário
-              final p = _pacienteService.pacientes
-                  .firstWhere((pac) => pac.id == item['id_paciente']);
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(child: Text("${i + 1}")),
                   title: Text(item['nome'] ?? 'Sem Nome'),
                   onTap: () async {
-                    Navigator.pop(context); // Fecha a lista
-
+                    Navigator.pop(context);
                     final p = _pacienteService.pacientes
                         .firstWhere((pac) => pac.id == item['id_paciente']);
 
@@ -120,10 +122,9 @@ class _DashboardState extends State<Dashboard> {
                       context: context,
                       builder: (context) => Dialog(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        clipBehavior: Clip.antiAlias, // Garante que o formulário respeite as bordas arredondadas
                         child: SizedBox(
-                          width: 650,  // ⬅️ Ajuste a LARGURA aqui se quiser maior ou menor
-                          height: 8000, // ⬅️ Ajuste a ALTURA aqui
+                          width: 650,
+                          height: 800,
                           child: EncaminhamentoForm(
                             paciente: p,
                             triagem: item,
@@ -132,8 +133,7 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                     );
-
-                    _carregarFila(); // Atualiza a fila quando o admin fechar o form
+                    _carregarFila();
                   },
                 ),
               );
@@ -144,7 +144,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,22 +153,17 @@ class _DashboardState extends State<Dashboard> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout), // Ícone de porta/saída
+            icon: const Icon(Icons.logout),
             tooltip: 'Sair do Sistema',
             onPressed: () {
-              // Redireciona para a tela de login limpando a memória de telas anteriores
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => TelaLogin(database: widget.database),
-                ),
-                (route) =>
-                    false, // Garante que o usuário não consiga "voltar" sem logar
+                MaterialPageRoute(builder: (context) => TelaLogin(database: widget.database)),
+                (route) => false,
               );
             },
           ),
-          const SizedBox(
-              width: 16), // Dá um espaço elegante até a borda da tela
+          const SizedBox(width: 16),
         ],
       ),
       body: Row(
@@ -178,48 +172,19 @@ class _DashboardState extends State<Dashboard> {
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) {
               setState(() => _selectedIndex = i);
-              _pacienteService.carregarPacientes();
-              _medicoService.carregarMedicos();
-              _convenioService.carregarConvenios();
             },
-            extended: false,
-            labelType: NavigationRailLabelType.none,
             destinations: const [
-              NavigationRailDestination(
-                  icon:
-                      Tooltip(message: "Início", child: Icon(Icons.dashboard)),
-                  label: Text("Início")),
-              NavigationRailDestination(
-                  icon: Tooltip(
-                      message: "Farmácia", child: Icon(Icons.local_pharmacy)),
-                  label: Text("Farmácia")),
-              NavigationRailDestination(
-                  icon:
-                      Tooltip(message: "Pacientes", child: Icon(Icons.people)),
-                  label: Text("Pacientes")),
-              NavigationRailDestination(
-                  icon: Tooltip(
-                      message: "Médicos", child: Icon(Icons.medical_services)),
-                  label: Text("Médicos")),
-              NavigationRailDestination(
-                  icon: Tooltip(message: "Leitos", child: Icon(Icons.bed)),
-                  label: Text("Leitos")),
-              NavigationRailDestination(
-                  icon: Icon(Icons.calendar_month),
-                  selectedIcon: Icon(Icons.calendar_month),
-                  label: Text('Agenda Médica')),
-              NavigationRailDestination(
-                  icon: Tooltip(
-                      message: "Faturamento", child: Icon(Icons.attach_money)),
-                  label: Text("Faturamento")),
-              NavigationRailDestination(
-                  icon: Tooltip(
-                      message: "Atendimento", child: Icon(Icons.healing)),
-                  label: Text("Atendimento")),
-              NavigationRailDestination(
-                  icon: Tooltip(
-                      message: "Convênios", child: Icon(Icons.business)),
-                  label: Text("Convênios")),
+              NavigationRailDestination(icon: Tooltip(message: 'Início', child: Icon(Icons.dashboard)), label: Text("Início")),
+              NavigationRailDestination(icon: Tooltip(message: 'Farmácia', child: Icon(Icons.local_pharmacy)), label: Text("Farmácia")),
+              NavigationRailDestination(icon: Tooltip(message: 'Pacientes', child: Icon(Icons.people)), label: Text("Pacientes")),
+              NavigationRailDestination(icon: Tooltip(message: 'Médicos', child: Icon(Icons.medical_services)), label: Text("Médicos")),
+              NavigationRailDestination(icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)), label: Text("Leitos")),
+              NavigationRailDestination(icon: Tooltip(message: 'Agenda', child: Icon(Icons.calendar_month)), label: Text('Agenda')),
+              NavigationRailDestination(icon: Tooltip(message: 'Faturamento', child: Icon(Icons.attach_money)), label: Text("Faturamento")),
+              NavigationRailDestination(icon: Tooltip(message: 'Atendimento', child: Icon(Icons.healing)), label: Text("Atendimento")),
+              NavigationRailDestination(icon: Tooltip(message: 'Convênios', child: Icon(Icons.business)), label: Text("Convênios")),
+              // ABA DE EXAMES ADICIONADA AQUI (Índice 9)
+              NavigationRailDestination(icon: Tooltip(message: 'Exames', child: Icon(Icons.science)), label: Text("Exames")),
             ],
           ),
           const VerticalDivider(width: 1),
@@ -231,53 +196,34 @@ class _DashboardState extends State<Dashboard> {
 
   Widget _getPage(int index) {
     switch (index) {
-      case 0:
-        return _dashboard();
-      case 1:
-        return const TelaFarmacia();
-      case 2:
-        return ListarPaciente(
-            service: _pacienteService,
-            convenioService: _convenioService); // 👈 Atualize esta linha
-      case 3:
-        return ListarMedico(service: _medicoService);
-      case 4:
-        return const MapaLeitos();
-      case 5:
-        return const AgendaMedicaTela();
-      case 6:
-        return const TelaFaturamento();
-      case 7:
-        return TelaAtendimentoMedico(database: widget.database);
-      case 8:
-        return ListarConvenio(
-            service:
-                _convenioService); // ✅ Mapeamento da listagem na aba lateral!
-      default:
-        return _dashboard();
+      case 0: return _dashboard();
+      case 1: return const TelaFarmacia();
+      case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
+      case 3: return ListarMedico(service: _medicoService);
+      case 4: return const MapaLeitos();
+      case 5: return const AgendaMedicaTela();
+      case 6: return const TelaFaturamento();
+      case 7: return TelaAtendimentoMedico(database: widget.database);
+      case 8: return ListarConvenio(service: _convenioService);
+      case 9: return ListarExame(service: _exameService);
+      default: return _dashboard();
     }
   }
 
   Widget _dashboard() {
-    //ver aqui pq tem que buscar na tabela triagem
-    // Calcula as contagens baseadas na FILA DE TRIAGEM real
     int emergencia = _filaTriagem.where((t) => t['risco'] == "VERMELHO").length;
-    int muitoUrgente =
-        _filaTriagem.where((t) => t['risco'] == "LARANJA").length;
+    int muitoUrgente = _filaTriagem.where((t) => t['risco'] == "LARANJA").length;
     int urgente = _filaTriagem.where((t) => t['risco'] == "AMARELO").length;
     int poucoUrgente = _filaTriagem.where((t) => t['risco'] == "VERDE").length;
     int naoUrgente = _filaTriagem.where((t) => t['risco'] == "AZUL").length;
-    //card para solicitação de internação
-    int solicitados =
-        _filaTriagem.where((t) => t['internacao'] == 'SOLICITADO').length;
 
-    //ABRE MENU LATERAL PARA CADASTRO
+   // ABRE MENU LATERAL PARA CADASTRO
     Future<void> abrirDialogoLateral(Widget content) async {
       await showGeneralDialog(
         context: context,
         barrierDismissible: true,
-        barrierLabel: "Cadastro",
-        barrierColor: Colors.black54,
+        barrierLabel: "Fechar Cadastro",
+        barrierColor: Colors.black54,    // Escurece o fundo
         transitionDuration: const Duration(milliseconds: 300),
         transitionBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
@@ -308,73 +254,29 @@ class _DashboardState extends State<Dashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Painel Geral",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text("Painel Geral", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
             children: [
-              GestureDetector(
-                  onTap: () => _mostrarTriagem("VERMELHO", "Emergência"),
-                  child: _card("🔴 Emergência", emergencia, Colors.red)),
-              GestureDetector(
-                  onTap: () => _mostrarTriagem("LARANJA", "Muito Urgente"),
-                  child:
-                      _card("🟠 Muito Urgente", muitoUrgente, Colors.orange)),
-              GestureDetector(
-                  onTap: () => _mostrarTriagem("AMARELO", "Urgente"),
-                  child: _card("🟡 Urgente", urgente, Colors.yellow.shade700)),
-              GestureDetector(
-                  onTap: () => _mostrarTriagem("VERDE", "Pouco Urgente"),
-                  child: _card("🟢 Pouco Urgente", poucoUrgente, Colors.green)),
-              GestureDetector(
-                  onTap: () => _mostrarTriagem("AZUL", "Não Urgente"),
-                  child: _card("🔵 Não Urgente", naoUrgente, Colors.blue)),
+              GestureDetector(onTap: () => _mostrarTriagem("VERMELHO", "Emergência"), child: _card("🔴 Emergência", emergencia, Colors.red)),
+              GestureDetector(onTap: () => _mostrarTriagem("LARANJA", "Muito Urgente"), child: _card("🟠 Muito Urgente", muitoUrgente, Colors.orange)),
+              GestureDetector(onTap: () => _mostrarTriagem("AMARELO", "Urgente"), child: _card("🟡 Urgente", urgente, Colors.yellow.shade700)),
+              GestureDetector(onTap: () => _mostrarTriagem("VERDE", "Pouco Urgente"), child: _card("🟢 Pouco Urgente", poucoUrgente, Colors.green)),
+              GestureDetector(onTap: () => _mostrarTriagem("AZUL", "Não Urgente"), child: _card("🔵 Não Urgente", naoUrgente, Colors.blue)),
             ],
           ),
           const SizedBox(height: 30),
           Wrap(
             spacing: 12,
+            runSpacing: 12,
             children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await abrirDialogoLateral(CadastrarPaciente(
-                      service: _pacienteService,
-                      convenioService: _convenioService));
-                  _pacienteService.carregarPacientes(); // Atualiza pacientes
-                },
-                icon: const Icon(Icons.people),
-                label: const Text("Paciente"),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => abrirDialogoLateral(
-                    CadastrarMedico(service: _medicoService)),
-                icon: const Icon(Icons.medical_services),
-                label: const Text("Médico"),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => abrirDialogoLateral(
-                    CadastrarConvenio(service: _convenioService)),
-                icon: const Icon(Icons.business),
-                label: const Text("Convênio"),
-              ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await abrirDialogoLateral(RealizarTriagem(
-                      pacienteService: _pacienteService,
-                      triagemService: _triagemService));
-                  _carregarFila();
-                },
-                icon: const Icon(Icons.favorite),
-                label: const Text("Triagem"),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => abrirDialogoLateral(
-                    CadastrarLeito(leitoService: _leitoService)
-                ),
-                icon: const Icon(Icons.bed),
-                label: const Text("Leito"),
-              ),
+              ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(CadastrarPaciente(service: _pacienteService, convenioService: _convenioService)); _pacienteService.carregarPacientes(); }, icon: const Icon(Icons.people), label: const Text("Paciente")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarMedico(service: _medicoService)), icon: const Icon(Icons.medical_services), label: const Text("Médico")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarConvenio(service: _convenioService)), icon: const Icon(Icons.business), label: const Text("Convênio")),
+              ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)); _carregarFila(); }, icon: const Icon(Icons.favorite), label: const Text("Triagem")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService)), icon: const Icon(Icons.bed), label: const Text("Leito")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(const CadastrarExame()), icon: const Icon(Icons.science), label: const Text("Exame")),
             ],
           ),
         ],

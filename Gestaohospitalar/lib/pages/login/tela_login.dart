@@ -87,7 +87,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: const AssetImage('assets/imagens/monge2.jpeg'),
+                  image: const AssetImage('assets/imagens/monge.jpeg'),
                   fit: BoxFit.contain,
                   colorFilter: ColorFilter.mode(
                     Colors.white.withValues(alpha: 0.08),
