@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/paciente.dart';
 import '../../domain/entities/leito.dart';
 import '../../domain/services/leito_service.dart';
-import '../dashboard_medico.dart'; 
 
 // Importe suas entidades e services aqui...
 

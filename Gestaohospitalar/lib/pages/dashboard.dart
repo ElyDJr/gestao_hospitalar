@@ -10,6 +10,7 @@ import 'pacientes/cadastrar_paciente.dart';
 // MEDICOS
 import 'medicos/listar_medico.dart';
 import 'medicos/cadastrar_medico.dart';
+import 'medicos/agenda_medica.dart';
 
 // CONVENIO
 import 'convenios/listar_convenio.dart';
@@ -28,7 +29,6 @@ import 'leitos/mapa_leitos.dart';
 import 'leitos/cadastrar_leito.dart';
 import '../domain/services/leito_service.dart';
 
-import '../telas/tela_estoque.dart';
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_farmacia.dart';
 import '../telas/tela_atendimento_medico.dart';
@@ -205,9 +205,9 @@ class _DashboardState extends State<Dashboard> {
                   icon: Tooltip(message: "Leitos", child: Icon(Icons.bed)),
                   label: Text("Leitos")),
               NavigationRailDestination(
-                  icon:
-                      Tooltip(message: "Estoque", child: Icon(Icons.inventory)),
-                  label: Text("Estoque")),
+                  icon: Icon(Icons.calendar_month),
+                  selectedIcon: Icon(Icons.calendar_month),
+                  label: Text('Agenda Médica')),
               NavigationRailDestination(
                   icon: Tooltip(
                       message: "Faturamento", child: Icon(Icons.attach_money)),
@@ -244,7 +244,7 @@ class _DashboardState extends State<Dashboard> {
       case 4:
         return const MapaLeitos();
       case 5:
-        return const TelaEstoque();
+        return const AgendaMedicaTela();
       case 6:
         return const TelaFaturamento();
       case 7:

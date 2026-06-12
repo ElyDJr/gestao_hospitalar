@@ -33,6 +33,17 @@ CREATE TABLE medico(
     FOREIGN KEY (id_especialidade) REFERENCES especialidade(id_especialidade)
 );
 
+CREATE TABLE escala_medica(
+    id_escala INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_medico INTEGER NOT NULL,
+    data_escala TEXT NOT NULL, -- Formato ISO: 'YYYY-MM-DD'
+    hora_inicio TEXT NOT NULL, -- 'HH:MM'
+    hora_fim TEXT NOT NULL,    -- 'HH:MM'
+    is_plantao INTEGER DEFAULT 0 CHECK (is_plantao IN (0, 1)),
+    FOREIGN KEY (id_medico) REFERENCES medico(id_medico)
+);
+
+
 CREATE TABLE paciente(
     id_paciente INTEGER PRIMARY KEY AUTOINCREMENT,
     ativo INTEGER DEFAULT 1,
@@ -284,6 +295,14 @@ static const String mockData = '''
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (3, 'Dr. Carlos Souza', 'CRM34567', 400.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (4, 'Dra. Ana Pereira', 'CRM45678', 550.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (5, 'Dr. Jorge Lima', 'CRM56789', 600.0);
+  
+  -- Médicos trabalhando em dias normais
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-15', '08:00', '18:00', 0);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-15', '08:00', '12:00', 0);
+  
+  -- Médico de Plantão
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-15', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-16', '08:00', '18:00', 0);
   
   INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('João da Silva', '11111111111', 'MASCULINO', '1985-05-15', 'Nenhuma', 'O+');
   INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Maria Oliveira', '22222222222', 'FEMININO', '1990-08-20', 'Penicilina', 'A+');
