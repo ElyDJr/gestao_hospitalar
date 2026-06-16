@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import '../domain/services/leito_service.dart';
 import 'atendimento/evolucao_prontuario_form.dart';
 
-//DASHBOARD
+// DASHBOARD
 import 'login/tela_login.dart';
 
 class DashboardMedico extends StatefulWidget {
   final dynamic database;
-  const DashboardMedico({super.key, required this.database});
+
+  const DashboardMedico({
+    super.key,
+    required this.database,
+  });
 
   @override
   State<DashboardMedico> createState() => _DashboardMedicoState();
@@ -25,6 +29,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
 
   Future<void> _carregarMapa() async {
     final mapa = await _leitoService.buscarMapaLeitos();
+
     setState(() {
       _leitos = mapa;
     });
@@ -33,26 +38,15 @@ class _DashboardMedicoState extends State<DashboardMedico> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(),
       appBar: AppBar(
         title: const Text("Painel do Médico - Mapa de Leitos"),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _carregarMapa),
           IconButton(
-            icon: const Icon(Icons.logout), // Ícone de porta/saída
-            tooltip: 'Sair do Sistema',
-            onPressed: () {
-              // Redireciona para a tela de login limpando a memória de telas anteriores
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TelaLogin(database: widget.database),
-                ),
-                (route) =>
-                    false, // Garante que o usuário não consiga "voltar" sem logar
-              );
-            },
+            icon: const Icon(Icons.refresh),
+            onPressed: _carregarMapa,
           ),
         ],
       ),
@@ -71,16 +65,18 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                 _buildLegenda(Colors.orange, "Em Higienização"),
               ],
             ),
+
             const SizedBox(height: 20),
-            
+
             // Grid de Leitos
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5, // Quantidade de leitos por linha (ajuste conforme a tela)
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.2, // Proporção do "card" quadrado/retangular
+                  childAspectRatio: 1.2,
                 ),
                 itemCount: _leitos.length,
                 itemBuilder: (context, index) {
@@ -95,12 +91,109 @@ class _DashboardMedicoState extends State<DashboardMedico> {
     );
   }
 
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.teal,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.medical_services,
+                  color: Colors.white,
+                  size: 50,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Painel Médico',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // INÍCIO
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Início'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+
+          // SALAS
+          ListTile(
+            leading: const Icon(Icons.meeting_room),
+            title: const Text('Salas'),
+            onTap: () {
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tela de Salas em desenvolvimento'),
+                ),
+              );
+            },
+          ),
+
+          const Divider(),
+
+          // SAIR
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.red,
+            ),
+            title: const Text(
+              'Sair',
+              style: TextStyle(
+                color: Colors.red,
+              ),
+            ),
+            onTap: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      TelaLogin(database: widget.database),
+                ),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLegenda(Color cor, String texto) {
     return Row(
       children: [
-        Container(width: 20, height: 20, decoration: BoxDecoration(color: cor, shape: BoxShape.circle)),
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: cor,
+            shape: BoxShape.circle,
+          ),
+        ),
         const SizedBox(width: 8),
-        Text(texto, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          texto,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -113,7 +206,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
       corFundo = Colors.green.shade600;
     } else if (status == 'OCUPADO') {
       corFundo = Colors.red.shade600;
-    } else { // HIGIENIZACAO
+    } else {
       corFundo = Colors.orange.shade600;
     }
 
@@ -123,24 +216,40 @@ class _DashboardMedicoState extends State<DashboardMedico> {
       child: Card(
         color: corFundo,
         elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.bed, color: Colors.white, size: 40),
+              const Icon(
+                Icons.bed,
+                color: Colors.white,
+                size: 40,
+              ),
               const SizedBox(height: 10),
               Text(
                 "Leito ${leito['numero_leito']}",
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
-              if (status == 'OCUPADO' && leito['nome'] != null) ...[
+              if (status == 'OCUPADO' &&
+                  leito['nome'] != null) ...[
                 const SizedBox(height: 5),
                 Text(
-                  leito['nome'].toString().split(' ')[0], // Mostra só o primeiro nome
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  leito['nome']
+                      .toString()
+                      .split(' ')[0],
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ]
@@ -151,20 +260,37 @@ class _DashboardMedicoState extends State<DashboardMedico> {
     );
   }
 
-  void _interagirComLeito(Map<String, dynamic> leito, String status) async {
+  void _interagirComLeito(
+    Map<String, dynamic> leito,
+    String status,
+  ) async {
     if (status == 'VAGO') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Leito desocupado. Sem paciente no momento.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Leito desocupado. Sem paciente no momento.",
+          ),
+        ),
+      );
     } else if (status == 'HIGIENIZACAO') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Leito em higienização! Aguarde a liberação do setor de limpeza."), backgroundColor: Colors.orange));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Leito em higienização! Aguarde a liberação do setor de limpeza.",
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
     } else if (status == 'OCUPADO') {
-      // Abre o Prontuário em TELA CHEIA (Navigator.push normal)
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ProntuarioEvolucaoForm(dadosLeitoPaciente: leito),
+          builder: (_) => ProntuarioEvolucaoForm(
+            dadosLeitoPaciente: leito,
+          ),
         ),
       );
-      // Quando fechar o prontuário, atualiza o mapa (caso o paciente tenha recebido alta pelo médico no futuro)
+
       _carregarMapa();
     }
   }
