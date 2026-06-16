@@ -61,12 +61,15 @@ class ExameService extends ChangeNotifier {
 
   // --- MÉTODOS DE SOLICITAÇÃO ---
 
+  // --- MÉTODOS DE SOLICITAÇÃO ---
+
   Future<List<Map<String, dynamic>>> buscarExamesPorProntuario(int idProntuario) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      // Certifique-se de que a query retorna os campos necessários para a UI
+      // CORREÇÃO: Alterado de se.status para se.status_exame
+      // Usamos "AS status" para não quebrar a sua interface (UI) caso ela espere essa chave
       final result = await db.rawQuery('''
-        SELECT se.id_exame, e.nome, se.status 
+        SELECT se.id_exame, e.nome, se.status_exame AS status 
         FROM solicitacao_exame se 
         JOIN exame e ON se.id_exame = e.id_exame 
         WHERE se.id_prontuario = ?
@@ -86,17 +89,16 @@ class ExameService extends ChangeNotifier {
     try {
       final db = await DatabaseProvider.instance.database;
       
-      // NOTA: Se a sua tabela solicitacao_exame exige o id_medico, 
-      // você deve incluí-lo aqui.
+      // CORREÇÃO: O nome da coluna no banco é 'status_exame' e não 'status'
       await db.insert('solicitacao_exame', {
         'id_prontuario': idProntuario,
         'id_exame': idExame,
-        'id_medico': idMedico, // Incluído conforme a assinatura do método
-        'status': 'SOLICITADO',
+        'id_medico': idMedico, 
+        'status_exame': 'SOLICITADO', 
       });
+      // ADICIONE ESTA LINHA:
+      notifyListeners(); // <--- Isso é o que faz a tela atualizar e mostrar o exame na lista!
     } catch (e) {
-      // Se este erro disparar, o console mostrará exatamente o motivo 
-      // (ex: tabela inexistente ou campo faltando)
       throw Exception("Erro ao salvar solicitação de exame: $e");
     }
   }

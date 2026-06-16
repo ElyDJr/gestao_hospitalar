@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/services/leito_service.dart';
+import '../../domain/services/exame_service.dart';
 
 class ProntuarioEvolucaoForm extends StatefulWidget {
   final Map<String, dynamic> dadosLeitoPaciente;
@@ -13,14 +14,16 @@ class ProntuarioEvolucaoForm extends StatefulWidget {
 class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
   final _evolucaoCtrl = TextEditingController();
   final LeitoService _leitoService = LeitoService();
-  
-  int _abaSelecionada = 0; 
 
-  // ================= MODIFICAÇÕES AQUI =================
-  // Usando um ID inteiro em vez de um Map complexo para evitar o erro do Dropdown
+  // 1. Adicione o ExameService aqui:
+  final ExameService _exameService = ExameService();
+
+
+  int _abaSelecionada = 0; 
   int? _idExameSelecionado;
   
-  final List<Map<String, dynamic>> _listaExamesSolicitados = [];
+  //final List<Map<String, dynamic>> _listaExamesSolicitados = [];
+  List<Map<String, dynamic>> _listaExamesSolicitados = [];
   List<Map<String, dynamic>> _examesDisponiveisNoHospital = [];
   bool _carregandoExames = true; // Para mostrar um indicador de loading no dropdown
   // =====================================================
@@ -35,12 +38,17 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
   // ================= NOVA FUNÇÃO PARA BUSCAR DADOS =================
   Future<void> _carregarExamesDoBanco() async {
     try {
-      // Chama o método do seu serviço que busca do banco de dados
+      final idProntuario = widget.dadosLeitoPaciente['id_prontuario'];
+      
+      // Busca os exames do catálogo
       final exames = await _leitoService.listarExamesCatalogo(); 
+      // Busca o histórico do paciente no banco de dados
+      final historico = await _exameService.buscarExamesPorProntuario(idProntuario);
       
       if (mounted) {
         setState(() {
           _examesDisponiveisNoHospital = exames;
+          _listaExamesSolicitados = historico; // Atualiza a tela com o banco!
           _carregandoExames = false;
         });
       }
@@ -48,10 +56,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
       if (mounted) {
         setState(() => _carregandoExames = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Erro ao carregar catálogo de exames: $e"),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text("Erro ao carregar exames: $e"), backgroundColor: Colors.red),
         );
       }
     }
@@ -256,21 +261,39 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                 backgroundColor: Colors.blue.shade700,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (_idExameSelecionado != null) {
-                  // Acha o exame completo na lista usando o ID selecionado
-                  final exameCompleto = _examesDisponiveisNoHospital.firstWhere(
-                    (e) => e['id_exame'] == _idExameSelecionado,
-                  );
+                  try {
+                    final idProntuario = widget.dadosLeitoPaciente['id_prontuario'];
+                    final idMedico = widget.dadosLeitoPaciente['id_medico'] ?? 1; // ID do médico (1 como fallback)
 
-                  setState(() {
-                    _listaExamesSolicitados.insert(0, {
-                      'id_exame': exameCompleto['id_exame'],
-                      'nome': exameCompleto['nome'],
-                      'status': 'SOLICITADO' 
+                    // 1. CHAMA O BANCO DE DADOS PARA SALVAR (usando o método que arrumamos)
+                    await _exameService.solicitarNovoExame(
+                      idProntuario: idProntuario,
+                      idExame: _idExameSelecionado!,
+                      idMedico: idMedico,
+                    );
+
+                    // 2. BUSCA A LISTA ATUALIZADA DO BANCO
+                    final historicoAtualizado = await _exameService.buscarExamesPorProntuario(idProntuario);
+
+                    // 3. ATUALIZA A TELA
+                    setState(() {
+                      _listaExamesSolicitados = historicoAtualizado;
+                      _idExameSelecionado = null; // Reseta o dropdown
                     });
-                    _idExameSelecionado = null; // Reseta após a seleção
-                  });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Exame solicitado e salvo no banco com sucesso!"),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Erro ao salvar no banco: $e"), backgroundColor: Colors.red),
+                    );
+                  }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -349,7 +372,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                               exame['status'] = 'CONCLUIDO';
                             });
                           },
-                          child: const Text("Liberar Laudo (Simular)", style: TextStyle(color: Colors.grey)),
+                          child: const Text("Liberar Laudo", style: TextStyle(color: Colors.grey)),
                         ),
                         const SizedBox(
                           width: 24,

@@ -29,6 +29,8 @@ flutter:
   
   # A seção 'assets' foi removida. 
   # Se no futuro você for adicionar imagens (ex: logo do hospital), 
-  # você deve recriar a seção assim:
-assets:
-  - assets/imagens/monge.jpeg
+  # você deve recriar a seção assim:  
+  assets:
+    
+    - assets/imagens/monge.jpeg
+  

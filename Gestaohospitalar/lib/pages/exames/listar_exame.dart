@@ -49,7 +49,7 @@ class _ListarExameState extends State<ListarExame> {
       builder: (context, _) {
         if (widget.service.isLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator(color: Colors.blueAccent)),
+            body: Center(child: CircularProgressIndicator(color: Colors.teal,)),
           );
         }
 
@@ -62,7 +62,7 @@ class _ListarExameState extends State<ListarExame> {
         return Scaffold(
           appBar: AppBar(
             title: const Text("Catálogo de Exames"),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Colors.teal,
             foregroundColor: Colors.white,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(70),
@@ -75,7 +75,7 @@ class _ListarExameState extends State<ListarExame> {
                     hintText: "Buscar exame por nome...",
                     fillColor: Colors.white,
                     filled: true,
-                    prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
+                    prefixIcon: const Icon(Icons.search, color: Colors.teal,),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -87,7 +87,7 @@ class _ListarExameState extends State<ListarExame> {
           ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _abrirFormularioCadastro(),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor:Colors.teal,
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text("Novo Exame", style: TextStyle(color: Colors.white)),
           ),
