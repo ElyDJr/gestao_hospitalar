@@ -29,9 +29,7 @@ class _TelaMapaLeitosState extends State<TelaMapaLeitos> {
         if (l.status == BedStatus.ocupado) {
           cor = Colors.red;
           txt = "Ocupado";
-        }
-
-        if (l.status == BedStatus.limpeza) {
+        } else if (l.status == BedStatus.limpeza) {
           cor = Colors.orange;
           txt = "Limpeza";
         }

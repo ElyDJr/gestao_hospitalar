@@ -270,6 +270,7 @@ class _DashboardState extends State<Dashboard> {
     //card para solicitação de internação
     int solicitados =
         _filaTriagem.where((t) => t['internacao'] == 'SOLICITADO').length;
+        
 
     //ABRE MENU LATERAL PARA CADASTRO
     Future<void> abrirDialogoLateral(Widget content) async {

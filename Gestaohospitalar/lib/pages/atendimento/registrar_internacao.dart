@@ -98,20 +98,16 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
     }
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
-    // Tenta converter a string de data de nascimento para DateTime para formatar
+    // 1. Declare a variável UMA ÚNICA VEZ
     String dataNascFormatada = "N/A";
-    // try {
-    //   if (widget.paciente.dataNascimento != null) {
-    //     // Assume que a data no banco está em formato ISO ou similar
-    //     DateTime dt = DateTime.parse(widget.paciente.dataNascimento!);
-    //     dataNascFormatada = _dateFormatter.format(dt);
-    //   }
-    // } catch (_) {
-    //   dataNascFormatada = widget.paciente.dataNascimento ?? "N/A";
-    // }
 
+    // 2. Agora, faça a lógica para dar valor a ela
+    if (widget.paciente.nascimento != null) {
+      dataNascFormatada = _dateFormatter.format(widget.paciente.nascimento!);
+    }
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Registrar Internação')),
       body: SingleChildScrollView(
@@ -126,13 +122,14 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Paciente: ${widget.paciente.nome}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Nascimento: $dataNascFormatada'), // <--- Data formatada aqui
+                    Text('Nascimento: $dataNascFormatada'), // A variável agora contém o valor formatado
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            
+
+
             FutureBuilder<List<Leito>>(
               future: _leitoService.listarLeitosDisponiveis(),
               builder: (context, snapshot) {

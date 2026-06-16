@@ -1,0 +1,1 @@
+ /home/administrativo/gestao_hospitalar/Gestaohospitalar/build/2832ad01b98b8312039afe838aca93ca/dart_build_result.json:  /home/administrativo/flutter/bin/cache/dart-sdk/version /home/administrativo/gestao_hospitalar/Gestaohospitalar/.dart_tool/package_config.json /home/administrativo/gestao_hospitalar/Gestaohospitalar/pubspec.yaml

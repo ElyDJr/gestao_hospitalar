@@ -121,36 +121,38 @@ class _TelaLoginState extends State<TelaLogin> {
                     const SizedBox(height: 10),
 
                     TextField(
-                      controller: user,
-                      decoration: InputDecoration(
-                        labelText: tipoAcesso == "ADMIN" ? "Usuário" : "CRM",
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+  controller: user,
+  decoration: InputDecoration(
+    labelText: tipoAcesso == "ADMIN" ? "Usuário" : "CRM",
+    border: const OutlineInputBorder(),
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+  ),
+  onSubmitted: (_) => _login(), // Adicionado aqui
+),
+const SizedBox(height: 12),
 
-                    TextField(
-                      controller: pass,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: "Senha",
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+TextField(
+  controller: pass,
+  obscureText: true,
+  decoration: InputDecoration(
+    labelText: "Senha",
+    border: const OutlineInputBorder(),
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+  ),
+  onSubmitted: (_) => _login(), // Adicionado aqui
+),
+const SizedBox(height: 20),
 
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 45),
-                      ),
-                      onPressed: _login,
-                      child: const Text("Entrar"),
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.teal,
+    foregroundColor: Colors.white,
+    minimumSize: const Size(double.infinity, 45),
+  ),
+  onPressed: _login,
+  child: const Text("Entrar"),
                     ),
                   ],
                 ),

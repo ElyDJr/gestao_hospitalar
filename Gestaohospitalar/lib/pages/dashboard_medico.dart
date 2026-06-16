@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../domain/services/leito_service.dart';
 import 'atendimento/evolucao_prontuario_form.dart';
-
-//DASHBOARD
 import 'login/tela_login.dart';
 
 class DashboardMedico extends StatefulWidget {
@@ -14,6 +12,7 @@ class DashboardMedico extends StatefulWidget {
 }
 
 class _DashboardMedicoState extends State<DashboardMedico> {
+  int _selectedIndex = 0;
   final LeitoService _leitoService = LeitoService();
   List<Map<String, dynamic>> _leitos = [];
 
@@ -24,148 +23,140 @@ class _DashboardMedicoState extends State<DashboardMedico> {
   }
 
   Future<void> _carregarMapa() async {
-    final mapa = await _leitoService.buscarMapaLeitos();
+  final mapa = await _leitoService.buscarMapaLeitos();
+  print("DEBUG: Total de linhas retornadas pelo SQL: ${mapa.length}");
+  for (var m in mapa) {
+    print("DEBUG: Leito ${m['numero_leito']} - Paciente: ${m['nome']}");
+  }
+  if (mounted) {
     setState(() {
       _leitos = mapa;
     });
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Painel do Médico - Mapa de Leitos"),
+        title: const Text("Painel do Médico"),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _carregarMapa),
           IconButton(
-            icon: const Icon(Icons.logout), // Ícone de porta/saída
-            tooltip: 'Sair do Sistema',
+            icon: const Icon(Icons.logout),
             onPressed: () {
-              // Redireciona para a tela de login limpando a memória de telas anteriores
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => TelaLogin(database: widget.database),
-                ),
-                (route) =>
-                    false, // Garante que o usuário não consiga "voltar" sem logar
+                MaterialPageRoute(builder: (_) => TelaLogin(database: widget.database)),
+                (route) => false,
               );
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Legenda de Cores
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLegenda(Colors.green, "Desocupado"),
-                const SizedBox(width: 20),
-                _buildLegenda(Colors.red, "Ocupado"),
-                const SizedBox(width: 20),
-                _buildLegenda(Colors.orange, "Em Higienização"),
-              ],
-            ),
-            const SizedBox(height: 20),
-            
-            // Grid de Leitos
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5, // Quantidade de leitos por linha (ajuste conforme a tela)
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.2, // Proporção do "card" quadrado/retangular
-                ),
-                itemCount: _leitos.length,
-                itemBuilder: (context, index) {
-                  final leito = _leitos[index];
-                  return _buildCardLeito(leito);
-                },
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+                // A MÁGICA: Sempre que clicar em "Salas", ele força a atualização dos dados
+                if (_selectedIndex == 1) {
+                  _carregarMapa();
+                }
+              });
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.dashboard),
+                label: Text("Início"),
               ),
+              NavigationRailDestination(
+                icon: Icon(Icons.meeting_room),
+                label: Text("Salas"),
+              ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(
+            child: _selectedIndex == 0
+                ? const Center(child: Text("Bem-vindo ao Painel do Médico."))
+                : _buildMapaLeitos(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMapaLeitos() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Legenda
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            _buildLegenda(Colors.green.shade600, "Desocupado"),
+            const SizedBox(width: 20),
+            _buildLegenda(Colors.red.shade600, "Ocupado"),
+            const SizedBox(width: 20),
+            _buildLegenda(Colors.orange.shade600, "Em Higienização"),
+          ]),
+          const SizedBox(height: 20),
+          // Grid de Leitos
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.2,
+              ),
+              itemCount: _leitos.length,
+              itemBuilder: (context, i) => _buildCardLeito(_leitos[i]),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegenda(Color cor, String texto) => Row(children: [
+    Container(width: 20, height: 20, decoration: BoxDecoration(color: cor, shape: BoxShape.circle)),
+    const SizedBox(width: 8),
+    Text(texto, style: const TextStyle(fontWeight: FontWeight.bold))
+  ]);
+
+  Widget _buildCardLeito(Map<String, dynamic> leito) {
+    String status = leito['status_leito'] ?? 'VAGO';
+    Color corFundo = status == 'VAGO' 
+        ? Colors.green.shade600 
+        : (status == 'OCUPADO' ? Colors.red.shade600 : Colors.orange.shade600);
+
+    return InkWell(
+      onTap: () async {
+        if (status == 'OCUPADO') {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ProntuarioEvolucaoForm(dadosLeitoPaciente: leito)),
+          );
+          // Atualiza ao voltar do prontuário
+          _carregarMapa();
+        }
+      },
+      child: Card(
+        color: corFundo,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.bed, color: Colors.white, size: 40),
+            Text("Leito ${leito['numero_leito']}", 
+                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildLegenda(Color cor, String texto) {
-    return Row(
-      children: [
-        Container(width: 20, height: 20, decoration: BoxDecoration(color: cor, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Text(texto, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _buildCardLeito(Map<String, dynamic> leito) {
-    Color corFundo;
-    String status = leito['status_leito'] ?? 'VAGO';
-
-    if (status == 'VAGO') {
-      corFundo = Colors.green.shade600;
-    } else if (status == 'OCUPADO') {
-      corFundo = Colors.red.shade600;
-    } else { // HIGIENIZACAO
-      corFundo = Colors.orange.shade600;
-    }
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => _interagirComLeito(leito, status),
-      child: Card(
-        color: corFundo,
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.bed, color: Colors.white, size: 40),
-              const SizedBox(height: 10),
-              Text(
-                "Leito ${leito['numero_leito']}",
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              if (status == 'OCUPADO' && leito['nome'] != null) ...[
-                const SizedBox(height: 5),
-                Text(
-                  leito['nome'].toString().split(' ')[0], // Mostra só o primeiro nome
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ]
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _interagirComLeito(Map<String, dynamic> leito, String status) async {
-    if (status == 'VAGO') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Leito desocupado. Sem paciente no momento.")));
-    } else if (status == 'HIGIENIZACAO') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Leito em higienização! Aguarde a liberação do setor de limpeza."), backgroundColor: Colors.orange));
-    } else if (status == 'OCUPADO') {
-      // Abre o Prontuário em TELA CHEIA (Navigator.push normal)
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProntuarioEvolucaoForm(dadosLeitoPaciente: leito),
-        ),
-      );
-      // Quando fechar o prontuário, atualiza o mapa (caso o paciente tenha recebido alta pelo médico no futuro)
-      _carregarMapa();
-    }
   }
 }
