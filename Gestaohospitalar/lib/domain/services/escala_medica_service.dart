@@ -26,4 +26,25 @@ class EscalaService {
     final db = await DatabaseProvider.instance.database;
     await db.insert('escala_medica', escala.toMap());
   }
+
+  // 🟢 NOVO: Atualiza uma escala existente
+  Future<void> atualizarEscala(EscalaMedica escala) async {
+    final db = await DatabaseProvider.instance.database;
+    await db.update(
+      'escala_medica',
+      escala.toMap(),
+      where: 'id_escala = ?',
+      whereArgs: [escala.id],
+    );
+  }
+
+  // 🟢 NOVO: Exclui uma escala
+  Future<void> excluirEscala(int id) async {
+    final db = await DatabaseProvider.instance.database;
+    await db.delete(
+      'escala_medica',
+      where: 'id_escala = ?',
+      whereArgs: [id],
+    );
+  }
 }

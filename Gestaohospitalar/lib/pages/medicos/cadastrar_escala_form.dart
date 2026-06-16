@@ -5,7 +5,12 @@ import '../../domain/services/escala_medica_service.dart';
 
 class CadastrarEscalaForm extends StatefulWidget {
   final EscalaService escalaService;
-  const CadastrarEscalaForm({super.key, required this.escalaService});
+  final EscalaMedica? escalaParaEditar;
+  const CadastrarEscalaForm({
+    super.key,
+    required this.escalaService,
+    this.escalaParaEditar,
+  });
 
   @override
   State<CadastrarEscalaForm> createState() => _CadastrarEscalaFormState();
@@ -13,7 +18,7 @@ class CadastrarEscalaForm extends StatefulWidget {
 
 class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
   final _formKey = GlobalKey<FormState>();
-  
+
   int? _idMedicoSelecionado;
   DateTime? _dataSelecionada;
   TimeOfDay? _horaInicio;
@@ -27,13 +32,35 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
   void initState() {
     super.initState();
     _carregarMedicos();
+
+    //preenche para edição
+    if (widget.escalaParaEditar != null) {
+      final escala = widget.escalaParaEditar!;
+      _idMedicoSelecionado = escala.idMedico;
+      _dataSelecionada = DateTime.tryParse(escala.dataEscala);
+      _horaInicio = _converterParaTimeOfDay(escala.horaInicio);
+      _horaFim = _converterParaTimeOfDay(escala.horaFim);
+      _isPlantao = escala.isPlantao;
+    }
+  }
+
+  TimeOfDay? _converterParaTimeOfDay(String? horario) {
+    if (horario == null || horario.isEmpty) return null;
+    try {
+      final partes = horario.split(':');
+      return TimeOfDay(
+          hour: int.parse(partes[0]), minute: int.parse(partes[1]));
+    } catch (e) {
+      return null;
+    }
   }
 
   // Busca os médicos ativos diretamente do banco
   Future<void> _carregarMedicos() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final res = await db.query('medico', where: 'ativo != 0', orderBy: 'nome');
+      final res =
+          await db.query('medico', where: 'ativo != 0', orderBy: 'nome');
       setState(() {
         _medicosAtivos = res;
         _carregandoMedicos = false;
@@ -86,15 +113,19 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
     if (_formKey.currentState!.validate()) {
       if (_dataSelecionada == null || _horaInicio == null || _horaFim == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por favor, preencha a data e os horários!'), backgroundColor: Colors.orange),
+          const SnackBar(
+              content: Text('Por favor, preencha a data e os horários!'),
+              backgroundColor: Colors.orange),
         );
         return;
       }
 
       // Formata a data para YYYY-MM-DD
-      String dataFormatada = "${_dataSelecionada!.year}-${_dataSelecionada!.month.toString().padLeft(2, '0')}-${_dataSelecionada!.day.toString().padLeft(2, '0')}";
+      String dataFormatada =
+          "${_dataSelecionada!.year}-${_dataSelecionada!.month.toString().padLeft(2, '0')}-${_dataSelecionada!.day.toString().padLeft(2, '0')}";
 
       final novaEscala = EscalaMedica(
+        id: widget.escalaParaEditar?.id,
         idMedico: _idMedicoSelecionado!,
         dataEscala: dataFormatada,
         horaInicio: _formatarTimeOfDay(_horaInicio),
@@ -102,13 +133,21 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
         isPlantao: _isPlantao,
       );
 
-      await widget.escalaService.cadastrarEscala(novaEscala);
+      // 🟢 DECIDE SE VAI CADASTRAR OU ATUALIZAR O BANCO
+      if (widget.escalaParaEditar == null) {
+        await widget.escalaService.cadastrarEscala(novaEscala);
+      } else {
+        await widget.escalaService.atualizarEscala(novaEscala);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Turno agendado com sucesso!'), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Turno agendado com sucesso!'),
+              backgroundColor: Colors.green),
         );
-        Navigator.pop(context, true); // Retorna true para recarregar o calendário
+        Navigator.pop(
+            context, true); // Retorna true para recarregar o calendário
       }
     }
   }
@@ -117,11 +156,11 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Escala Médica'),
+        title: Text(widget.escalaParaEditar == null ? 'Adicionar Escala Médica' : 'Editar Escala Médica'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
-      body: _carregandoMedicos 
+      body: _carregandoMedicos
           ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(20.0),
@@ -143,20 +182,24 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
                           child: Text(m['nome'].toString()),
                         );
                       }).toList(),
-                      onChanged: (val) => setState(() => _idMedicoSelecionado = val),
-                      validator: (value) => value == null ? 'Selecione o Médico' : null,
+                      onChanged: (val) =>
+                          setState(() => _idMedicoSelecionado = val),
+                      validator: (value) =>
+                          value == null ? 'Selecione o Médico' : null,
                     ),
                     const SizedBox(height: 20),
 
                     // Campo de Data Customizado
                     ListTile(
-                      leading: const Icon(Icons.calendar_month, color: Colors.teal),
+                      leading:
+                          const Icon(Icons.calendar_month, color: Colors.teal),
                       title: const Text("Data da Escala"),
-                      subtitle: Text(_dataSelecionada == null 
-                          ? "Clique para escolher..." 
+                      subtitle: Text(_dataSelecionada == null
+                          ? "Clique para escolher..."
                           : "${_dataSelecionada!.day.toString().padLeft(2, '0')}/${_dataSelecionada!.month.toString().padLeft(2, '0')}/${_dataSelecionada!.year}"),
                       tileColor: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
                       onTap: _selecionarData,
                     ),
                     const SizedBox(height: 16),
@@ -166,22 +209,26 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
                       children: [
                         Expanded(
                           child: ListTile(
-                            leading: const Icon(Icons.access_time, color: Colors.green),
+                            leading: const Icon(Icons.access_time,
+                                color: Colors.green),
                             title: const Text("Início"),
                             subtitle: Text(_formatarTimeOfDay(_horaInicio)),
                             tileColor: Colors.grey.shade100,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
                             onTap: () => _selecionarHora(true),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: ListTile(
-                            leading: const Icon(Icons.access_time_filled, color: Colors.red),
+                            leading: const Icon(Icons.access_time_filled,
+                                color: Colors.red),
                             title: const Text("Término"),
                             subtitle: Text(_formatarTimeOfDay(_horaFim)),
                             tileColor: Colors.grey.shade100,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
                             onTap: () => _selecionarHora(false),
                           ),
                         ),
@@ -191,24 +238,28 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
 
                     // Chave de seleção se é plantonista
                     SwitchListTile(
-                      title: const Text("Médico de Plantão?", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Ative se for cobertura de urgência/emergência 24h"),
+                      title: const Text("Médico de Plantão?",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text(
+                          "Ative se for cobertura de urgência/emergência 24h"),
                       value: _isPlantao,
                       activeColor: Colors.red,
-                      secondary: Icon(Icons.warning, color: _isPlantao ? Colors.red : Colors.grey),
+                      secondary: Icon(Icons.warning,
+                          color: _isPlantao ? Colors.red : Colors.grey),
                       onChanged: (val) => setState(() => _isPlantao = val),
                     ),
                     const Spacer(),
 
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal, 
-                        foregroundColor: Colors.white, 
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-                      ),
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8))),
                       onPressed: _salvar,
-                      child: const Text('Salvar Escala no Calendário', style: TextStyle(fontSize: 16)),
+                      child: const Text('Salvar Escala no Calendário',
+                          style: TextStyle(fontSize: 16)),
                     )
                   ],
                 ),

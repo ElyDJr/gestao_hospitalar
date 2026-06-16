@@ -325,5 +325,32 @@ static const String mockData = '''
   INSERT INTO agendamento (id_paciente, id_medico, id_sala, data_hora, status) VALUES (5, 5, 1, '2026-06-07 15:00', 'AGENDADO');  
 
   INSERT INTO medicamento (id_almoxarifado, principio_ativo) VALUES (1, 'Dipirona');
+
+  -- ==========================================
+  -- 1. ESCALAS MÉDICAS (Junho de 2026)
+  -- ==========================================
+  
+  -- Plantões Diários (Fechando de 15/06 a 30/06) - Médico ID 3 assumindo a maioria
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-15', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-16', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-17', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (4, '2026-06-18', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-19', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-20', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-21', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-22', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (4, '2026-06-23', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-24', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-25', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-26', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-27', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-28', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-29', '00:00', '23:59', 1);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (5, '2026-06-30', '00:00', '23:59', 1);
+
+  -- Expedientes Regulares (Consultas) para agendamentos futuros
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-16', '08:00', '18:00', 0);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (5, '2026-06-17', '13:00', '19:00', 0);
+  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-18', '08:00', '12:00', 0);
   ''';
 }

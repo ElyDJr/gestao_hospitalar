@@ -119,17 +119,49 @@ class _AgendaMedicaTelaState extends State<AgendaMedicaTela> {
                     itemCount: escalas.length,
                     itemBuilder: (context, index) {
                       final escala = escalas[index];
+                      // return ListTile(
+                      //   leading: Icon(Icons.person, color: escala.isPlantao ? Colors.red : Colors.teal),
+                      //   title: Text(escala.nomeMedico ?? "Médico", style: const TextStyle(fontWeight: FontWeight.w600)),
+                      //   subtitle: Text("${escala.horaInicio} às ${escala.horaFim}"),
+                      //   trailing: escala.isPlantao 
+                      //     ? Container(
+                      //         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      //         decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(12)),
+                      //         child: const Text("PLANTÃO", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      //       ) 
+                      //     : null,
+                      // );
                       return ListTile(
                         leading: Icon(Icons.person, color: escala.isPlantao ? Colors.red : Colors.teal),
                         title: Text(escala.nomeMedico ?? "Médico", style: const TextStyle(fontWeight: FontWeight.w600)),
                         subtitle: Text("${escala.horaInicio} às ${escala.horaFim}"),
-                        trailing: escala.isPlantao 
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(12)),
-                              child: const Text("PLANTÃO", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ) 
-                          : null,
+                        
+                        // 🟢 3. MODIFICAÇÃO AQUI NO TRAILING: Substituindo por um Row para agrupar badge + botões
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min, // Impede que ocupe todo o espaço do listTile
+                          children: [
+                            if (escala.isPlantao)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(12)),
+                                child: const Text("PLANTÃO", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                              ),
+                            // Botão de Editar
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                              onPressed: () {
+                                Navigator.pop(context); // Fecha o painel inferior antes de abrir o formulário
+                                _abrirCadastroEscala(escalaEditar: escala); // Abre o formulário passando a escala
+                              },
+                            ),
+                            // Botão de Excluir
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                              onPressed: () => _confirmarExclusao(escala),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -141,12 +173,42 @@ class _AgendaMedicaTelaState extends State<AgendaMedicaTela> {
     );
   }
 
+  void _confirmarExclusao(EscalaMedica escala) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir Escala'),
+        content: Text('Tem certeza que deseja remover o plantão de ${escala.nomeMedico}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx), 
+            child: const Text('Cancelar')
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx); // Fecha o AlertDialog
+              if (escala.id != null) {
+                await _escalaService.excluirEscala(escala.id!);
+                _carregarEscalas(); // Atualiza a tela por trás
+                if (mounted) Navigator.pop(context); // Fecha o BottomSheet
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Escala removida com sucesso!'), backgroundColor: Colors.red),
+                );
+              }
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   // 🟢 NOVA FUNÇÃO: Abre o formulário em formato Drawer lateral direito
-  Future<void> _abrirCadastroEscala() async {
+  Future<void> _abrirCadastroEscala({EscalaMedica? escalaEditar}) async {
     final atualizou = await showGeneralDialog<bool>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "NovaEscala",
+      barrierLabel: "Fechar",
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
@@ -158,7 +220,8 @@ class _AgendaMedicaTelaState extends State<AgendaMedicaTela> {
             child: SizedBox(
               width: 450, // Largura ideal de preenchimento para tablets/monitores
               height: double.infinity,
-              child: CadastrarEscalaForm(escalaService: _escalaService),
+              child: CadastrarEscalaForm(escalaService: _escalaService,
+                  escalaParaEditar: escalaEditar),
             ),
           ),
         );
