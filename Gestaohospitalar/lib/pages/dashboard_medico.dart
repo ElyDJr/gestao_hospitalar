@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../domain/services/leito_service.dart';
 import 'atendimento/evolucao_prontuario_form.dart';
+import 'salas/mapa_salas.dart';
+import '../domain/services/sala_service.dart';
 
 // DASHBOARD
 import 'login/tela_login.dart';
 
 class DashboardMedico extends StatefulWidget {
   final dynamic database;
+
+  
 
   const DashboardMedico({
     super.key,
@@ -29,6 +33,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
 
   Future<void> _carregarMapa() async {
     final mapa = await _leitoService.buscarMapaLeitos();
+    
 
     setState(() {
       _leitos = mapa;
@@ -76,7 +81,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                   crossAxisCount: 5,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.2,
+                  childAspectRatio: 0.95,
                 ),
                 itemCount: _leitos.length,
                 itemBuilder: (context, index) {
@@ -132,20 +137,25 @@ class _DashboardMedicoState extends State<DashboardMedico> {
           ),
 
           // SALAS
+// SALAS
           ListTile(
             leading: const Icon(Icons.meeting_room),
             title: const Text('Salas'),
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              Navigator.pop(context); // Fecha o menu lateral
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tela de Salas em desenvolvimento'),
+              // 🟢 Abre a tela de Salas perfeitamente
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MapaSalas(),
                 ),
               );
+              // 🔴 REMOVIDO o _carregarMapa() daqui de baixo para evitar conflitos de recarga
             },
           ),
 
+          
           const Divider(),
 
           // SAIR
@@ -198,67 +208,74 @@ class _DashboardMedicoState extends State<DashboardMedico> {
     );
   }
 
-  Widget _buildCardLeito(Map<String, dynamic> leito) {
-    Color corFundo;
-    String status = leito['status_leito'] ?? 'VAGO';
+Widget _buildCardLeito(Map<String, dynamic> leito) {
+  Color corFundo;
+  String status = leito['status_leito']?.toString().toUpperCase() ?? 'VAGO';
 
-    if (status == 'VAGO') {
-      corFundo = Colors.green.shade600;
-    } else if (status == 'OCUPADO') {
-      corFundo = Colors.red.shade600;
-    } else {
-      corFundo = Colors.orange.shade600;
+  if (status == 'VAGO' || status == 'DESOCUPADO') {
+    corFundo = Colors.green.shade600;
+  } else if (status == 'OCUPADO') {
+    corFundo = Colors.red.shade600;
+  } else {
+    corFundo = Colors.orange.shade600;
+  }
+
+  String primeiroNome = '';
+  final nomeBruto = leito['nome']?.toString().trim() ?? '';
+  if (nomeBruto.isNotEmpty) {
+    final partes = nomeBruto.split(' ');
+    if (partes.isNotEmpty) {
+      primeiroNome = partes[0];
     }
+  }
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => _interagirComLeito(leito, status),
-      child: Card(
-        color: corFundo,
-        elevation: 6,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.bed,
+  return InkWell(
+    borderRadius: BorderRadius.circular(12),
+    onTap: () => _interagirComLeito(leito, status),
+    child: Card(
+      color: corFundo,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // 🟢 Força a coluna a ocupar o mínimo espaço possível
+          children: [
+            const Icon(Icons.bed, color: Colors.white, size: 32), // 🟢 Reduzido levemente de 36 para 32
+            const SizedBox(height: 6),
+            Text(
+              "Leito ${leito['numero_leito'] ?? ''}",
+              style: const TextStyle(
                 color: Colors.white,
-                size: 40,
+                fontSize: 15, // 🟢 Reduzido de 16 para 15
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 10),
-              Text(
-                "Leito ${leito['numero_leito']}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (status == 'OCUPADO' &&
-                  leito['nome'] != null) ...[
-                const SizedBox(height: 5),
-                Text(
-                  leito['nome']
-                      .toString()
-                      .split(' ')[0],
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+            if (status == 'OCUPADO' && primeiroNome.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              // 🟢 Envolvido em um Flexible para impedir que o texto force o estouro vertical do container
+              Flexible(
+                child: Text(
+                  primeiroNome,
                   style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+                    color: Colors.white70, 
+                    fontSize: 12, // 🟢 Reduzido levemente para melhor leitura no grid
+                    fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-              ]
-            ],
-          ),
+              ),
+            ]
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _interagirComLeito(
     Map<String, dynamic> leito,
