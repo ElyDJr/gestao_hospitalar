@@ -20,22 +20,27 @@ import 'convenios/cadastrar_convenio.dart';
 import 'exames/cadastrar_exame.dart';
 import 'exames/listar_exame.dart'; 
 
+// ALMOXARIFADO / FARMÁCIA (NOVO)
+import 'almoxarifado/listar_almoxarifado.dart';
+import 'almoxarifado/cadastrar_almoxarifado.dart';
+import '../domain/services/almoxarifado_service.dart';
+
 // TRIAGEM
 import 'triagem/realizar_triagem.dart';
 
 // ATENDIMENTO
 import 'atendimento/encaminhamento_form.dart';
-//DASHBOARD
+
+// DASHBOARD
 import 'login/tela_login.dart';
 
-//LEITOS
+// LEITOS
 import 'leitos/mapa_leitos.dart';
 import 'leitos/cadastrar_leito.dart';
 import '../domain/services/leito_service.dart';
 import '../domain/services/exame_service.dart';
 
 import '../telas/tela_faturamento.dart';
-import '../telas/tela_farmacia.dart';
 import '../telas/tela_atendimento_medico.dart';
 
 import '../domain/services/paciente_service.dart';
@@ -59,6 +64,7 @@ class _DashboardState extends State<Dashboard> {
   late TriagemService _triagemService;
   late LeitoService _leitoService;
   late ExameService _exameService;
+  late AlmoxarifadoService _almoxarifadoService; // Serviço do Almoxarifado instanciado aqui
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -76,8 +82,13 @@ class _DashboardState extends State<Dashboard> {
 
     _triagemService = TriagemService(widget.database);
     _leitoService = LeitoService();
+    
     _exameService = ExameService();
     _exameService.carregarExames();
+
+    // Inicializando o serviço do Almoxarifado
+    _almoxarifadoService = AlmoxarifadoService(widget.database);
+    _almoxarifadoService.carregarItens();
 
     _carregarFila();
     _carregarDadosIniciais();
@@ -175,7 +186,8 @@ class _DashboardState extends State<Dashboard> {
             },
             destinations: const [
               NavigationRailDestination(icon: Tooltip(message: 'Início', child: Icon(Icons.dashboard)), label: Text("Início")),
-              NavigationRailDestination(icon: Tooltip(message: 'Farmácia', child: Icon(Icons.local_pharmacy)), label: Text("Farmácia")),
+              // ALTERADO: Ícone e label para Almoxarifado (Índice 1)
+              NavigationRailDestination(icon: Tooltip(message: 'Almoxarifado', child: Icon(Icons.inventory)), label: Text("Almoxarifado")),
               NavigationRailDestination(icon: Tooltip(message: 'Pacientes', child: Icon(Icons.people)), label: Text("Pacientes")),
               NavigationRailDestination(icon: Tooltip(message: 'Médicos', child: Icon(Icons.medical_services)), label: Text("Médicos")),
               NavigationRailDestination(icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)), label: Text("Leitos")),
@@ -183,7 +195,6 @@ class _DashboardState extends State<Dashboard> {
               NavigationRailDestination(icon: Tooltip(message: 'Faturamento', child: Icon(Icons.attach_money)), label: Text("Faturamento")),
               NavigationRailDestination(icon: Tooltip(message: 'Atendimento', child: Icon(Icons.healing)), label: Text("Atendimento")),
               NavigationRailDestination(icon: Tooltip(message: 'Convênios', child: Icon(Icons.business)), label: Text("Convênios")),
-              // ABA DE EXAMES ADICIONADA AQUI (Índice 9)
               NavigationRailDestination(icon: Tooltip(message: 'Exames', child: Icon(Icons.science)), label: Text("Exames")),
             ],
           ),
@@ -197,7 +208,7 @@ class _DashboardState extends State<Dashboard> {
   Widget _getPage(int index) {
     switch (index) {
       case 0: return _dashboard();
-      case 1: return const TelaFarmacia();
+      case 1: return ListarAlmoxarifado(service: _almoxarifadoService); // ALTERADO: Direciona para a listagem
       case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
       case 3: return ListarMedico(service: _medicoService);
       case 4: return const MapaLeitos();
@@ -217,13 +228,12 @@ class _DashboardState extends State<Dashboard> {
     int poucoUrgente = _filaTriagem.where((t) => t['risco'] == "VERDE").length;
     int naoUrgente = _filaTriagem.where((t) => t['risco'] == "AZUL").length;
 
-   // ABRE MENU LATERAL PARA CADASTRO
     Future<void> abrirDialogoLateral(Widget content) async {
       await showGeneralDialog(
         context: context,
         barrierDismissible: true,
         barrierLabel: "Fechar Cadastro",
-        barrierColor: Colors.black54,    // Escurece o fundo
+        barrierColor: Colors.black54,
         transitionDuration: const Duration(milliseconds: 300),
         transitionBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
@@ -277,6 +287,12 @@ class _DashboardState extends State<Dashboard> {
               ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)); _carregarFila(); }, icon: const Icon(Icons.favorite), label: const Text("Triagem")),
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService)), icon: const Icon(Icons.bed), label: const Text("Leito")),
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(const CadastrarExame()), icon: const Icon(Icons.science), label: const Text("Exame")),
+              // NOVO: Botão de atalho rápido para o Almoxarifado na Home
+              ElevatedButton.icon(
+                onPressed: () => abrirDialogoLateral(CadastrarAlmoxarifado(service: _almoxarifadoService)), 
+                icon: const Icon(Icons.inventory), 
+                label: const Text("Almoxarifado")
+              ),
             ],
           ),
         ],
