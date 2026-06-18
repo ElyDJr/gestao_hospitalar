@@ -12,6 +12,9 @@ class AlmoxarifadoService extends ChangeNotifier {
   
   List<Almoxarifado> _itens = [];
   List<Almoxarifado> get itens => _itens;
+
+  // ADICIONE ESTA LINHA:
+  bool get temAlertaEstoque => _itens.any((item) => item.quantidade < item.estoqueMinimo);
   
   bool _isLoading = false;
   bool get isLoading => _isLoading;

@@ -20,7 +20,7 @@ import 'convenios/cadastrar_convenio.dart';
 import 'exames/cadastrar_exame.dart';
 import 'exames/listar_exame.dart'; 
 
-// ALMOXARIFADO / FARMÁCIA (NOVO)
+// ALMOXARIFADO / FARMÁCIA
 import 'almoxarifado/listar_almoxarifado.dart';
 import 'almoxarifado/cadastrar_almoxarifado.dart';
 import '../domain/services/almoxarifado_service.dart';
@@ -64,7 +64,7 @@ class _DashboardState extends State<Dashboard> {
   late TriagemService _triagemService;
   late LeitoService _leitoService;
   late ExameService _exameService;
-  late AlmoxarifadoService _almoxarifadoService; // Serviço do Almoxarifado instanciado aqui
+  late AlmoxarifadoService _almoxarifadoService;
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -86,12 +86,24 @@ class _DashboardState extends State<Dashboard> {
     _exameService = ExameService();
     _exameService.carregarExames();
 
-    // Inicializando o serviço do Almoxarifado
     _almoxarifadoService = AlmoxarifadoService(widget.database);
+    
+    _almoxarifadoService.addListener(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    });
+
     _almoxarifadoService.carregarItens();
 
     _carregarFila();
     _carregarDadosIniciais();
+  }
+
+  @override
+  void dispose() {
+    _almoxarifadoService.dispose();
+    super.dispose();
   }
 
   Future<void> _carregarFila() async {
@@ -184,18 +196,27 @@ class _DashboardState extends State<Dashboard> {
             onDestinationSelected: (i) {
               setState(() => _selectedIndex = i);
             },
-            destinations: const [
-              NavigationRailDestination(icon: Tooltip(message: 'Início', child: Icon(Icons.dashboard)), label: Text("Início")),
-              // ALTERADO: Ícone e label para Almoxarifado (Índice 1)
-              NavigationRailDestination(icon: Tooltip(message: 'Almoxarifado', child: Icon(Icons.inventory)), label: Text("Almoxarifado")),
-              NavigationRailDestination(icon: Tooltip(message: 'Pacientes', child: Icon(Icons.people)), label: Text("Pacientes")),
-              NavigationRailDestination(icon: Tooltip(message: 'Médicos', child: Icon(Icons.medical_services)), label: Text("Médicos")),
-              NavigationRailDestination(icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)), label: Text("Leitos")),
-              NavigationRailDestination(icon: Tooltip(message: 'Agenda', child: Icon(Icons.calendar_month)), label: Text('Agenda')),
-              NavigationRailDestination(icon: Tooltip(message: 'Faturamento', child: Icon(Icons.attach_money)), label: Text("Faturamento")),
-              NavigationRailDestination(icon: Tooltip(message: 'Atendimento', child: Icon(Icons.healing)), label: Text("Atendimento")),
-              NavigationRailDestination(icon: Tooltip(message: 'Convênios', child: Icon(Icons.business)), label: Text("Convênios")),
-              NavigationRailDestination(icon: Tooltip(message: 'Exames', child: Icon(Icons.science)), label: Text("Exames")),
+            destinations: [
+              const NavigationRailDestination(icon: Tooltip(message: 'Início', child: Icon(Icons.dashboard)), label: Text("Início")),
+              // VOLTOU PARA A ORDEM ORIGINAL (Índice 1) com o alerta
+              NavigationRailDestination(
+                icon: Badge(
+                  isLabelVisible: _almoxarifadoService.temAlertaEstoque, 
+                  label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), 
+                  backgroundColor: Colors.red, 
+                  alignment: Alignment.topRight,
+                  child: const Tooltip(message: 'Almoxarifado', child: Icon(Icons.inventory)),
+                ),
+                label: const Text("Almoxarifado"),
+              ),
+              const NavigationRailDestination(icon: Tooltip(message: 'Pacientes', child: Icon(Icons.people)), label: Text("Pacientes")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Médicos', child: Icon(Icons.medical_services)), label: Text("Médicos")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)), label: Text("Leitos")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Agenda', child: Icon(Icons.calendar_month)), label: Text('Agenda')),
+              const NavigationRailDestination(icon: Tooltip(message: 'Faturamento', child: Icon(Icons.attach_money)), label: Text("Faturamento")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Atendimento', child: Icon(Icons.healing)), label: Text("Atendimento")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Convênios', child: Icon(Icons.business)), label: Text("Convênios")),
+              const NavigationRailDestination(icon: Tooltip(message: 'Exames', child: Icon(Icons.science)), label: Text("Exames")),
             ],
           ),
           const VerticalDivider(width: 1),
@@ -206,9 +227,10 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget _getPage(int index) {
+    // VOLTOU PARA A ORDEM ORIGINAL
     switch (index) {
       case 0: return _dashboard();
-      case 1: return ListarAlmoxarifado(service: _almoxarifadoService); // ALTERADO: Direciona para a listagem
+      case 1: return ListarAlmoxarifado(service: _almoxarifadoService); 
       case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
       case 3: return ListarMedico(service: _medicoService);
       case 4: return const MapaLeitos();
@@ -287,10 +309,15 @@ class _DashboardState extends State<Dashboard> {
               ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)); _carregarFila(); }, icon: const Icon(Icons.favorite), label: const Text("Triagem")),
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService)), icon: const Icon(Icons.bed), label: const Text("Leito")),
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(const CadastrarExame()), icon: const Icon(Icons.science), label: const Text("Exame")),
-              // NOVO: Botão de atalho rápido para o Almoxarifado na Home
+              // ALTERADO: Adicionado o Badge direto no botão do painel!
               ElevatedButton.icon(
                 onPressed: () => abrirDialogoLateral(CadastrarAlmoxarifado(service: _almoxarifadoService)), 
-                icon: const Icon(Icons.inventory), 
+                icon: Badge(
+                  isLabelVisible: _almoxarifadoService.temAlertaEstoque, // Só aparece se tiver alerta
+                  label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), 
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.inventory),
+                ), 
                 label: const Text("Almoxarifado")
               ),
             ],
