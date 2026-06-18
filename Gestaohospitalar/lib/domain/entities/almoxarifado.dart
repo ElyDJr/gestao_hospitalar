@@ -24,7 +24,7 @@ class Almoxarifado extends Entitie {
     this.quantidade = 0,
     this.unidade,
     required this.valorUnitario,
-    this.estoqueMinimo = 0,
+    required this.estoqueMinimo,
     this.lote,
     this.validade,
     this.principioAtivo,

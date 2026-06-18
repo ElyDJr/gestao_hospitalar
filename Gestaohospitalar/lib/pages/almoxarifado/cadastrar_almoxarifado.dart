@@ -168,7 +168,17 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                             controller: _estoqueMinimoCtrl,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            decoration: const InputDecoration(labelText: "Estoque Mínimo", border: OutlineInputBorder()),
+                            decoration: const InputDecoration(
+                              labelText: "Estoque Mínimo *", // INDICADOR VISUAL DE OBRIGATÓRIO
+                              border: OutlineInputBorder(),
+                            ),
+                            // ADICIONADO VALIDADOR PARA CAMPO OBRIGATÓRIO
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return "Obrigatório";
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ],
@@ -203,7 +213,7 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                         categoria: _categoriaSelecionada!, 
                         descricao: _descricaoCtrl.text,
                         quantidade: int.tryParse(_quantidadeCtrl.text) ?? 0,
-                        estoqueMinimo: int.tryParse(_estoqueMinimoCtrl.text) ?? 0,
+                        estoqueMinimo: int.parse(_estoqueMinimoCtrl.text), // Como o validador garante que não é nulo/vazio, pode usar int.parse diretamente.
                         valorUnitario: double.tryParse(_valorUnitarioCtrl.text.replaceAll(',', '.')) ?? 0.0,
                         // ADICIONE AS DUAS LINHAS ABAIXO:
                         principioAtivo: _categoriaSelecionada == 'MEDICAMENTO' ? _principioAtivoCtrl.text : null,
