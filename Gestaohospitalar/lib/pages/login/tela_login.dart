@@ -29,8 +29,6 @@ class _TelaLoginState extends State<TelaLogin> {
     super.dispose();
   }
 
-  // No seu _TelaLoginState, substitua a função _login por esta:
-
   void _login() async {
     final usuarioDigitado = user.text.trim();
     final senhaDigitada = pass.text.trim();
@@ -138,6 +136,7 @@ class _TelaLoginState extends State<TelaLogin> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: user,
+                      textInputAction: TextInputAction.next, // O Enter aqui pula para o próximo campo
                       decoration: InputDecoration(
                         labelText: tipoAcesso == "ADMIN" ? "Usuário" : "CRM",
                         border: const OutlineInputBorder(),
@@ -149,6 +148,8 @@ class _TelaLoginState extends State<TelaLogin> {
                     TextField(
                       controller: pass,
                       obscureText: true,
+                      textInputAction: TextInputAction.done, // Transforma o botão do teclado em "Concluído/Enter"
+                      onSubmitted: (_) => _login(), // Aciona o login ao apertar Enter
                       decoration: InputDecoration(
                         labelText: "Senha",
                         border: const OutlineInputBorder(),
