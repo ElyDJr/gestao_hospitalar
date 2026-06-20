@@ -48,4 +48,25 @@ class MedicamentoService {
       throw Exception("Erro ao salvar a prescrição no banco: $e");
     }
   }
+
+
+  Future<List<Map<String, dynamic>>> listarPrescricoesPorProntuario(int idProntuario) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      
+      // Busca os dados da prescrição juntando com o nome do almoxarifado
+      final List<Map<String, dynamic>> result = await db.rawQuery('''
+        SELECT p.id_prescricao, p.dosagem, p.aplicacao, p.horario, p.observacao, a.nome AS nome_medicamento
+        FROM prescricao p
+        INNER JOIN medicamento m ON p.id_medicamento = m.id_medicamento
+        INNER JOIN almoxarifado a ON m.id_almoxarifado = a.id_almoxarifado
+        WHERE p.id_prontuario = ?
+        ORDER BY p.id_prescricao DESC
+      ''', [idProntuario]);
+      
+      return result.map((item) => Map<String, dynamic>.from(item)).toList();
+    } catch (e) {
+      throw Exception("Erro ao buscar histórico de prescrições: $e");
+    }
+  }
 }
