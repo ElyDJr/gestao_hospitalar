@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/services/leito_service.dart';
 import '../../domain/services/exame_service.dart';
+// 🟢 PASSO 1: Import da nova tela de prescrição
+import 'prescricao_prontuario_form.dart';
 
 class ProntuarioEvolucaoForm extends StatefulWidget {
   final Map<String, dynamic> dadosLeitoPaciente;
@@ -17,7 +19,6 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
 
   // 1. Adicione o ExameService aqui:
   final ExameService _exameService = ExameService();
-
 
   int _abaSelecionada = 0; 
   int? _idExameSelecionado;
@@ -105,6 +106,12 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                 selectedIcon: Icon(Icons.science),
                 label: Text('Exames'),
               ),
+              // 🟢 PASSO 2: Adicionado o ícone da prescrição abaixo de exames
+              NavigationRailDestination(
+                icon: Icon(Icons.medication_outlined),
+                selectedIcon: Icon(Icons.medication),
+                label: Text('Prescrição'),
+              ),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
@@ -157,9 +164,12 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  // 🟢 PASSO 3: Lógica atualizada para renderizar a nova aba quando _abaSelecionada for igual a 2
                   _abaSelecionada == 0 
                       ? _buildSecaoEvolucao() 
-                      : _buildSecaoExames(),
+                      : _abaSelecionada == 1
+                          ? _buildSecaoExames()
+                          : PrescricaoProntuarioForm(dadosLeitoPaciente: widget.dadosLeitoPaciente),
                 ],
               ),
             ),
@@ -174,7 +184,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Text(
-          "Evolução Clínica e Conduta",
+          "Evolução Clinical e Conduta",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 10),
@@ -330,8 +340,8 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _listaExamesSolicitados.length,
           itemBuilder: (context, index) {
-            final exame = _listaExamesSolicitados[index];
-            final bool concluido = exame['status'] == 'CONCLUIDO';
+            final examen = _listaExamesSolicitados[index];
+            final bool concluido = examen['status'] == 'CONCLUIDO';
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 6),
@@ -341,7 +351,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                   Icons.biotech, 
                   color: concluido ? Colors.green : Colors.orange
                 ),
-                title: Text(exame['nome'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(examen['nome'], style: const TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: Row(
                   children: [
                     const Text("Status: "),
@@ -352,7 +362,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                         borderRadius: BorderRadius.circular(4)
                       ),
                       child: Text(
-                        exame['status'],
+                        examen['status'],
                         style: TextStyle(
                           color: concluido ? Colors.green.shade900 : Colors.orange.shade900,
                           fontSize: 12,
@@ -369,7 +379,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                         TextButton(
                           onPressed: () {
                             setState(() {
-                              exame['status'] = 'CONCLUIDO';
+                              examen['status'] = 'CONCLUIDO';
                             });
                           },
                           child: const Text("Liberar Laudo", style: TextStyle(color: Colors.grey)),
@@ -384,7 +394,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                   : TextButton.icon(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Abrindo laudo de: ${exame['nome']}"))
+                          SnackBar(content: Text("Abrindo laudo de: ${examen['nome']}"))
                         );
                       },
                       icon: const Icon(Icons.visibility, color: Colors.blue),
