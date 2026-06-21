@@ -127,14 +127,20 @@ CREATE TABLE prontuario(
     FOREIGN KEY (id_medico) REFERENCES medico(id_medico)
 );
 
+CREATE TABLE ala (
+  id_ala INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome_ala TEXT NOT NULL,
+  andar TEXT NOT NULL
+);
+
 CREATE TABLE leito(
     id_leito INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_ala INTEGER NOT NULL,
     numero TEXT,
-    ala TEXT,
-    andar TEXT, 
     data_higienizacao TEXT,
     situacao TEXT DEFAULT 'VAGO' CHECK (situacao IN ('VAGO', 'OCUPADO', 'HIGIENIZACAO'))
 );
+
 
 CREATE TABLE internacao(
     id_internacao INTEGER PRIMARY KEY AUTOINCREMENT,

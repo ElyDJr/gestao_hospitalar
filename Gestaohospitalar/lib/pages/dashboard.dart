@@ -40,6 +40,10 @@ import 'leitos/cadastrar_leito.dart';
 import '../domain/services/leito_service.dart';
 import '../domain/services/exame_service.dart';
 
+//ALAS
+import '../domain/services/ala_service.dart';
+import 'alas/listar_ala.dart';
+
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_atendimento_medico.dart';
 
@@ -65,6 +69,7 @@ class _DashboardState extends State<Dashboard> {
   late LeitoService _leitoService;
   late ExameService _exameService;
   late AlmoxarifadoService _almoxarifadoService;
+  late AlaService _alaService;
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -87,6 +92,11 @@ class _DashboardState extends State<Dashboard> {
     _exameService.carregarExames();
 
     _almoxarifadoService = AlmoxarifadoService(widget.database);
+
+    _alaService = AlaService();
+    //_alaService.carregarAlas();
+
+
     
     _almoxarifadoService.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,7 +105,6 @@ class _DashboardState extends State<Dashboard> {
     });
 
     _almoxarifadoService.carregarItens();
-
     _carregarFila();
     _carregarDadosIniciais();
   }
@@ -104,6 +113,9 @@ class _DashboardState extends State<Dashboard> {
   void dispose() {
     _almoxarifadoService.dispose();
     super.dispose();
+
+    /*void dispose()
+    O dispose limpa a memória quando a tela é fechada. */
   }
 
   Future<void> _carregarFila() async {
@@ -307,19 +319,10 @@ class _DashboardState extends State<Dashboard> {
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarMedico(service: _medicoService)), icon: const Icon(Icons.medical_services), label: const Text("Médico")),
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarConvenio(service: _convenioService)), icon: const Icon(Icons.business), label: const Text("Convênio")),
               ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)); _carregarFila(); }, icon: const Icon(Icons.favorite), label: const Text("Triagem")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService)), icon: const Icon(Icons.bed), label: const Text("Leito")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService,/* alaService: _alaService*/)), icon: const Icon(Icons.bed), label: const Text("Leito")), //descomentar depois de arrumar a ala
               ElevatedButton.icon(onPressed: () => abrirDialogoLateral(const CadastrarExame()), icon: const Icon(Icons.science), label: const Text("Exame")),
-              // ALTERADO: Adicionado o Badge direto no botão do painel!
-              ElevatedButton.icon(
-                onPressed: () => abrirDialogoLateral(CadastrarAlmoxarifado(service: _almoxarifadoService)), 
-                icon: Badge(
-                  isLabelVisible: _almoxarifadoService.temAlertaEstoque, // Só aparece se tiver alerta
-                  label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), 
-                  backgroundColor: Colors.red,
-                  child: const Icon(Icons.inventory),
-                ), 
-                label: const Text("Almoxarifado")
-              ),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarAlmoxarifado(service: _almoxarifadoService)), icon: Badge(isLabelVisible: _almoxarifadoService.temAlertaEstoque, label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), backgroundColor: Colors.red, child: const Icon(Icons.inventory)), label: const Text("Almoxarifado")),
+              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(ListarAlas(service: _alaService)), icon: const Icon(Icons.house), label: const Text("Ala Medica")),
             ],
           ),
         ],

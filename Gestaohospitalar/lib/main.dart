@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
-import 'data/resources/database_provider.dart'; 
+import 'data/resources/database_provider.dart';
 import 'pages/login/tela_login.dart'; // 🟢 Importação correta da sua Tela de Login
 
 void main() {
