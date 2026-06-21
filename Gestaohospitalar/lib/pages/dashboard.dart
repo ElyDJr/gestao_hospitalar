@@ -245,7 +245,7 @@ class _DashboardState extends State<Dashboard> {
       case 1: return ListarAlmoxarifado(service: _almoxarifadoService); 
       case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
       case 3: return ListarMedico(service: _medicoService);
-      case 4: return const MapaLeitos();
+      case 4: return MapaLeitos(leitoService: LeitoService(), alaService: AlaService());
       case 5: return const AgendaMedicaTela();
       case 6: return const TelaFaturamento();
       case 7: return TelaAtendimentoMedico(database: widget.database);

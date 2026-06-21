@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../domain/services/leito_service.dart';
 import 'atendimento/evolucao_prontuario_form.dart';
 import 'salas/mapa_salas.dart';
-import '../domain/services/sala_service.dart';
+import '../domain/services/ala_service.dart';
+import '../domain/entities/ala.dart';
 
 // DASHBOARD
 import 'login/tela_login.dart';
@@ -10,10 +11,7 @@ import 'login/tela_login.dart';
 class DashboardMedico extends StatefulWidget {
   final dynamic database;
 
-  const DashboardMedico({
-    super.key,
-    required this.database,
-  });
+  const DashboardMedico({super.key, required this.database});
 
   @override
   State<DashboardMedico> createState() => _DashboardMedicoState();
@@ -21,34 +19,45 @@ class DashboardMedico extends StatefulWidget {
 
 class _DashboardMedicoState extends State<DashboardMedico> {
   final LeitoService _leitoService = LeitoService();
+  final AlaService _alaService = AlaService();
+
   List<Map<String, dynamic>> _leitosFiltrados = [];
   List<Map<String, dynamic>> _todosLeitosDoBanco = [];
+  List<Ala> _alas = [];
   
   // Controle da Busca
   final TextEditingController _buscaCtrl = TextEditingController();
   String _termoBusca = '';
+  String? _categoriaSelecionada;
   
-  final List<String> _categorias = [
-    "Emergência",
-    "UTI",
-    "Pediatria",
-    "Cardiologia",
-    "Maternidade",
-    "Clínica Médica"
-  ];
-  
-  String _categoriaSelecionada = "Emergência";
-
   @override
   void initState() {
     super.initState();
-    _carregarMapa();
+    //_carregarMapa();
+    _carregarDadosIniciais();
   }
 
   @override
   void dispose() {
     _buscaCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _carregarDadosIniciais() async {
+    // Carrega alas e leitos simultaneamente
+    final alas = await _alaService.listarAlas();
+    final mapa = await _leitoService.buscarMapaLeitos();
+
+    setState(() {
+      _alas = alas;
+      _todosLeitosDoBanco = mapa;
+      
+      // Define a primeira ala como padrão se existir
+      if (_alas.isNotEmpty) {
+        _categoriaSelecionada = _alas.first.nomeAla;
+      }
+      _filtrarLeitos(_categoriaSelecionada ?? "");
+    });
   }
 
   Future<void> _carregarMapa() async {
@@ -63,7 +72,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
     if (mounted) {
       setState(() {
         _todosLeitosDoBanco = mapa;
-        _filtrarLeitos(_categoriaSelecionada);
+        _filtrarLeitos(_categoriaSelecionada ?? "");
       });
     }
   }
@@ -74,16 +83,15 @@ class _DashboardMedicoState extends State<DashboardMedico> {
       
       // Filtramos a lista real que veio do banco (_todosLeitosDoBanco)
       _leitosFiltrados = _todosLeitosDoBanco.where((leito) {
-        
+        final String alaLeito = leito['ala']?.toString() ?? "";
         // Verifica se a ala do leito corresponde à categoria (ala) atual (ignorando maiúsculas/minúsculas)
-        final bool naCategoria = (leito['ala']?.toString().toLowerCase() ?? "emergência") == categoria.toLowerCase();
+        final bool naCategoria = alaLeito.toLowerCase() == categoria.toLowerCase();
         
         // Lógica de Busca Global
         if (_termoBusca.isNotEmpty) {
           final numLeito = leito['numero_leito']?.toString().toLowerCase() ?? '';
           final nomePac = leito['nome']?.toString().toLowerCase() ?? '';
           final busca = _termoBusca.toLowerCase();
-          
           return numLeito.contains(busca) || nomePac.contains(busca);
         }
 
@@ -117,7 +125,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                     hintText: 'Buscar Leito ou Paciente...',
                     hintStyle: const TextStyle(color: Color.fromARGB(153, 0, 0, 0)),
                     prefixIcon: const Icon(
-                     Icons.search,
+                    Icons.search,
                       color: Color.fromARGB(255, 0, 150, 136),
                       size: 20),
                     suffixIcon: _buscaCtrl.text.isNotEmpty
@@ -127,7 +135,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                               _buscaCtrl.clear();
                               setState(() {
                                 _termoBusca = '';
-                                _filtrarLeitos(_categoriaSelecionada);
+                                _filtrarLeitos(_categoriaSelecionada ?? "");
                               });
                             },
                           )
@@ -142,7 +150,7 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                   ),
                   onChanged: (valor) {
                     _termoBusca = valor;
-                    _filtrarLeitos(_categoriaSelecionada);
+                    _filtrarLeitos(_categoriaSelecionada ?? "");
                   },
                 ),
               ),
@@ -162,8 +170,8 @@ class _DashboardMedicoState extends State<DashboardMedico> {
           children: [
             // Botões de Categorias lado a lado ocupando a mesma linha horizontal
             Row(
-              children: _categorias.map((categoria) {
-                final bool isSelected = _categoriaSelecionada == categoria;
+              children: _alas.map((ala) {
+                final bool isSelected = _categoriaSelecionada == ala.nomeAla;
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -173,26 +181,13 @@ class _DashboardMedicoState extends State<DashboardMedico> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isSelected ? Colors.teal : Colors.grey.shade300,
                           foregroundColor: isSelected ? Colors.white : Colors.black87,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          padding: EdgeInsets.zero,
                         ),
                         onPressed: () {
                           _buscaCtrl.clear();
                           _termoBusca = '';
-                          _filtrarLeitos(categoria);
+                          _filtrarLeitos(ala.nomeAla);
                         },
-                        child: Text(
-                          categoria,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: Text(ala.nomeAla, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
