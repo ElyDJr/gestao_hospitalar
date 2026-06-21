@@ -7,15 +7,21 @@ import '../../domain/services/leito_service.dart';
 import '../../domain/services/internacao_service.dart';
 import '../../domain/services/paciente_service.dart';
 import '../../data/resources/database_provider.dart';
+import '../../domain/services/ala_service.dart';
+import '../alas/cadastrar_ala.dart'; // Para o botão de atalho +
+import '../../domain/entities/ala.dart';
+import '../alas/listar_ala.dart';
 
 class RegistrarInternacao extends StatefulWidget {
   final Paciente paciente;
   final PacienteService pacienteService;
+  final AlaService alaService;
 
   const RegistrarInternacao({
     super.key,
     required this.paciente,
     required this.pacienteService,
+    required this.alaService
   });
 
   @override
@@ -25,7 +31,7 @@ class RegistrarInternacao extends StatefulWidget {
 class _RegistrarInternacaoState extends State<RegistrarInternacao> {
   final LeitoService _leitoService = LeitoService();
   final InternacaoService _internacaoService = InternacaoService();
-  
+
   // Formatador de data para exibir ao usuário (dd/MM/yyyy)
   final DateFormat _dateFormatter = DateFormat('dd/MM/yyyy');
 
@@ -42,7 +48,7 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
       whereArgs: [idPaciente, 'ATIVO'],
       limit: 1,
     );
-    
+
     if (maps.isNotEmpty) {
       return maps.first['id_prontuario'] as int;
     }
@@ -52,7 +58,8 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
   Future<void> _salvarInternacao() async {
     if (_leitoSelecionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um leito!'), backgroundColor: Colors.red),
+        const SnackBar(
+            content: Text('Selecione um leito!'), backgroundColor: Colors.red),
       );
       return;
     }
@@ -61,9 +68,10 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
 
     try {
       final idProntuario = await _buscarIdProntuarioAtivo(widget.paciente.id!);
-      
+
       if (idProntuario == null) {
-        throw Exception("Nenhum prontuário ATIVO encontrado para este paciente.");
+        throw Exception(
+            "Nenhum prontuário ATIVO encontrado para este paciente.");
       }
 
       // Salva no formato ISO 8601 (padrão SQLite)
@@ -78,21 +86,25 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
       await _internacaoService.registrarInternacao(novaInternacao);
       //await _leitoService.atualizarStatusLeito(_leitoSelecionado!.id!, 'OCUPADO');
 
-      final pacienteAtualizado = widget.paciente.copyWith(historicoClinico: 'Internado');
+      final pacienteAtualizado =
+          widget.paciente.copyWith(historicoClinico: 'Internado');
       await widget.pacienteService.salvarPaciente(pacienteAtualizado);
       await widget.pacienteService.carregarPacientes();
 
       if (!mounted) return;
 
       Navigator.of(context).popUntil((route) => route.isFirst);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Internação realizada com sucesso!'), backgroundColor: Colors.green),
+        const SnackBar(
+            content: Text('Internação realizada com sucesso!'),
+            backgroundColor: Colors.green),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao internar: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Erro ao internar: $e'), backgroundColor: Colors.red),
       );
       setState(() => _salvando = false);
     }
@@ -125,24 +137,27 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Paciente: ${widget.paciente.nome}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Nascimento: $dataNascFormatada'), // <--- Data formatada aqui
+                    Text('Paciente: ${widget.paciente.nome}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                        'Nascimento: $dataNascFormatada'), // <--- Data formatada aqui
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            
             FutureBuilder<List<Leito>>(
               future: _leitoService.listarLeitosDisponiveis(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return DropdownButtonFormField<Leito>(
-                    decoration: const InputDecoration(labelText: 'Selecione o Leito', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                        labelText: 'Selecione o Leito',
+                        border: OutlineInputBorder()),
                     items: snapshot.data!.map((leito) {
                       return DropdownMenuItem(
                         value: leito,
-                        child: Text('Leito ${leito.numero} - ${leito.ala}'),
+                        child: Text('leito') //Text('Leito ${leito.numero} - ${ala.nomeAla}'),
                       );
                     }).toList(),
                     onChanged: (val) => setState(() => _leitoSelecionado = val),
@@ -151,13 +166,11 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
                 return const CircularProgressIndicator();
               },
             ),
-            
             SwitchListTile(
               title: const Text('Isolamento?'),
               value: _necessitaIsolamento,
               onChanged: (val) => setState(() => _necessitaIsolamento = val),
             ),
-            
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _salvando ? null : _salvarInternacao,

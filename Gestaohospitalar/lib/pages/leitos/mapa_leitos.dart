@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/services/leito_service.dart';
 import 'cadastrar_leito.dart';
+import '../../domain/services/ala_service.dart';
 
 class MapaLeitos extends StatefulWidget {
   const MapaLeitos({super.key});
@@ -11,6 +12,7 @@ class MapaLeitos extends StatefulWidget {
 
 class _MapaLeitosState extends State<MapaLeitos> {
   final LeitoService _leitoService = LeitoService();
+  final AlaService _alaService = AlaService();
   List<Map<String, dynamic>> _leitos = [];
 
   // 🟢 Controladores para a barra de pesquisa
@@ -53,7 +55,10 @@ class _MapaLeitosState extends State<MapaLeitos> {
             child: SizedBox(
               width: 450,
               height: double.infinity,
-              child: CadastrarLeito(leitoService: _leitoService),
+              child: CadastrarLeito(
+                leitoService: _leitoService,
+                alaService: _alaService, // 🟢 ADICIONE ESTE PARÂMETRO AQUI
+              ),
             ),
           ),
         );
@@ -72,14 +77,16 @@ class _MapaLeitosState extends State<MapaLeitos> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text("Leito em Higienização"),
-          content: Text("O leito ${leito['numero_leito']} já foi higienizado e está pronto para uso?"),
+          content: Text(
+              "O leito ${leito['numero_leito']} já foi higienizado e está pronto para uso?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false), // Responde NÃO
               child: const Text("NÃO", style: TextStyle(color: Colors.red)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal, foregroundColor: Colors.white),
               onPressed: () => Navigator.pop(context, true), // Responde SIM
               child: const Text("SIM"),
             ),
@@ -90,96 +97,39 @@ class _MapaLeitosState extends State<MapaLeitos> {
       // Se respondeu SIM, atualiza no banco
       if (confirmou == true) {
         await _leitoService.atualizarStatusLeito(leito['id_leito'], 'VAGO');
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Leito liberado para uso!"), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text("Leito liberado para uso!"),
+                backgroundColor: Colors.green),
           );
         }
         _carregarMapa(); // Recarrega os leitos
       }
-    } 
+    }
     // Opcional: Avisar se clicar no Ocupado
     else if (status == 'OCUPADO') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Leito ocupado por ${leito['nome']?.toString().split(' ')[0] ?? 'um paciente'}."), 
-            backgroundColor: Colors.orange
-          )
-        );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "Leito ocupado por ${leito['nome']?.toString().split(' ')[0] ?? 'um paciente'}."),
+          backgroundColor: Colors.orange));
     }
   }
 
-
   @override
-  // Widget build(BuildContext context) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(16.0),
-  //     child: Column(
-  //       children: [
-  //         // Cabeçalho com Legenda e Botões
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Row(
-  //               children: [
-  //                 _buildLegenda(Colors.green, "Vago"),
-  //                 const SizedBox(width: 16),
-  //                 _buildLegenda(Colors.red, "Ocupado"),
-  //                 const SizedBox(width: 16),
-  //                 _buildLegenda(Colors.orange, "Limpeza"),
-  //               ],
-  //             ),
-  //             Row(
-  //               children: [
-  //                 IconButton(
-  //                   icon: const Icon(Icons.refresh, color: Colors.teal),
-  //                   tooltip: "Atualizar",
-  //                   onPressed: _carregarMapa,
-  //                 ),
-  //                 ElevatedButton.icon(
-  //                   onPressed: _abrirCadastro,
-  //                   icon: const Icon(Icons.add),
-  //                   label: const Text("Cadastrar Leito"),
-  //                   style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
-  //                 ),
-  //               ],
-  //             )
-  //           ],
-  //         ),
-  //         const SizedBox(height: 20),
-          
-  //         // Grid de Leitos
-  //         Expanded(
-  //           child: GridView.builder(
-  //             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-  //               crossAxisCount: 5,
-  //               crossAxisSpacing: 16,
-  //               mainAxisSpacing: 16,
-  //               childAspectRatio: 1.1, 
-  //             ),
-  //             itemCount: _leitos.length,
-  //             itemBuilder: (context, index) {
-  //               final leito = _leitos[index];
-  //               return _buildCardLeito(leito);
-  //             },
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     // 🟢 Aplica o filtro da barra de pesquisa
     final listaFiltrada = _leitos.where((l) {
       final numero = l['numero_leito']?.toString().toLowerCase() ?? '';
       final ala = l['ala']?.toString().toLowerCase() ?? '';
       final andar = l['andar']?.toString().toLowerCase() ?? '';
       final busca = _termoBusca.toLowerCase();
-      
+
       // Busca pelo número, pela ala ou pelo andar
-      return numero.contains(busca) || ala.contains(busca) || andar.contains(busca);
+      return numero.contains(busca) ||
+          ala.contains(busca) ||
+          andar.contains(busca);
     }).toList();
 
     return Scaffold(
@@ -198,20 +148,21 @@ class _MapaLeitosState extends State<MapaLeitos> {
               style: const TextStyle(color: Colors.black87),
               decoration: InputDecoration(
                 hintText: "Buscar leito por número, ala ou andar...",
-                fillColor: Colors.white, 
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                suffixIcon: _termoBusca.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey), 
-                      onPressed: () { 
-                        _buscaCtrl.clear(); 
-                        setState(() => _termoBusca = ''); 
-                      }
-                    ) 
-                  : null,
+                suffixIcon: _termoBusca.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: () {
+                          _buscaCtrl.clear();
+                          setState(() => _termoBusca = '');
+                        })
+                    : null,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none),
               ),
             ),
           ),
@@ -239,24 +190,27 @@ class _MapaLeitosState extends State<MapaLeitos> {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Grid de Leitos
             Expanded(
               child: listaFiltrada.isEmpty
-                ? const Center(child: Text("Nenhum leito encontrado.", style: TextStyle(fontSize: 16, color: Colors.grey)))
-                : GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 5,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.1, 
+                  ? const Center(
+                      child: Text("Nenhum leito encontrado.",
+                          style: TextStyle(fontSize: 16, color: Colors.grey)))
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.1,
+                      ),
+                      itemCount: listaFiltrada.length,
+                      itemBuilder: (context, index) {
+                        final leito = listaFiltrada[index];
+                        return _buildCardLeito(leito);
+                      },
                     ),
-                    itemCount: listaFiltrada.length,
-                    itemBuilder: (context, index) {
-                      final leito = listaFiltrada[index];
-                      return _buildCardLeito(leito);
-                    },
-                  ),
             ),
           ],
         ),
@@ -267,7 +221,10 @@ class _MapaLeitosState extends State<MapaLeitos> {
   Widget _buildLegenda(Color cor, String texto) {
     return Row(
       children: [
-        Container(width: 16, height: 16, decoration: BoxDecoration(color: cor, shape: BoxShape.circle)),
+        Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(color: cor, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(texto, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
@@ -280,8 +237,10 @@ class _MapaLeitosState extends State<MapaLeitos> {
 
     if (status == 'VAGO') {
       corFundo = Colors.green.shade600;
-    } else if (status == 'OCUPADO') corFundo = Colors.red.shade600;
-    else corFundo = Colors.orange.shade600;
+    } else if (status == 'OCUPADO')
+      corFundo = Colors.red.shade600;
+    else
+      corFundo = Colors.orange.shade600;
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -299,7 +258,10 @@ class _MapaLeitosState extends State<MapaLeitos> {
               const SizedBox(height: 6),
               Text(
                 "Leito ${leito['numero_leito']}",
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 "${leito['ala'] ?? ''} - ${leito['andar'] ?? ''}",
@@ -309,8 +271,11 @@ class _MapaLeitosState extends State<MapaLeitos> {
               if (status == 'OCUPADO' && leito['nome'] != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  leito['nome'].toString().split(' ')[0], 
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                  leito['nome'].toString().split(' ')[0],
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
               ]

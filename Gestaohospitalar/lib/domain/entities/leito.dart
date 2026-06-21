@@ -1,16 +1,14 @@
 class Leito {
   final int? id;
   final String? numero;
-  final String? ala;
-  final String? andar;
+  final int? idAla; //adicionei
   final DateTime? dataHigienizacao;
   final String? situacao;
 
   Leito({
     this.id,
     this.numero,
-    this.ala,
-    this.andar,
+    this.idAla, //adicionei
     this.dataHigienizacao,
     this.situacao,
   });
@@ -19,8 +17,7 @@ class Leito {
     return {
       'id_leito': id,
       'numero': numero,
-      'ala': ala,
-      'andar': andar,
+      'id_ala': idAla, //adicionei
       'data_higienizacao': dataHigienizacao?.toIso8601String(),
       'situacao': situacao,
     };
@@ -30,10 +27,9 @@ class Leito {
     return Leito(
       id: map['id_leito'],
       numero: map['numero'],
-      ala: map['ala'],
-      andar: map['andar'],
-      dataHigienizacao: map['data_higienizacao'] != null 
-          ? DateTime.parse(map['data_higienizacao']) 
+      idAla: map['id_ala'] != null ? int.tryParse(map['id_ala'].toString()) : null, //adicionei
+      dataHigienizacao: map['data_higienizacao'] != null
+          ? DateTime.parse(map['data_higienizacao'])
           : null,
       situacao: map['situacao'],
     );

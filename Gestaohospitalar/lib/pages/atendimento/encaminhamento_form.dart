@@ -128,7 +128,7 @@ class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
                           return DropdownMenuItem<int>(
                             value: leito.id, // ID que será salvo no banco
                             // Mostra número, ala e andar (se existir)
-                            child: Text("Leito ${leito.numero} - ${leito.ala} (${leito.andar ?? ''})"),
+                            child: (Text('Leito'))//Text("Leito ${leito.numero} - ${leito.ala} (${leito.andar ?? ''})"), //arrumar essa linha
                           );
                         }).toList(),
                         onChanged: (v) => setState(() => _idLeitoSelecionado = v),

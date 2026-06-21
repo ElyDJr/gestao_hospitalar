@@ -1,33 +1,36 @@
+import 'package:flutter/foundation.dart';
 import '../../data/resources/database_provider.dart';
 import '../entities/leito.dart';
 
 class LeitoService {
   // RF06, RN13, RN14: Buscar apenas leitos disponíveis
   Future<List<Leito>> listarLeitosDisponiveis() async {
-    final db = await DatabaseProvider.instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'leito',
-      where: 'situacao = ?',
-      whereArgs: ['VAGO'],
-    );
-    return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
+    // final db = await DatabaseProvider.instance.database;
+    // final List<Map<String, dynamic>> maps = await db.query(
+    //   'leito',
+    //   where: 'situacao = ?',
+    //   whereArgs: ['VAGO'],
+    // );
+    // return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
+    return buscarLeitosDisponiveis();
   }
 
   Future<List<Map<String, dynamic>>> buscarMapaLeitos() async {
     final db = await DatabaseProvider.instance.database;
     
     return await db.rawQuery('''
-      SELECT 
-        l.id_leito, 
+      SELECT
+        l.id_leito,
         l.numero AS numero_leito,
-        l.ala, l.andar,
-        l.situacao AS status_leito, 
+        a.nome_ala AS ala, a.andar AS andar, -- 🟢 CORRIGIDO: a.nome_ala
+        l.situacao AS status_leito,
         i.id_internacao,
         p.id_prontuario, p.evolucao, p.risco_evasao, p.isolamento, p.data_abertura,
         pac.id_paciente, pac.nome, pac.cpf,
         t.id_triagem, t.pressao, t.temperatura, t.saturacao, t.frequencia_cardiaca, t.escala_dor, t.queixa, t.alergias
       FROM leito l
       LEFT JOIN internacao i ON l.id_leito = i.id_leito
+      JOIN ala a ON l.id_ala = a.id_ala
       LEFT JOIN prontuario p ON i.id_prontuario = p.id_prontuario AND p.status_prontuario = 'ATIVO'
       LEFT JOIN paciente pac ON p.id_paciente = pac.id_paciente
       LEFT JOIN triagem t ON p.id_triagem = t.id_triagem
@@ -62,19 +65,24 @@ class LeitoService {
 
   Future<List<Leito>> buscarLeitosDisponiveis() async {
     final db = await DatabaseProvider.instance.database;
-    final List<Map<String, dynamic>> res = await db.query(
-      'leito',
-      where: 'situacao = ?',
-      whereArgs: ['VAGO'],
-      orderBy: 'numero',
-    );
-    return res.map((map) => Leito.fromMap(map)).toList();
+    final List<Map<String, dynamic>> res = await db.rawQuery('''
+      SELECT l.*, a.nome_ala, a.andar 
+      FROM leito l
+      INNER JOIN ala a ON l.id_ala = a.id_ala
+      WHERE l.situacao = 'VAGO'
+    ''');
+
+    return res.map((map) {
+      // Usamos um print para debugar no console o que vem do banco
+      debugPrint("Dados do Leito + Ala: $map");
+      return Leito.fromMap(map);
+    }).toList();
   }
 
   Future<List<Map<String, dynamic>>> listarExamesCatalogo() async {
     final db = await DatabaseProvider.instance.database;
     final List<Map<String, dynamic>> res = await db.query(
-      'exame', 
+      'exame',
       orderBy: 'nome',
     );
     return res;

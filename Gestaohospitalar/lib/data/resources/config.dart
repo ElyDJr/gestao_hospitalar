@@ -292,24 +292,26 @@ static const String mockData = '''
   INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Dipirona 500mg', 'MEDICAMENTO', 100, 1.5), ('Luvas', 'EPI', 500, 0.5);
   INSERT INTO almoxarifado (nome, categoria, quantidade, valor_unitario) VALUES ('Seringa 10ml', 'DESCARTAVEL', 200, 0.8), ('Detergente', 'LIMPEZA', 20, 10.0), ('Gaze', 'INSUMO', 300, 0.3);  
   
-  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('301', 'Pediatria', '2º Andar', 'VAGO');
-  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('101', 'Maternidade', '3º Andar', 'VAGO');
-  INSERT INTO leito (numero, ala, andar, situacao) VALUES ('201', 'UTI', '4º Andar', 'HIGIENIZACAO');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Pronto Socorro', 'Terreo');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Consultorio 01', 'Terreo');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Consultorio 02', 'Térreo');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Consultorio 03', 'Terreo');
+  INSERT INTO ala (nome_ala, andar) VALUES ('UTI', '1º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Iternação Comum', '1º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Cardiologia', '2º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Centro Cirurgico', '2º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Ortopedia', '2º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Maternidade', '3º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Pediatria', '3º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('UTI Neonatal', '3º Andar');
+  INSERT INTO ala (nome_ala, andar) VALUES ('Iternação Premium', '4º Andar');
 
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (1, 'Dr. Roberto Santos', 'CRM12345', 500.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (2, 'Dra. Maria Silva', 'CRM23456', 450.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (3, 'Dr. Carlos Souza', 'CRM34567', 400.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (4, 'Dra. Ana Pereira', 'CRM45678', 550.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (5, 'Dr. Jorge Lima', 'CRM56789', 600.0);
-  
-  -- Médicos trabalhando em dias normais
-  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-15', '08:00', '18:00', 0);
-  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (2, '2026-06-15', '08:00', '12:00', 0);
-  
-  -- Médico de Plantão
-  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (3, '2026-06-15', '00:00', '23:59', 1);
-  INSERT INTO escala_medica (id_medico, data_escala, hora_inicio, hora_fim, is_plantao) VALUES (1, '2026-06-16', '08:00', '18:00', 0);
-  
+    
   INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('João da Silva', '11111111111', 'MASCULINO', '1985-05-15', 'Nenhuma', 'O+');
   INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Maria Oliveira', '22222222222', 'FEMININO', '1990-08-20', 'Penicilina', 'A+');
   INSERT INTO paciente (nome, cpf, sexo, nascimento, alergias, tipo_sanguineo) VALUES ('Pedro Santos', '33333333333', 'MASCULINO', '1970-01-10', 'Nenhuma', 'B-');
