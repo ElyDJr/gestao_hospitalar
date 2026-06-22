@@ -61,7 +61,7 @@ class _MapaLeitosState extends State<MapaLeitos> {
                     final leitosDaAla = _leitos.where((l) => l.idAla == ala.id).toList();
 
                     return ExpansionTile(
-                      leading: const Icon(Icons.meeting_room, color: Colors.teal),
+                      leading: const Icon(Icons.bed, color: Colors.teal),
                       title: Text("${ala.nomeAla} - ${ala.andar}", 
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text("${leitosDaAla.length} leitos encontrados"),

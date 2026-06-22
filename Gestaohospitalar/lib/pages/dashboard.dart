@@ -18,7 +18,7 @@ import 'convenios/cadastrar_convenio.dart';
 
 // EXAMES
 import 'exames/cadastrar_exame.dart';
-import 'exames/listar_exame.dart'; 
+import 'exames/listar_exame.dart';
 
 // ALMOXARIFADO / FARMÁCIA
 import 'almoxarifado/listar_almoxarifado.dart';
@@ -43,6 +43,10 @@ import '../domain/services/exame_service.dart';
 //ALAS
 import '../domain/services/ala_service.dart';
 import 'alas/listar_ala.dart';
+
+import '../domain/services/sala_service.dart';
+import '../domain/entities/sala.dart';
+import '../pages/salas/listar_salas.dart';
 
 import '../telas/tela_faturamento.dart';
 import '../telas/tela_atendimento_medico.dart';
@@ -87,7 +91,7 @@ class _DashboardState extends State<Dashboard> {
 
     _triagemService = TriagemService(widget.database);
     _leitoService = LeitoService();
-    
+
     _exameService = ExameService();
     _exameService.carregarExames();
 
@@ -96,8 +100,6 @@ class _DashboardState extends State<Dashboard> {
     _alaService = AlaService();
     //_alaService.carregarAlas();
 
-
-    
     _almoxarifadoService.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() {});
@@ -156,7 +158,8 @@ class _DashboardState extends State<Dashboard> {
                     await showDialog(
                       context: context,
                       builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         child: SizedBox(
                           width: 650,
                           height: 800,
@@ -193,7 +196,8 @@ class _DashboardState extends State<Dashboard> {
             onPressed: () {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => TelaLogin(database: widget.database)),
+                MaterialPageRoute(
+                    builder: (context) => TelaLogin(database: widget.database)),
                 (route) => false,
               );
             },
@@ -209,26 +213,53 @@ class _DashboardState extends State<Dashboard> {
               setState(() => _selectedIndex = i);
             },
             destinations: [
-              const NavigationRailDestination(icon: Tooltip(message: 'Início', child: Icon(Icons.dashboard)), label: Text("Início")),
+              const NavigationRailDestination(
+                  icon:
+                      Tooltip(message: 'Início', child: Icon(Icons.dashboard)),
+                  label: Text("Início")),
               // VOLTOU PARA A ORDEM ORIGINAL (Índice 1) com o alerta
               NavigationRailDestination(
                 icon: Badge(
-                  isLabelVisible: _almoxarifadoService.temAlertaEstoque, 
-                  label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), 
-                  backgroundColor: Colors.red, 
+                  isLabelVisible: _almoxarifadoService.temAlertaEstoque,
+                  label: const Icon(Icons.warning_amber_rounded,
+                      size: 12, color: Colors.white),
+                  backgroundColor: Colors.red,
                   alignment: Alignment.topRight,
-                  child: const Tooltip(message: 'Almoxarifado', child: Icon(Icons.inventory)),
+                  child: const Tooltip(
+                      message: 'Almoxarifado', child: Icon(Icons.inventory)),
                 ),
                 label: const Text("Almoxarifado"),
               ),
-              const NavigationRailDestination(icon: Tooltip(message: 'Pacientes', child: Icon(Icons.people)), label: Text("Pacientes")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Médicos', child: Icon(Icons.medical_services)), label: Text("Médicos")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)), label: Text("Leitos")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Agenda', child: Icon(Icons.calendar_month)), label: Text('Agenda')),
-              const NavigationRailDestination(icon: Tooltip(message: 'Faturamento', child: Icon(Icons.attach_money)), label: Text("Faturamento")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Atendimento', child: Icon(Icons.healing)), label: Text("Atendimento")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Convênios', child: Icon(Icons.business)), label: Text("Convênios")),
-              const NavigationRailDestination(icon: Tooltip(message: 'Exames', child: Icon(Icons.science)), label: Text("Exames")),
+              const NavigationRailDestination(
+                  icon:
+                      Tooltip(message: 'Pacientes', child: Icon(Icons.people)),
+                  label: Text("Pacientes")),
+              const NavigationRailDestination(
+                  icon: Tooltip(
+                      message: 'Médicos', child: Icon(Icons.medical_services)),
+                  label: Text("Médicos")),
+              const NavigationRailDestination(
+                  icon: Tooltip(message: 'Leitos', child: Icon(Icons.bed)),
+                  label: Text("Leitos")),
+              const NavigationRailDestination(
+                  icon: Tooltip(
+                      message: 'Agenda', child: Icon(Icons.calendar_month)),
+                  label: Text('Agenda')),
+              const NavigationRailDestination(
+                  icon: Tooltip(
+                      message: 'Faturamento', child: Icon(Icons.attach_money)),
+                  label: Text("Faturamento")),
+              const NavigationRailDestination(
+                  icon: Tooltip(
+                      message: 'Atendimento', child: Icon(Icons.healing)),
+                  label: Text("Atendimento")),
+              const NavigationRailDestination(
+                  icon: Tooltip(
+                      message: 'Convênios', child: Icon(Icons.business)),
+                  label: Text("Convênios")),
+              const NavigationRailDestination(
+                  icon: Tooltip(message: 'Exames', child: Icon(Icons.science)),
+                  label: Text("Exames")),
             ],
           ),
           const VerticalDivider(width: 1),
@@ -241,23 +272,37 @@ class _DashboardState extends State<Dashboard> {
   Widget _getPage(int index) {
     // VOLTOU PARA A ORDEM ORIGINAL
     switch (index) {
-      case 0: return _dashboard();
-      case 1: return ListarAlmoxarifado(service: _almoxarifadoService); 
-      case 2: return ListarPaciente(service: _pacienteService, convenioService: _convenioService);
-      case 3: return ListarMedico(service: _medicoService);
-      case 4: return MapaLeitos(leitoService: LeitoService(), alaService: AlaService());
-      case 5: return const AgendaMedicaTela();
-      case 6: return const TelaFaturamento();
-      case 7: return TelaAtendimentoMedico(database: widget.database);
-      case 8: return ListarConvenio(service: _convenioService);
-      case 9: return ListarExame(service: _exameService);
-      default: return _dashboard();
+      case 0:
+        return _dashboard();
+      case 1:
+        return ListarAlmoxarifado(service: _almoxarifadoService);
+      case 2:
+        return ListarPaciente(
+            service: _pacienteService, convenioService: _convenioService);
+      case 3:
+        return ListarMedico(service: _medicoService);
+      case 4:
+        return MapaLeitos(
+            leitoService: LeitoService(), alaService: AlaService());
+      case 5:
+        return const AgendaMedicaTela();
+      case 6:
+        return const TelaFaturamento();
+      case 7:
+        return TelaAtendimentoMedico(database: widget.database);
+      case 8:
+        return ListarConvenio(service: _convenioService);
+      case 9:
+        return ListarExame(service: _exameService);
+      default:
+        return _dashboard();
     }
   }
 
   Widget _dashboard() {
     int emergencia = _filaTriagem.where((t) => t['risco'] == "VERMELHO").length;
-    int muitoUrgente = _filaTriagem.where((t) => t['risco'] == "LARANJA").length;
+    int muitoUrgente =
+        _filaTriagem.where((t) => t['risco'] == "LARANJA").length;
     int urgente = _filaTriagem.where((t) => t['risco'] == "AMARELO").length;
     int poucoUrgente = _filaTriagem.where((t) => t['risco'] == "VERDE").length;
     int naoUrgente = _filaTriagem.where((t) => t['risco'] == "AZUL").length;
@@ -298,16 +343,28 @@ class _DashboardState extends State<Dashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Painel Geral", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text("Painel Geral",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
             children: [
-              GestureDetector(onTap: () => _mostrarTriagem("VERMELHO", "Emergência"), child: _card("🔴 Emergência", emergencia, Colors.red)),
-              GestureDetector(onTap: () => _mostrarTriagem("LARANJA", "Muito Urgente"), child: _card("🟠 Muito Urgente", muitoUrgente, Colors.orange)),
-              GestureDetector(onTap: () => _mostrarTriagem("AMARELO", "Urgente"), child: _card("🟡 Urgente", urgente, Colors.yellow.shade700)),
-              GestureDetector(onTap: () => _mostrarTriagem("VERDE", "Pouco Urgente"), child: _card("🟢 Pouco Urgente", poucoUrgente, Colors.green)),
-              GestureDetector(onTap: () => _mostrarTriagem("AZUL", "Não Urgente"), child: _card("🔵 Não Urgente", naoUrgente, Colors.blue)),
+              GestureDetector(
+                  onTap: () => _mostrarTriagem("VERMELHO", "Emergência"),
+                  child: _card("🔴 Emergência", emergencia, Colors.red)),
+              GestureDetector(
+                  onTap: () => _mostrarTriagem("LARANJA", "Muito Urgente"),
+                  child:
+                      _card("🟠 Muito Urgente", muitoUrgente, Colors.orange)),
+              GestureDetector(
+                  onTap: () => _mostrarTriagem("AMARELO", "Urgente"),
+                  child: _card("🟡 Urgente", urgente, Colors.yellow.shade700)),
+              GestureDetector(
+                  onTap: () => _mostrarTriagem("VERDE", "Pouco Urgente"),
+                  child: _card("🟢 Pouco Urgente", poucoUrgente, Colors.green)),
+              GestureDetector(
+                  onTap: () => _mostrarTriagem("AZUL", "Não Urgente"),
+                  child: _card("🔵 Não Urgente", naoUrgente, Colors.blue)),
             ],
           ),
           const SizedBox(height: 30),
@@ -315,14 +372,64 @@ class _DashboardState extends State<Dashboard> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(CadastrarPaciente(service: _pacienteService, convenioService: _convenioService)); _pacienteService.carregarPacientes(); }, icon: const Icon(Icons.people), label: const Text("Paciente")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarMedico(service: _medicoService)), icon: const Icon(Icons.medical_services), label: const Text("Médico")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarConvenio(service: _convenioService)), icon: const Icon(Icons.business), label: const Text("Convênio")),
-              ElevatedButton.icon(onPressed: () async { await abrirDialogoLateral(RealizarTriagem(pacienteService: _pacienteService, triagemService: _triagemService)); _carregarFila(); }, icon: const Icon(Icons.favorite), label: const Text("Triagem")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarLeito(leitoService: _leitoService, alaService: _alaService)), icon: const Icon(Icons.bed), label: const Text("Leito")), //descomentar depois de arrumar a ala
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(const CadastrarExame()), icon: const Icon(Icons.science), label: const Text("Exame")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(CadastrarAlmoxarifado(service: _almoxarifadoService)), icon: Badge(isLabelVisible: _almoxarifadoService.temAlertaEstoque, label: const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.white), backgroundColor: Colors.red, child: const Icon(Icons.inventory)), label: const Text("Almoxarifado")),
-              ElevatedButton.icon(onPressed: () => abrirDialogoLateral(ListarAlas(service: _alaService)), icon: const Icon(Icons.house), label: const Text("Ala Medica")),
+              ElevatedButton.icon(
+                  onPressed: () async {
+                    await abrirDialogoLateral(CadastrarPaciente(
+                        service: _pacienteService,
+                        convenioService: _convenioService));
+                    _pacienteService.carregarPacientes();
+                  },
+                  icon: const Icon(Icons.people),
+                  label: const Text("Paciente")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(
+                      CadastrarMedico(service: _medicoService)),
+                  icon: const Icon(Icons.medical_services),
+                  label: const Text("Médico")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(
+                      CadastrarConvenio(service: _convenioService)),
+                  icon: const Icon(Icons.business),
+                  label: const Text("Convênio")),
+              ElevatedButton.icon(
+                  onPressed: () async {
+                    await abrirDialogoLateral(RealizarTriagem(
+                        pacienteService: _pacienteService,
+                        triagemService: _triagemService));
+                    _carregarFila();
+                  },
+                  icon: const Icon(Icons.favorite),
+                  label: const Text("Triagem")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(CadastrarLeito(
+                      leitoService: _leitoService, alaService: _alaService)),
+                  icon: const Icon(Icons.bed),
+                  label: const Text(
+                      "Leito")), //descomentar depois de arrumar a ala
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(const CadastrarExame()),
+                  icon: const Icon(Icons.science),
+                  label: const Text("Exame")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(
+                      CadastrarAlmoxarifado(service: _almoxarifadoService)),
+                  icon: Badge(
+                      isLabelVisible: _almoxarifadoService.temAlertaEstoque,
+                      label: const Icon(Icons.warning_amber_rounded,
+                          size: 12, color: Colors.white),
+                      backgroundColor: Colors.red,
+                      child: const Icon(Icons.inventory)),
+                  label: const Text("Almoxarifado")),
+              ElevatedButton.icon(
+                  onPressed: () =>
+                      abrirDialogoLateral(ListarAlas(service: _alaService)),
+                  icon: const Icon(Icons.house),
+                  label: const Text("Ala Medica")),
+              ElevatedButton.icon(
+                  onPressed: () =>
+                      abrirDialogoLateral(ListarSalas(service: SalaService())),
+                  icon: const Icon(Icons.meeting_room),
+                  label: const Text("Salas"))
             ],
           ),
         ],

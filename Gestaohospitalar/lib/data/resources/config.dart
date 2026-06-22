@@ -77,8 +77,7 @@ CREATE TABLE paciente_convenio (
 
 CREATE TABLE sala (
     id_sala INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT,
-    tipo TEXT,
+    nome_sala TEXT,
     status TEXT CHECK (status IN ('LIVRE', 'OCUPADA', 'MANUTENCAO'))
 );
 

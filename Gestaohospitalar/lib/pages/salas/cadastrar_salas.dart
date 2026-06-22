@@ -1,14 +1,64 @@
+// import 'package:flutter/material.dart';
+// import '../../domain/services/sala_service.dart';
+// import '../../domain/entities/sala.dart';
+
+// class CadastrarSalas extends StatefulWidget {
+//   final SalaService salaService;
+//   const CadastrarSalas({super.key, required this.salaService});
+
+//   @override
+//   State<CadastrarSalas> createState() => _CadastrarSalasState();
+// }
+
+// class _CadastrarSalasState extends State<CadastrarSalas> {
+//   final _formKey = GlobalKey<FormState>();
+//   final _nomeSalaController = TextEditingController();
+
+//   Future<void> _salvar() async {
+//     if (!_formKey.currentState!.validate()) return;
+
+//     final novaSala = Sala(nomeSala: _nomeSalaController.text);
+//     await widget.salaService.salvar(novaSala);
+
+//     if (mounted) {
+//       Navigator.pop(context, true); // Retorna true para atualizar lista
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Cadastrar Sala')),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16),
+//         child: Form(
+//           key: _formKey,
+//           child: Column(
+//             children: [
+//               TextFormField(
+//                 controller: _nomeSalaController,
+//                 decoration: const InputDecoration(labelText: 'Nome da Sala'),
+//                 validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
+//               ),
+//               const Spacer(),
+//               ElevatedButton(onPressed: _salvar, child: const Text('Salvar'))
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 import 'package:flutter/material.dart';
-import '../../domain/services/sala_service.dart';
+import '../../../domain/entities/sala.dart';
+import '../../../domain/services/sala_service.dart';
 
 class CadastrarSalas extends StatefulWidget {
-  // 🟢 Corrigido para salaService para alinhar com o restante do ecossistema de salas
-  final SalaService salaService; 
+  final SalaService salaService;
+  final Sala? salaEdicao; // Parâmetro opcional para edição
 
-  const CadastrarSalas({
-    super.key,
-    required this.salaService,
-  });
+  const CadastrarSalas({super.key, required this.salaService, this.salaEdicao});
 
   @override
   State<CadastrarSalas> createState() => _CadastrarSalasState();
@@ -16,83 +66,39 @@ class CadastrarSalas extends StatefulWidget {
 
 class _CadastrarSalasState extends State<CadastrarSalas> {
   final _formKey = GlobalKey<FormState>();
+  final _nomeController = TextEditingController();
 
-  final TextEditingController _numeroController = TextEditingController();
-
-  String? _alaSelecionada;
-  String? _andarSelecionado;
-
-  final List<String> _alas = [
-    'Maternidade',
-    'UTI',
-    'Pediatria',
-    'Cardiologia',
-    'Emergência',
-    'Clínica Médica',
-  ];
-
-  final List<String> _andares = [
-    'Térreo',
-    '1º Andar',
-    '2º Andar',
-    '3º Andar',
-    '4º Andar',
-  ];
-
-  Future<void> _salvar() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    try {
-      // 🟢 Transforma os inputs no Map esperado pelo método 'cadastrarSala' do Sqflite
-      final Map<String, dynamic> novaSala = {
-        'numero_sala': _numeroController.text,
-        'ala': _alaSelecionada!,
-        'andar': _andarSelecionado!,
-        'status_sala': 'DISPONIVEL', // Define o status inicial padrão no banco
-      };
-
-      // 🟢 Envia o Map estruturado para o seu Service
-      await widget.salaService.cadastrarSala(novaSala);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sala cadastrada com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Retorna 'true' para sinalizar à tela anterior que a lista precisa ser atualizada
-        Navigator.pop(context, true); 
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao cadastrar sala: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+  @override
+  void initState() {
+    super.initState();
+    if (widget.salaEdicao != null) {
+      _nomeController.text = widget.salaEdicao!.nomeSala ?? '';
     }
   }
 
-  @override
-  void dispose() {
-    _numeroController.dispose();
-    super.dispose();
+  Future<void> _salvar() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    try {
+      final sala = Sala(
+        id: widget.salaEdicao?.id, // Mantém o ID se for edição
+        nomeSala: _nomeController.text,
+      );
+      
+      await widget.salaService.salvar(sala);
+      
+      if (mounted) Navigator.pop(context, true); // Retorna true para atualizar lista
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao salvar: $e"), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cadastrar Sala'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: Text(widget.salaEdicao == null ? 'Nova Sala' : 'Editar Sala')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -100,72 +106,12 @@ class _CadastrarSalasState extends State<CadastrarSalas> {
           child: Column(
             children: [
               TextFormField(
-                controller: _numeroController,
-                decoration: const InputDecoration(
-                  labelText: 'Número da Sala',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Informe o número da sala';
-                  }
-                  return null;
-                },
+                controller: _nomeController,
+                decoration: const InputDecoration(labelText: 'Nome da Sala'),
+                validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _alaSelecionada,
-                decoration: const InputDecoration(
-                  labelText: 'Ala',
-                ),
-                items: _alas.map((ala) {
-                  return DropdownMenuItem(
-                    value: ala,
-                    child: Text(ala),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _alaSelecionada = value;
-                  });
-                },
-                validator: (value) =>
-                    value == null ? 'Selecione uma ala' : null,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _andarSelecionado,
-                decoration: const InputDecoration(
-                  labelText: 'Andar',
-                ),
-                items: _andares.map((andar) {
-                  return DropdownMenuItem(
-                    value: andar,
-                    child: Text(andar),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _andarSelecionado = value;
-                  });
-                },
-                validator: (value) =>
-                    value == null ? 'Selecione um andar' : null,
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _salvar,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                  ),
-                  child: const Text('Salvar Sala'),
-                ),
-              ),
+              const SizedBox(height: 20),
+              ElevatedButton(onPressed: _salvar, child: const Text('Salvar'))
             ],
           ),
         ),
