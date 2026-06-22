@@ -112,7 +112,7 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                     
                     // ALTERAÇÃO 2: Configuração do Dropdown
                     DropdownButtonFormField<String>(
-                      value: _categoriaSelecionada, // Agora começa nulo
+                      initialValue: _categoriaSelecionada, // Agora começa nulo
                       hint: const Text("Selecione uma categoria"), // Dica visual para o admin
                       decoration: const InputDecoration(labelText: "Categoria *", border: OutlineInputBorder()),
                       items: const ['MEDICAMENTO', 'DESCARTAVEL', 'LIMPEZA', 'EPI', 'INSUMO']

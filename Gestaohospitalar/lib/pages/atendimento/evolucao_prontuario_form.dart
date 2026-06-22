@@ -236,7 +236,7 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                       ),
                     )
                   : DropdownButtonFormField<int>( // Alterado para <int>
-                      value: _idExameSelecionado,
+                      initialValue: _idExameSelecionado,
                       hint: const Text("Selecione um exame cadastrado no hospital..."),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

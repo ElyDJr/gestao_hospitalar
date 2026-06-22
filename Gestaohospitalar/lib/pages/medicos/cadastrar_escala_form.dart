@@ -175,7 +175,7 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
                         labelText: 'Médico Disponível *',
                         prefixIcon: Icon(Icons.person, color: Colors.teal),
                       ),
-                      value: _idMedicoSelecionado,
+                      initialValue: _idMedicoSelecionado,
                       items: _medicosAtivos.map((m) {
                         return DropdownMenuItem<int>(
                           value: m['id_medico'] as int,
@@ -243,7 +243,7 @@ class _CadastrarEscalaFormState extends State<CadastrarEscalaForm> {
                       subtitle: const Text(
                           "Ative se for cobertura de urgência/emergência 24h"),
                       value: _isPlantao,
-                      activeColor: Colors.red,
+                      activeThumbColor: Colors.red,
                       secondary: Icon(Icons.warning,
                           color: _isPlantao ? Colors.red : Colors.grey),
                       onChanged: (val) => setState(() => _isPlantao = val),

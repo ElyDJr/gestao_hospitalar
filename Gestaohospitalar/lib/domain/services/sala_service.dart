@@ -51,4 +51,16 @@ class SalaService {
       whereArgs: [idSala],
     );
   }
+
+  // Adicione este método ao seu SalaService
+  Future<List<Map<String, dynamic>>> buscarPacientesPorSala(int idSala) async {
+    final database = await db; // Certifique-se que você tem acesso ao DB
+    return await database.rawQuery('''
+      SELECT pr.*, p.nome as nome_paciente, p.cpf
+      FROM prontuario pr
+      JOIN paciente p ON pr.id_paciente = p.id_paciente
+      WHERE pr.id_sala = ? AND pr.status_prontuario = 'ATIVO'
+    ''', [idSala]);
+  }
+
 }

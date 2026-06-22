@@ -216,7 +216,7 @@ class _ListarSalasState extends State<ListarSalas> {
   }
 
   // Corrigido para receber o objeto Sala opcionalmente (para edição)
-  void _abrirFormulario({Sala? salaEdicao}) async {
+  void _abrirFormulario() async {
     final atualizou = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,

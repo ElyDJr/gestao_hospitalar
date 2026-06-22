@@ -157,7 +157,7 @@ class _RegistrarInternacaoState extends State<RegistrarInternacao> {
                     items: snapshot.data!.map((leito) {
                       return DropdownMenuItem(
                         value: leito,
-                        child: Text('leito') //Text('Leito ${leito.numero} - ${ala.nomeAla}'),
+                        child: const Text('leito') //Text('Leito ${leito.numero} - ${ala.nomeAla}'),
                       );
                     }).toList(),
                     onChanged: (val) => setState(() => _leitoSelecionado = val),

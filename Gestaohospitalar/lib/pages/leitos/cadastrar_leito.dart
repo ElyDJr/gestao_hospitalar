@@ -112,7 +112,7 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
                       labelText: 'Selecione a Ala',
                       border: OutlineInputBorder(),
                     ),
-                    value: _idAlaSelecionada,
+                    initialValue: _idAlaSelecionada,
                     items: _alasDisponiveis.map((ala) {
                       return DropdownMenuItem<int>(
                         value: ala.id,

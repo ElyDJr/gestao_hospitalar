@@ -45,7 +45,6 @@ import '../domain/services/ala_service.dart';
 import 'alas/listar_ala.dart';
 
 import '../domain/services/sala_service.dart';
-import '../domain/entities/sala.dart';
 import '../pages/salas/listar_salas.dart';
 
 import '../telas/tela_faturamento.dart';

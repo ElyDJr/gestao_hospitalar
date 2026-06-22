@@ -305,6 +305,101 @@ static const String mockData = '''
   INSERT INTO ala (nome_ala, andar) VALUES ('UTI Neonatal', '3º Andar');
   INSERT INTO ala (nome_ala, andar) VALUES ('Iternação Premium', '4º Andar');
 
+  -- TÉRREO (Alas 1 a 4)
+-- Pronto Socorro (id_ala 1)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (1, '001', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (1, '002', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (1, '003', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (1, '004', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (1, '005', NULL, 'VAGO');
+
+-- Consultorio 01 (id_ala 2)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (2, '006', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (2, '007', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (2, '008', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (2, '009', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (2, '010', NULL, 'VAGO');
+
+-- Consultorio 02 (id_ala 3)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (3, '011', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (3, '012', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (3, '013', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (3, '014', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (3, '015', NULL, 'VAGO');
+
+-- Consultorio 03 (id_ala 4)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (4, '016', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (4, '017', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (4, '018', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (4, '019', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (4, '020', NULL, 'VAGO');
+
+-- 1º ANDAR (Alas 5 e 6)
+-- UTI (id_ala 5)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (5, '101', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (5, '102', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (5, '103', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (5, '104', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (5, '105', NULL, 'VAGO');
+
+-- Iternação Comum (id_ala 6)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '106', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '107', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '108', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '109', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '110', NULL, 'VAGO');
+
+-- 2º ANDAR (Alas 7 a 9)
+-- Cardiologia (id_ala 7)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '201', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '202', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '203', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '204', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '205', NULL, 'VAGO');
+
+-- Centro Cirurgico (id_ala 8)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (8, '206', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (8, '207', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (8, '208', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (8, '209', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (8, '210', NULL, 'VAGO');
+
+-- Ortopedia (id_ala 9)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (9, '211', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (9, '212', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (9, '213', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (9, '214', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (9, '215', NULL, 'VAGO');
+
+-- 3º ANDAR (Alas 10 a 12)
+-- Maternidade (id_ala 10)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (10, '301', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (10, '302', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (10, '303', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (10, '304', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (10, '305', NULL, 'VAGO');
+
+-- Pediatria (id_ala 11)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (11, '306', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (11, '307', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (11, '308', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (11, '309', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (11, '310', NULL, 'VAGO');
+-- UTI Neonatal (id_ala 12)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (12, '311', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (12, '312', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (12, '313', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (12, '314', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (12, '315', NULL, 'VAGO');
+
+-- 4º ANDAR (Ala 13)
+-- Iternação Premium (id_ala 13)
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (13, '401', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (13, '402', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (13, '403', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (13, '404', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (13, '405', NULL, 'VAGO');
+
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (1, 'Dr. Roberto Santos', 'CRM12345', 500.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (2, 'Dra. Maria Silva', 'CRM23456', 450.0);
   INSERT INTO medico (id_especialidade, nome, crm, honorario) VALUES (3, 'Dr. Carlos Souza', 'CRM34567', 400.0);
