@@ -278,54 +278,6 @@ class _ListarSalasState extends State<ListarSalas> {
                   : ListView.builder(
                       padding: const EdgeInsets.all(20),
                       itemCount: listaFiltrada.length,
-                      // itemBuilder: (context, i) {
-                      //   final sala = listaFiltrada[i];
-                      //   return Card(
-                      //     elevation: 2,
-                      //     margin: const EdgeInsets.symmetric(vertical: 6),
-                      //     child: ListTile(
-                      //       leading: const CircleAvatar(
-                      //         backgroundColor: Colors.teal,
-                      //         child: Icon(Icons.meeting_room, color: Colors.white),
-                      //       ),
-                      //       title: Text(sala.nomeSala ?? "Sem nome"),
-                      //       subtitle: Text("Status: ${sala.status ?? 'Livre'}"),
-                      //       trailing: Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           IconButton(
-                      //             icon: const Icon(Icons.edit, color: Colors.blue),
-                      //             onPressed: () => _abrirFormulario(salaEdicao: sala),
-                      //           ),
-                      //           IconButton(
-                      //             icon: const Icon(Icons.delete, color: Colors.red),
-                      //             onPressed: () async {
-                      //               final confirmar = await showDialog<bool>(
-                      //                 context: context,
-                      //                 builder: (ctx) => AlertDialog(
-                      //                   title: const Text("Excluir Sala?"),
-                      //                   content: const Text("Tem certeza que deseja excluir esta sala?"),
-                      //                   actions: [
-                      //                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancelar")),
-                      //                     ElevatedButton(
-                      //                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-                      //                       onPressed: () => Navigator.pop(ctx, true),
-                      //                       child: const Text("Excluir"),
-                      //                     ),
-                      //                   ],
-                      //                 ),
-                      //               );
-                      //               if (confirmar == true) {
-                      //                 await widget.service.excluir(sala.id!);
-                      //                 await _carregarSalas();
-                      //               }
-                      //             },
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     ),
-                      //   );
-                      // },//fecha aqui
                       itemBuilder: (context, index) {
                         final sala = _salas[index];
                         return ListTile(

@@ -1,217 +1,458 @@
-import 'package:flutter/material.dart';
-import '../../domain/entities/paciente.dart';
-import '../../domain/entities/leito.dart';
-import '../../domain/services/leito_service.dart';
+// import 'package:flutter/material.dart';
+// import 'package:sqflite/sqflite.dart'; // Import necessário
+// import '../../domain/services/sala_service.dart';
+// import '../../domain/services/leito_service.dart';
+// import '../../domain/services/ala_service.dart';
+// import '../../domain/entities/sala.dart';
+// import '../../domain/entities/leito.dart';
+// import '../../domain/entities/ala.dart';
+// import '../../domain/entities/paciente.dart'; // Import necessário
+// import '../../domain/services/medico_service.dart';
+// import '../../domain/entities/medico.dart';
 
-// Importe suas entidades e services aqui...
+// class EncaminhamentoForm extends StatefulWidget {
+//   final Paciente paciente;
+//   final Map<String, dynamic> triagem;
+//   final Database database;
+
+//   // Construtor atualizado para receber os parâmetros da Dashboard
+//   const EncaminhamentoForm({
+//     super.key,
+//     required this.paciente,
+//     required this.triagem,
+//     required this.database,
+//   });
+
+//   @override
+//   State<EncaminhamentoForm> createState() => _EncaminhamentoFormState();
+// }
+
+// class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
+//   final _formKey = GlobalKey<FormState>();
+
+//   // final SalaService _salaService = SalaService();
+//   // final LeitoService _leitoService = LeitoService();
+//   // final AlaService _alaService = AlaService();
+
+//   // Serviços
+//   late final SalaService _salaService;
+//   late final LeitoService _leitoService;
+//   late final AlaService _alaService;
+//   late final MedicoService _medicoService;
+
+//   List<Sala> _listaSalas = [];
+//   List<Leito> _listaLeitos = [];
+//   List<Ala> _listaAlas = [];
+//   List<Medico> _listaMedicos = [];
+//   bool _isLoading = true;
+
+//   String? _tipoDestino;
+//   //dynamic _destinoSelecionado;
+//   //int? _medicoSelecionado;
+//   int? _idDestinoSelecionado;
+//   int? _idMedicoSelecionado;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     //_carregarDados();
+//     _salaService = SalaService();
+//     _leitoService = LeitoService();
+//     _alaService = AlaService();
+//     _medicoService = MedicoService(widget.database); // Inicializa com database
+//     _carregarDados();
+//   }
+
+//   Future<void> _carregarDados() async {
+//     setState(() => _isLoading = true);
+//     final salas = await _salaService.listarTodas();
+//     final leitos = await _leitoService.listarLeitosDisponiveis();
+//     final alas = await _alaService.listarAlas();
+
+//     await _medicoService.carregarMedicos();
+//     final medicos = _medicoService.medicos;
+
+//     if (mounted) {
+//       setState(() {
+//         _listaSalas = salas;
+//         _listaLeitos = leitos;
+//         _listaAlas = alas;
+//         _listaMedicos = medicos;
+//         _isLoading = false;
+//       });
+//     }
+//   }
+
+//   String _getNomeAla(int? idAla) {
+//     if (idAla == null) return "Sem Ala";
+//     try {
+//       final ala = _listaAlas.firstWhere((a) => a.id == idAla);
+//       return ala.nomeAla ?? "Sem nome";
+//     } catch (e) {
+//       return "Ala não encontrada";
+//     }
+//   }
+
+//   Widget build(BuildContext context) {
+//     return Material(
+//       color: Colors.white,
+//       child: _isLoading
+//           ? const Center(child: CircularProgressIndicator())
+//           : Form(
+//               key: _formKey,
+//               child: ListView(
+//                 padding: const EdgeInsets.all(20),
+//                 children: [
+//                   const Text("Encaminhamento Médico", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.teal)),
+//                   const Divider(),
+
+//                   // 1. DADOS DO PACIENTE
+//                   _buildSectionTitle("1. Dados do Paciente"),
+//                   Card(
+//                     margin: const EdgeInsets.only(bottom: 15),
+//                     child: ListTile(
+//                       title: Text(widget.paciente.nome ?? "Sem nome"),
+//                       subtitle: Text("CPF: ${widget.paciente.cpf ?? 'N/A'} | Nasc: ${widget.paciente.nascimento ?? 'N/A'}\nSexo: ${widget.paciente.sexo ?? 'N/A'}"),
+//                     ),
+//                   ),
+
+//                   // 2. DADOS DA TRIAGEM
+//                   _buildSectionTitle("2. Dados da Triagem"),
+//                   Card(
+//                     margin: const EdgeInsets.only(bottom: 15),
+//                     child: Padding(
+//                       padding: const EdgeInsets.all(12.0),
+//                       child: Text(
+//                         "PA: ${widget.triagem['pressao'] ?? '--'} | Temp: ${widget.triagem['temperatura'] ?? '--'}°C | Sat: ${widget.triagem['saturacao'] ?? '--'}%\n"
+//                         "Risco: ${widget.triagem['risco'] ?? '--'}\n"
+//                         "Queixa: ${widget.triagem['queixa'] ?? '--'}\n"
+//                         "Alergias: ${widget.triagem['alergias'] ?? 'Nenhuma'}",
+//                       ),
+//                     ),
+//                   ),
+
+//                   // 3. DEFINIR DESTINO E MÉDICO
+//                   _buildSectionTitle("3. Definir Destino"),
+//                   DropdownButtonFormField<int>(
+//                     decoration: const InputDecoration(labelText: "Médico Responsável *", border: OutlineInputBorder()),
+//                     items: _listaMedicos.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nome ?? ""))).toList(),
+//                     onChanged: (val) => setState(() => _idMedicoSelecionado = val),
+//                     validator: (v) => v == null ? "Selecione o médico" : null,
+//                   ),
+//                   const SizedBox(height: 15),
+                  
+//                   Row(
+//                     children: [
+//                       Expanded(child: RadioListTile(title: const Text("Sala"), value: 'SALA', groupValue: _tipoDestino, onChanged: (v) => setState(() { _tipoDestino = v; _idDestinoSelecionado = null; }))),
+//                       Expanded(child: RadioListTile(title: const Text("Leito"), value: 'LEITO', groupValue: _tipoDestino, onChanged: (v) => setState(() { _tipoDestino = v; _idDestinoSelecionado = null; }))),
+//                     ],
+//                   ),
+
+//                   if (_tipoDestino != null)
+//                     DropdownButtonFormField<int>(
+//                       decoration: const InputDecoration(labelText: "Selecione o local *", border: OutlineInputBorder()),
+//                       initialValue: _idDestinoSelecionado,
+//                       isExpanded: true,
+//                       items: _tipoDestino == 'SALA'
+//                           ? _listaSalas.map((s) => DropdownMenuItem(value: s.id, child: Text(s.nomeSala ?? ""))).toList()
+//                           : _listaLeitos.map((l) => DropdownMenuItem(value: l.id, child: Text("Leito ${l.numero} - ${_getNomeAla(l.idAla)}"))).toList(),
+//                       onChanged: (val) => setState(() => _idDestinoSelecionado = val),
+//                       validator: (v) => v == null ? "Obrigatório" : null,
+//                     ),
+
+//                   const SizedBox(height: 25),
+//                   ElevatedButton(
+//                     style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+//                     onPressed: _finalizarFluxo,
+//                     child: const Text("Salvar e Enviar para o Médico"),
+//                   )
+//                 ],
+//               ),
+//             ),
+//     );
+//   }
+
+//   void _finalizarFluxo() async {
+//     print("Iniciando fluxo de salvamento..."); // 🟢 DEBUG 1
+
+//     // 1. Verificar se o formulário é válido
+//     if (!_formKey.currentState!.validate()) {
+//       print("Validação do formulário falhou!"); // 🟢 DEBUG 2
+//       return;
+//     }
+//     print("Formulário validado com sucesso."); // 🟢 DEBUG 3
+
+//     // 2. Validações manuais
+//     if (_idMedicoSelecionado == null) {
+//       print("Erro: Médico não selecionado");
+//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecione um Médico!")));
+//       return;
+//     }
+    
+//     if (_idDestinoSelecionado == null) {
+//       print("Erro: Destino não selecionado");
+//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecione o destino!")));
+//       return;
+//     }
+
+//     try {
+//       print("Tentando inserir no banco..."); // 🟢 DEBUG 4
+      
+//       // CRIA O PRONTUÁRIO
+//       int idProntuario = await widget.database.insert('prontuario', {
+//         'id_paciente': widget.paciente.id,
+//         'id_triagem': widget.triagem['id_triagem'],
+//         'id_medico': _idMedicoSelecionado,
+//         'id_sala': _tipoDestino == 'SALA' ? _idDestinoSelecionado : null,
+//         'data_abertura': DateTime.now().toIso8601String(),
+//         'status_prontuario': 'ATIVO',
+//       });
+      
+//       print("Prontuário inserido com ID: $idProntuario"); // 🟢 DEBUG 5
+
+//       // ... restante da lógica (internação, etc) ...
+
+//       if (mounted) {
+//         Navigator.pop(context, true);
+//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sucesso!")));
+//       }
+//     } catch (e) {
+//       print("ERRO CAPTURADO NO TRY-CATCH: $e"); // 🟢 DEBUG 6
+//       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro: $e")));
+//     }
+//   }
+
+
+//   Widget _buildSectionTitle(String title) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blueGrey)),
+//     );
+//   }
+// }
+
+
+import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import '../../domain/services/sala_service.dart';
+import '../../domain/services/leito_service.dart';
+import '../../domain/services/ala_service.dart';
+import '../../domain/entities/sala.dart';
+import '../../domain/entities/leito.dart';
+import '../../domain/entities/ala.dart';
+import '../../domain/entities/paciente.dart';
+import '../../domain/services/medico_service.dart';
+import '../../domain/entities/medico.dart';
 
 class EncaminhamentoForm extends StatefulWidget {
   final Paciente paciente;
   final Map<String, dynamic> triagem;
-  //final String tipoDestino; // 'SALA' ou 'INTERNACAO'
-  final dynamic database;
+  final Database database;
 
-  const EncaminhamentoForm({super.key, required this.paciente, required this.triagem, required this.database});
+  const EncaminhamentoForm({
+    super.key,
+    required this.paciente,
+    required this.triagem,
+    required this.database,
+  });
 
   @override
   State<EncaminhamentoForm> createState() => _EncaminhamentoFormState();
 }
 
 class _EncaminhamentoFormState extends State<EncaminhamentoForm> {
-  String _tipoDestino = 'SALA';
-  final String _riscoEvasao = 'BAIXO';
-  final String _isolamento = 'NAO';
+  final _formKey = GlobalKey<FormState>();
 
-  final LeitoService _leitoService = LeitoService();
-  List<Leito> _leitosDisponiveis = [];
-  // Leito? _leitoSelecionado;
-  // bool _exibirSelecaoLeito = false;
-  
-  // Variáveis de destino
+  late final SalaService _salaService;
+  late final LeitoService _leitoService;
+  late final AlaService _alaService;
+  late final MedicoService _medicoService;
+
+  List<Sala> _listaSalas = [];
+  List<Leito> _listaLeitos = [];
+  List<Ala> _listaAlas = [];
+  List<Medico> _listaMedicos = [];
+  bool _isLoading = true;
+
+  // Variáveis do Form
+  String? _tipoDestino;
+  int? _idDestinoSelecionado;
   int? _idMedicoSelecionado;
-  int? _idSalaSelecionada;
-  int? _idLeitoSelecionado;
-
-  List<Map<String, dynamic>> _medicos = [];
+  
+  // Campos obrigatórios para o prontuário
+  String _riscoEvasao = 'BAIXO';
+  String _isolamento = 'NAO';
 
   @override
   void initState() {
     super.initState();
-    _carregarMedicos(); // Busca os médicos do banco para o Select
-    _carregarLeitosDisponiveis(); // Busca os leitos disponíveis
+    _salaService = SalaService();
+    _leitoService = LeitoService();
+    _alaService = AlaService();
+    _medicoService = MedicoService(widget.database);
+    _carregarDados();
   }
 
-  Future<void> _carregarMedicos() async {
-    final medicos = await widget.database.query('medico');
-    setState(() => _medicos = medicos);
+  Future<void> _carregarDados() async {
+    setState(() => _isLoading = true);
+    final salas = await _salaService.listarTodas();
+    final leitos = await _leitoService.listarLeitosDisponiveis();
+    final alas = await _alaService.listarAlas();
+    await _medicoService.carregarMedicos();
+
+    if (mounted) {
+      setState(() {
+        _listaSalas = salas;
+        _listaLeitos = leitos;
+        _listaAlas = alas;
+        _listaMedicos = _medicoService.medicos;
+        _isLoading = false;
+      });
+    }
   }
 
-  Future<void> _carregarLeitosDisponiveis() async {
-    // _leitosDisponiveis = await _leitoService.buscarLeitosDisponiveis();
-    // setState(() {});
-    final leitos = await _leitoService.buscarLeitosDisponiveis();
-    setState(() {
-      _leitosDisponiveis = leitos;
-    });
+  String _getNomeAla(int? idAla) {
+    if (idAla == null) return "Sem Ala";
+    try {
+      return _listaAlas.firstWhere((a) => a.id == idAla).nomeAla ?? "Sem nome";
+    } catch (e) {
+      return "Ala não encontrada";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Encaminhamento para ${_tipoDestino == 'SALA' ? "Sala/Consultório" : "Internação"}",
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. INFORMAÇÕES DO PACIENTE (Leitura)
-            Card(
-              child: ListTile(
-                title: const Text("1. Dados do Paciente", style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Nome: ${widget.paciente.nome}\nCPF: ${widget.paciente.cpf}\nData Nasc: ${widget.paciente.nascimento}\nSexo: ${widget.paciente.sexo}"),
-              ),
-            ),
-            
-            // 2. INFORMAÇÕES DA TRIAGEM (Leitura)
-            Card(
-              child: ListTile(
-                title: const Text("2. Dados da Triagem", style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("PA: ${widget.triagem['pressao']} | Temp: ${widget.triagem['temperatura']}°C | Sat: ${widget.triagem['saturacao']}%\n"
-                "Risco: ${widget.triagem['risco']}\nQueixa: ${widget.triagem['queixa']}\n"
-                "Alergias: ${widget.triagem['alergias'] ?? "Não relatado"}"),
-              ),
-            ),
+    return Material(
+      color: Colors.white,
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  const Text("Encaminhamento Médico", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.teal)),
+                  const Divider(),
 
-            // 3. DEFINIR DESTINO E MÉDICO
-            Card(
-              color: Colors.blue.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("3. Definir Destino", style: TextStyle(fontWeight: FontWeight.bold)),
-                    
-                    // 🟢 ESCOLHA DE INTERNAÇÃO OU SALA AQUI
-                    Row(
-                      children: [
-                        Expanded(child: RadioListTile<String>(title: const Text("Sala/Consultório"), value: 'SALA', groupValue: _tipoDestino, onChanged: (v) => setState(() => _tipoDestino = v!))),
-                        Expanded(child: RadioListTile<String>(title: const Text("Internação/Leito"), value: 'INTERNACAO', groupValue: _tipoDestino, onChanged: (v) => setState(() => _tipoDestino = v!))),
-                      ],
+                  // 1. DADOS DO PACIENTE
+                  _buildSectionTitle("1. Dados do Paciente"),
+                  Card(
+                    child: ListTile(
+                      title: Text(widget.paciente.nome ?? "Sem nome"),
+                      subtitle: Text("CPF: ${widget.paciente.cpf ?? 'N/A'} | Nasc: ${widget.paciente.nascimento ?? 'N/A'}"),
                     ),
+                  ),
 
-                    // 🟢 ESCOLHA DO MÉDICO (Resolve o erro 1299 NOT NULL)
+                  // 2. DADOS DA TRIAGEM
+                  _buildSectionTitle("2. Dados da Triagem"),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text("Risco: ${widget.triagem['risco'] ?? '--'} | Queixa: ${widget.triagem['queixa'] ?? '--'}"),
+                    ),
+                  ),
+
+                  // 3. AVALIAÇÃO CLÍNICA E DESTINO
+                  _buildSectionTitle("3. Avaliação e Destino"),
+                  
+                  // Novos campos obrigatórios
+                  DropdownButtonFormField<String>(
+                    value: _riscoEvasao,
+                    decoration: const InputDecoration(labelText: "Risco de Evasão *", border: OutlineInputBorder()),
+                    items: ['BAIXO', 'MÉDIO', 'ALTO'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                    onChanged: (v) => setState(() => _riscoEvasao = v!),
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: _isolamento,
+                    decoration: const InputDecoration(labelText: "Isolamento *", border: OutlineInputBorder()),
+                    items: ['SIM', 'NAO'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                    onChanged: (v) => setState(() => _isolamento = v!),
+                  ),
+                  const SizedBox(height: 10),
+
+                  DropdownButtonFormField<int>(
+                    decoration: const InputDecoration(labelText: "Médico Responsável *", border: OutlineInputBorder()),
+                    items: _listaMedicos.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nome ?? ""))).toList(),
+                    onChanged: (val) => setState(() => _idMedicoSelecionado = val),
+                    validator: (v) => v == null ? "Selecione o médico" : null,
+                  ),
+                  
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(child: RadioListTile(title: const Text("Sala"), value: 'SALA', groupValue: _tipoDestino, onChanged: (v) => setState(() { _tipoDestino = v; _idDestinoSelecionado = null; }))),
+                      Expanded(child: RadioListTile(title: const Text("Leito"), value: 'LEITO', groupValue: _tipoDestino, onChanged: (v) => setState(() { _tipoDestino = v; _idDestinoSelecionado = null; }))),
+                    ],
+                  ),
+
+                  if (_tipoDestino != null)
                     DropdownButtonFormField<int>(
-                      initialValue: _idMedicoSelecionado,
-                      items: _medicos.map((m) => DropdownMenuItem<int>(value: m['id_medico'] as int, child: Text(m['nome']))).toList(),
-                      onChanged: (v) => setState(() => _idMedicoSelecionado = v),
-                      decoration: const InputDecoration(labelText: "Médico Responsável *"),
+                      decoration: const InputDecoration(labelText: "Selecione o local *", border: OutlineInputBorder()),
+                      value: _idDestinoSelecionado,
+                      isExpanded: true,
+                      items: _tipoDestino == 'SALA'
+                          ? _listaSalas.map((s) => DropdownMenuItem<int>(value: s.id, child: Text(s.nomeSala ?? ""))).toList()
+                          : _listaLeitos.map((l) => DropdownMenuItem<int>(value: l.id, child: Text("Leito ${l.numero} - ${_getNomeAla(l.idAla)}"))).toList(),
+                      onChanged: (val) => setState(() => _idDestinoSelecionado = val),
+                      validator: (v) => v == null ? "Obrigatório" : null,
                     ),
-                    const SizedBox(height: 10),
 
-                    if (_tipoDestino == 'SALA')
-                      DropdownButtonFormField<int>(
-                        initialValue: _idSalaSelecionada,
-                        items: const [
-                          DropdownMenuItem(value: 1, child: Text("Consultório 01 - Triagem")),
-                          DropdownMenuItem(value: 2, child: Text("Consultório 02 - Especialidades")),
-                        ],
-                        onChanged: (v) => setState(() => _idSalaSelecionada = v),
-                        decoration: const InputDecoration(labelText: "Selecione a Sala *"),
-                      ),
-
-                    if (_tipoDestino == 'INTERNACAO')
-                      DropdownButtonFormField<int>(
-                        initialValue: _idLeitoSelecionado,
-                        items: _leitosDisponiveis.map((leito) {
-                          return DropdownMenuItem<int>(
-                            value: leito.id, // ID que será salvo no banco
-                            // Mostra número, ala e andar (se existir)
-                            child: (Text('Leito'))//Text("Leito ${leito.numero} - ${leito.ala} (${leito.andar ?? ''})"), //arrumar essa linha
-                          );
-                        }).toList(),
-                        onChanged: (v) => setState(() => _idLeitoSelecionado = v),
-                        decoration: const InputDecoration(labelText: "Selecione o Leito Vago *"),
-                      ),
-                  ],
-                ),
+                  const SizedBox(height: 25),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                    onPressed: _finalizarFluxo,
+                    child: const Text("Salvar e Enviar para o Médico"),
+                  )
+                ],
               ),
             ),
-
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-              onPressed: _finalizarFluxo,
-              child: const Text("Salvar e Enviar para o Médico"),
-            )
-          ],
-        ),
-      ),
     );
   }
 
   void _finalizarFluxo() async {
-    // Validações obrigatórias
-    if (_idMedicoSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecione um Médico!"), backgroundColor: Colors.red));
-      return;
-    }
-    if (_tipoDestino == 'SALA' && _idSalaSelecionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecione uma Sala!"), backgroundColor: Colors.red));
-      return;
-    }
-    if (_tipoDestino == 'INTERNACAO' && _idLeitoSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecione um Leito!"), backgroundColor: Colors.red));
+    if (_idMedicoSelecionado == null || _idDestinoSelecionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Preencha médico e destino!"), backgroundColor: Colors.red));
       return;
     }
 
     try {
-      // 1. CRIA O PRONTUÁRIO (Com o id_medico resolvendo o erro)
       int idProntuario = await widget.database.insert('prontuario', {
         'id_paciente': widget.paciente.id,
         'id_triagem': widget.triagem['id_triagem'],
-        'id_medico': _idMedicoSelecionado, // 🟢 ERRO 1299 RESOLVIDO
-        'id_sala': _tipoDestino == 'SALA' ? _idSalaSelecionada : null,
-        'risco_evasao': _riscoEvasao,
-        'isolamento': _isolamento,
+        'id_medico': _idMedicoSelecionado,
+        'id_sala': _tipoDestino == 'SALA' ? _idDestinoSelecionado : null,
+        'risco_evasao': _riscoEvasao,   // Valor agora garantido
+        'isolamento': _isolamento,     // Valor agora garantido
         'data_abertura': DateTime.now().toIso8601String(),
-        'status_prontuario': 'ATIVO', // 🟢 ATIVO GARANTIDO
+        'status_prontuario': 'ATIVO',
       });
 
-      // 2. SE FOR INTERNAÇÃO, CRIA NA TABELA INTERNACAO
-      if (_tipoDestino == 'INTERNACAO') {
+      if (_tipoDestino == 'LEITO') {
         await widget.database.insert('internacao', {
           'id_prontuario': idProntuario,
-          'id_leito': _idLeitoSelecionado,
+          'id_leito': _idDestinoSelecionado,
           'data_entrada': DateTime.now().toIso8601String(),
         });
-
-        // 🟢 ATUALIZA O STATUS DO LEITO PARA 'OCUPADO' NO BANCO
-        await widget.database.rawUpdate(
-          'UPDATE leito SET situacao = ? WHERE id_leito = ?',
-          ['OCUPADO', _idLeitoSelecionado],
-        );
-        
+        await widget.database.rawUpdate('UPDATE leito SET situacao = ? WHERE id_leito = ?', ['OCUPADO', _idDestinoSelecionado]);
       }
 
-      String valorInternacao = (_tipoDestino == 'INTERNACAO') ? 'SIM' : 'NAO';
-
-      // 3. (OPCIONAL Mas recomendado) Atualiza a triagem dizendo que ele foi encaminhado para sair da fila inicial
-      await widget.database.update(
-        'triagem', 
-        {'internacao': valorInternacao}, // Agora envia apenas 'SIM' ou 'NAO'
-        where: 'id_triagem = ?', 
-        whereArgs: [widget.triagem['id_triagem']]
-      );
+      await widget.database.update('triagem', {'internacao': 'SIM'}, where: 'id_triagem = ?', whereArgs: [widget.triagem['id_triagem']]);
 
       if (mounted) {
-        Navigator.pop(context); // Fecha o form lateral
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Encaminhamento realizado com sucesso!"), backgroundColor: Colors.green));
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Encaminhado com sucesso!"), backgroundColor: Colors.green));
       }
     } catch (e) {
-      debugPrint("ERRO AO SALVAR: $e");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro: $e"), backgroundColor: Colors.red));
+      debugPrint("ERRO: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro ao salvar: $e"), backgroundColor: Colors.red));
     }
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blueGrey)),
+    );
   }
 }
