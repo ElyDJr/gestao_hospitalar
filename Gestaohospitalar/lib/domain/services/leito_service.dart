@@ -5,14 +5,14 @@ import '../entities/leito.dart';
 class LeitoService {
   // RF06, RN13, RN14: Buscar apenas leitos disponíveis
   Future<List<Leito>> listarLeitosDisponiveis() async {
-    // final db = await DatabaseProvider.instance.database;
-    // final List<Map<String, dynamic>> maps = await db.query(
-    //   'leito',
-    //   where: 'situacao = ?',
-    //   whereArgs: ['VAGO'],
-    // );
-    // return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
-    return buscarLeitosDisponiveis();
+    final db = await DatabaseProvider.instance.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'leito',
+      where: 'situacao = ?',
+      whereArgs: ['VAGO'],
+    );
+    return List.generate(maps.length, (i) => Leito.fromMap(maps[i]));
+    //return buscarLeitosDisponiveis();
   }
 
   Future<List<Map<String, dynamic>>> buscarMapaLeitos() async {

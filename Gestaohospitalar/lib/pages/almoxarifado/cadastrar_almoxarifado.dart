@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../domain/services/almoxarifado_service.dart';
 import '../../../domain/entities/almoxarifado.dart';
-import '../../domain/entities/medicamento.dart';
 
 class CadastrarAlmoxarifado extends StatefulWidget {
   final AlmoxarifadoService service;

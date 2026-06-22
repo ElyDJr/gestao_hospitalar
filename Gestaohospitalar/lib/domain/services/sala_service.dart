@@ -35,6 +35,7 @@ class SalaService {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS sala (
         id_sala INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo TEXT NOT NULL,
         nome_sala TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'LIVRE'
       )
@@ -52,13 +53,30 @@ class SalaService {
     );
   }
 
-  // Adicione este método ao seu SalaService
+  // Substitua este método no seu SalaService
   Future<List<Map<String, dynamic>>> buscarPacientesPorSala(int idSala) async {
-    final database = await db; // Certifique-se que você tem acesso ao DB
+    final database = await db; 
+    
+    // Agora fazemos JOIN com Paciente e LEFT JOIN com Triagem
     return await database.rawQuery('''
-      SELECT pr.*, p.nome as nome_paciente, p.cpf
+      SELECT
+        pr.*,
+        p.nome as nome_paciente,
+        p.cpf,
+        p.nascimento,
+        p.sexo,
+        p.alergias,
+        p.tipo_sanguineo,
+        p.historico_clinico,
+        t.frequencia_cardiaca,
+        t.temperatura,
+        t.saturacao,
+        t.queixa,
+        t.pressao,
+        t.risco
       FROM prontuario pr
       JOIN paciente p ON pr.id_paciente = p.id_paciente
+      LEFT JOIN triagem t ON pr.id_triagem = t.id_triagem
       WHERE pr.id_sala = ? AND pr.status_prontuario = 'ATIVO'
     ''', [idSala]);
   }

@@ -15,12 +15,14 @@ class CadastrarSalas extends StatefulWidget {
 class _CadastrarSalasState extends State<CadastrarSalas> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
+  final _tipoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     if (widget.salaEdicao != null) {
       _nomeController.text = widget.salaEdicao!.nomeSala ?? '';
+      _tipoController.text = widget.salaEdicao!.tipo ?? '';
     }
   }
 
@@ -30,6 +32,7 @@ class _CadastrarSalasState extends State<CadastrarSalas> {
     try {
       final sala = Sala(
         id: widget.salaEdicao?.id, // Mantém o ID se for edição
+        tipo: _tipoController.text,
         nomeSala: _nomeController.text,
       );
       
@@ -59,6 +62,11 @@ class _CadastrarSalasState extends State<CadastrarSalas> {
                 validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
               ),
               const SizedBox(height: 20),
+              TextFormField( // Campo adicionado
+                controller: _tipoController,
+                decoration: const InputDecoration(labelText: 'Tipo (ex: Consultório, Exame)'),
+                validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
+              ),
               ElevatedButton(onPressed: _salvar, child: const Text('Salvar'))
             ],
           ),

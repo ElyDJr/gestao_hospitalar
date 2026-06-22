@@ -78,6 +78,7 @@ CREATE TABLE paciente_convenio (
 CREATE TABLE sala (
     id_sala INTEGER PRIMARY KEY AUTOINCREMENT,
     nome_sala TEXT,
+    tipo TEXT,
     status TEXT CHECK (status IN ('LIVRE', 'OCUPADA', 'MANUTENCAO'))
 );
 
@@ -279,11 +280,11 @@ static const String mockData = '''
   INSERT INTO especialidade (descricao_especialidade) VALUES ('Ortopedia');
   INSERT INTO especialidade (descricao_especialidade) VALUES ('Neurologia');
 
-  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 101', 'Consultorio', 'LIVRE');
-  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 102', 'Consultorio', 'OCUPADA');
-  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 103', 'Exames', 'LIVRE');
-  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 104', 'Cirurgia', 'MANUTENCAO');
-  INSERT INTO sala (nome, tipo, status) VALUES ('Sala 105', 'Emergencia', 'LIVRE');
+  INSERT INTO sala (nome_sala, tipo, status) VALUES ('Sala 101', 'Consultorio', 'LIVRE');
+  INSERT INTO sala (nome_sala, tipo, status) VALUES ('Sala 102', 'Consultorio', 'OCUPADA');
+  INSERT INTO sala (nome_sala, tipo, status) VALUES ('Sala 103', 'Exames', 'LIVRE');
+  INSERT INTO sala (nome_sala, tipo, status) VALUES ('Sala 104', 'Cirurgia', 'MANUTENCAO');
+  INSERT INTO sala (nome_sala, tipo, status) VALUES ('Sala 105', 'Emergencia', 'LIVRE');
 
   INSERT INTO exame (nome, valor, descricao) VALUES ('Hemograma', 50.0, 'Exame de sangue'), ('Raio-X Torax', 150.0, 'Imagem');
   INSERT INTO exame (nome, valor, descricao) VALUES ('Eletrocardiograma', 200.0, 'Coracao'), ('Ultrassom', 300.0, 'Imagem'), ('Tomografia', 600.0, 'Imagem'); 

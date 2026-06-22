@@ -54,15 +54,31 @@ class _MapaSalasState extends State<MapaSalas> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
+            width: double.infinity, // Garante que o cabeçalho ocupe toda a largura
             color: Colors.teal.shade50,
-            child: Text("Sala ${sala.nomeSala}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Sala ${sala.nomeSala}",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                ),
+                // Exibe o tipo, ou vazio se for nulo, com fonte menor e cor cinza
+                Text(
+                  sala.tipo ?? "",
+                  style: const TextStyle(fontSize: 11, color: Colors.black54)
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: _salaService.buscarPacientesPorSala(sala.id!),
               builder: (context, snapshot) {
+                // ... (seu código de ListView permanece igual)
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final pacientes = snapshot.data!;
+                
                 return ListView.builder(
                   itemCount: pacientes.length,
                   itemBuilder: (ctx, index) {
@@ -72,7 +88,6 @@ class _MapaSalasState extends State<MapaSalas> {
                       leading: const Icon(Icons.person, size: 16),
                       title: Text(p['nome_paciente'], style: const TextStyle(fontSize: 12)),
                       onTap: () {
-                        // Ao clicar, abre o prontuário para evoluir
                         Navigator.push(context, MaterialPageRoute(
                           builder: (_) => ProntuarioEvolucaoForm(dadosLeitoPaciente: p),
                         ));
