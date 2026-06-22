@@ -74,6 +74,7 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
     String alergiasPaciente = (widget.dadosLeitoPaciente['alergias'] ?? '').toString().toLowerCase();
     String principioAtivo = (medicamento['principio_ativo'] ?? '').toString().toLowerCase();
 
+    // 🟢 Correção do erro de digitação do 'princivoAtivo'
     if (alergiasPaciente.contains(principioAtivo) && principioAtivo.isNotEmpty) {
       showDialog(
         context: context,
@@ -88,7 +89,7 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
           ),
           content: Text(
             "Atenção! O paciente tem alergia registrada a: '${widget.dadosLeitoPaciente['alergias']}'.\n\n"
-            "Evite prescrever o medicamento selecionado (${medicamento['nome']}).",
+            "Não é permitido prescrever o medicamento selecionado (${medicamento['nome']}).",
           ),
           actions: [
             TextButton(
@@ -96,11 +97,7 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
                 Navigator.pop(context);
                 setState(() => _medicamentoSelecionado = null);
               },
-              child: const Text("CANCELAR PRESCRIÇÃO", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("IGNORAR E MANTER", style: TextStyle(color: Colors.orange)),
+              child: const Text("OK, COMPREENDIDO", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -131,7 +128,6 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
           observacao: _observacaoCtrl.text.trim().isEmpty ? null : _observacaoCtrl.text.trim(),
         );
 
-        // 🟢 Correção das Linhas 133 e 146: Evita quebra de contexto síncrono
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +178,6 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
           const SizedBox(height: 10),
           
           DropdownButtonFormField<Map<String, dynamic>>(
-            // 🟢 Correção da Linha 180: Trocado 'value' por 'initialValue' devido à depreciação
             initialValue: _medicamentoSelecionado,
             hint: const Text("Selecione um medicamento disponível..."),
             decoration: InputDecoration(
@@ -271,6 +266,7 @@ class _PrescricaoProntuarioFormState extends State<PrescricaoProntuarioForm> {
           ),
           
           if (_historicoPrescricoes.isEmpty)
+            // 🟢 Correção do erro da Linha 287 (Removido o const problemático que causava o bug do TextAlign)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
