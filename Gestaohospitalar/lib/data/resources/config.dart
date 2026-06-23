@@ -354,7 +354,7 @@ INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (6, '110'
 -- 2º ANDAR (Alas 7 a 9)
 -- Cardiologia (id_ala 7)
 INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '201', NULL, 'VAGO');
-INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '202', NULL, 'VAGO');
+INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '202', NULL, 'HIGIENIZACAO');
 INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '203', NULL, 'VAGO');
 INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '204', NULL, 'VAGO');
 INSERT INTO leito (id_ala, numero, data_higienizacao, situacao) VALUES (7, '205', NULL, 'VAGO');
