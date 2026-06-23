@@ -27,10 +27,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  # A seção 'assets' foi removida. 
-  # Se no futuro você for adicionar imagens (ex: logo do hospital), 
-  # você deve recriar a seção assim:  
+
+  # adicionando imagem
   assets:
-    
     - assets/imagens/monge.jpeg
   

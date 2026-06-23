@@ -588,45 +588,68 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
     }
   }
 
-  void _confirmarAlta(bool isLeito) {
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-              title: const Text("Confirmar Alta/Liberação"),
-              content: Text(isLeito
-                  ? "O paciente terá alta, o leito irá para higienização e os custos serão calculados."
-                  : "O atendimento será encerrado e a consulta enviada ao faturamento."),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text("Cancelar")),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(ctx);
-                    // Chama a lógica de cálculo e alta
-                    await _processarFinalizacao(isLeito);
-                  },
-                  child: const Text("Confirmar"),
-                ),
-              ],
-            ));
-  }
+  // void _confirmarAlta(bool isLeito) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (ctx) => AlertDialog(
+  //             title: const Text("Confirmar Alta/Liberação"),
+  //             content: Text(isLeito
+  //                 ? "O paciente terá alta, o leito irá para higienização e os custos serão calculados."
+  //                 : "O atendimento será encerrado e a consulta enviada ao faturamento."),
+  //             actions: [
+  //               TextButton(
+  //                   onPressed: () => Navigator.pop(ctx),
+  //                   child: const Text("Cancelar")),
+  //               ElevatedButton(
+  //                 onPressed: () async {
+  //                   Navigator.pop(ctx);
+  //                   // Chama a lógica de cálculo e alta
+  //                   await _processarFinalizacao(isLeito);
+  //                 },
+  //                 child: const Text("Confirmar"),
+  //               ),
+  //             ],
+  //           ));
+  // }
 
+  // O MÉTODO DEFINITIVO DE ALTA
   Future<void> _processarFinalizacao(bool isLeito) async {
-    _salvarEvolucao();
+    // 1. Salva evolução
     final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ?? widget.dadosLeitoPaciente['id'];
+    await _leitoService.atualizarEvolucaoProntuario(idProntuario, _evolucaoCtrl.text);
     
-    // O service agora calcula tudo internamente e insere na tabela faturamento
-    await FaturamentoService(await DatabaseProvider.instance.database)
-        .calcularConta(idProntuario, isLeito ? widget.dadosLeitoPaciente['id_internacao'] : null);
-
-    if (isLeito) {
-      await _leitoService.atualizarStatusLeito(widget.dadosLeitoPaciente['id_leito'], 'HIGIENIZACAO');
-    }
+    // 2. Processa alta e faturamento via Transação
+    final db = await DatabaseProvider.instance.database;
+    await FaturamentoService(db).processarAltaEGerarFaturamento(
+      idProntuario: idProntuario,
+      idInternacao: isLeito ? widget.dadosLeitoPaciente['id_internacao'] : null,
+      idSala: !isLeito ? widget.dadosLeitoPaciente['id_sala'] : null,
+      idLeito: isLeito ? widget.dadosLeitoPaciente['id_leito'] : null,
+    );
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Processo concluído com sucesso!")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Alta concluída com sucesso!")));
     }
+  }
+
+  void _confirmarAlta(bool isLeito) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirmar Alta/Liberação"),
+        content: const Text("Deseja finalizar o atendimento e gerar faturamento?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar")),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _processarFinalizacao(isLeito);
+            },
+            child: const Text("Confirmar"),
+          ),
+        ],
+      )
+    );
   }
 }

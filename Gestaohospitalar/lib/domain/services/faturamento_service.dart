@@ -1,13 +1,11 @@
-// import 'package:flutter/material.dart';
 // import 'package:sqflite/sqflite.dart';
 // import '../entities/faturamento.dart';
 // import '../repository/entitie_repository.dart';
 // import '../../data/repositories/generic_repository_impl.dart';
-// import '../../data/resources/database_provider.dart';
 
-// class FaturamentoService extends ChangeNotifier {
-//   late final EntitieRepository<Faturamento> _repository;
+// class FaturamentoService {
 //   final Database db;
+//   late final EntitieRepository<Faturamento> _repository;
 
 //   FaturamentoService(this.db) {
 //     _repository = GenericRepositoryImpl<Faturamento>(
@@ -18,112 +16,214 @@
 //     );
 //   }
 
-//   Future<List<Faturamento>> listarFaturamentos() async {
-//     return await _repository.findAll();
-//   }
+//   /// 1. Apenas faz os cálculos e retorna o mapa com os valores
+//   Future<Map<String, dynamic>> calcularConta(int idProntuario, int? idInternacao) async {
+//     // 1. Honorários Médicos
+//     final med = await db.rawQuery('''
+//       SELECT m.honorario FROM prontuario pr 
+//       JOIN medico m ON pr.id_medico = m.id_medico 
+//       WHERE pr.id_prontuario = ?''', [idProntuario]);
+//     double valorHonorarios = (med.isNotEmpty) ? (med.first['honorario'] as num).toDouble() : 0.0;
 
-//   Future<void> salvarFaturamento(Faturamento f) async {
-//     if (f.id == null) {
-//       await _repository.create(f);
-//     } else {
-//       await _repository.update(f);
+//     // 2. Exames
+//     final ex = await db.rawQuery('''
+//       SELECT SUM(e.valor) as total FROM solicitacao_exame se 
+//       JOIN exame e ON se.id_exame = e.id_exame 
+//       WHERE se.id_prontuario = ?''', [idProntuario]);
+//     double valorExames = (ex.first['total'] as num? ?? 0).toDouble();
+
+//     // 3. Medicamentos/Consumo
+//     double valorConsumo = 0;
+//     if (idInternacao != null) {
+//       final cons = await db.rawQuery('''
+//         SELECT SUM(ci.quantidade * a.valor_unitario) as total 
+//         FROM consumo_item ci 
+//         JOIN almoxarifado a ON ci.id_almoxarifado = a.id_almoxarifado 
+//         WHERE ci.id_internacao = ?''', [idInternacao]);
+//       valorConsumo = (cons.first['total'] as num? ?? 0).toDouble();
 //     }
-//     notifyListeners();
+
+//     // 4. Busca desconto do convênio
+//     final conv = await db.rawQuery('''
+//       SELECT c.percentual_cobertura FROM paciente_convenio pc 
+//       JOIN convenio c ON pc.id_convenio = c.id_convenio 
+//       JOIN prontuario pr ON pr.id_paciente = pc.id_paciente
+//       WHERE pr.id_prontuario = ? AND pc.ativo = 1''', [idProntuario]);
+    
+//     double percentual = (conv.isNotEmpty) ? (conv.first['percentual_cobertura'] as num).toDouble() : 0.0;
+//     double totalBruto = valorHonorarios + valorExames + valorConsumo;
+//     double valorAbatido = totalBruto * (percentual / 100);
+
+//     return {
+//       'honorarios': valorHonorarios,
+//       'exames': valorExames,
+//       'consumo': valorConsumo,
+//       'total_bruto': totalBruto,
+//       'total_a_pagar': totalBruto - valorAbatido
+//     };
 //   }
 
-//   // Adicione este método para buscar com o JOIN do nome do paciente
+//   /// 2. Chama o cálculo e SALVA no banco de dados
+//   Future<void> gerarContaFinal(int idProntuario, int? idInternacao) async {
+//     try {
+//       print("Iniciando faturamento para Prontuário: $idProntuario");
+      
+//       final calc = await calcularConta(idProntuario, idInternacao);
+
+//       Map<String, dynamic> dados = {
+//         'id_prontuario': idProntuario,
+//         'id_internacao': idInternacao,
+//         'valor_medicamentos': calc['consumo'],
+//         'valor_exames': calc['exames'],
+//         'valor_internacao': (idInternacao != null ? 1500.0 : 0.0), // Ajuste sua lógica de diária aqui
+//         'valor_honorarios': calc['honorarios'],
+//         'valor_consumo': calc['consumo'],
+//         'valor_total': calc['total_a_pagar'],
+//         'status_pagamento': 'PENDENTE'
+//       };
+
+//       int result = await db.insert('faturamento', dados);
+//       print("Faturamento salvo com sucesso, ID: $result");
+//     } catch (e) {
+//       print("ERRO AO FATURAR: $e");
+//       rethrow;
+//     }
+//   }
+
+//   // 3. Listagem para a tela de faturamento
 //   Future<List<Map<String, dynamic>>> listarFaturamentosComPaciente() async {
-//     final db = await DatabaseProvider.instance.database;
-//     return await db.rawQuery('''
-//     SELECT f.*, p.nome as nome_paciente
-//     FROM faturamento f
-//     JOIN paciente p ON f.id_paciente = p.id_paciente
-//     ORDER BY f.data_fechamento DESC
-//   ''');
+//     final results = await db.rawQuery('''
+//       SELECT f.*, p.nome as nome_paciente, p.cpf
+//       FROM faturamento f
+//       LEFT JOIN prontuario pr ON f.id_prontuario = pr.id_prontuario
+//       LEFT JOIN paciente p ON pr.id_paciente = p.id_paciente
+//       ORDER BY f.data_fechamento DESC
+//     ''');
+//     return results;
 //   }
 
-//   Future<void> gerarContaFinal(int idProntuario, bool isLeito) async {
-//   final db = await DatabaseProvider.instance.database;
-  
-//   // 1. Soma Medicamentos (Exemplo de query)
-//     final meds = await db.rawQuery('SELECT SUM(total) as val FROM consumo_item WHERE id_prontuario = ?', [idProntuario]);
-//     double valMeds = (meds.first['val'] as num? ?? 0).toDouble();
-
-//     // 2. Soma Exames
-//     final exames = await db.rawQuery('SELECT SUM(valor) as val FROM solicitacao_exame WHERE id_prontuario = ?', [idProntuario]);
-//     double valExames = (exames.first['val'] as num? ?? 0).toDouble();
-
-//     // 3. Soma Honorários (Exemplo fixo ou baseado em carga horária/medico)
-//     double valHonorarios = 300.0;
-
-//     // 4. Salva no Faturamento
-//     await db.insert('faturamento', {
-//       'id_prontuario': idProntuario,
-//       'valor_medicamentos': valMeds,
-//       'valor_exames': valExames,
-//       'valor_honorarios': valHonorarios,
-//       'valor_total': (valMeds + valExames + valHonorarios),
-//       'status_pagamento': 'PENDENTE'
+//   // 4. Marcar como pago e arquivar
+//   Future<void> marcarComoPago(int idFaturamento, int idProntuario) async {
+//     await db.transaction((txn) async {
+//       await txn.update('faturamento', {'status_pagamento': 'PAGO'},
+//           where: 'id_faturamento = ?', whereArgs: [idFaturamento]);
+      
+//       await txn.update('prontuario', {'status_prontuario': 'ARQUIVADO'},
+//           where: 'id_prontuario = ?', whereArgs: [idProntuario]);
 //     });
 //   }
-
 // }
-
 import 'package:sqflite/sqflite.dart';
-
+import '../entities/faturamento.dart';
+import '../repository/entitie_repository.dart';
+import '../../data/repositories/generic_repository_impl.dart';
 
 class FaturamentoService {
   final Database db;
-  FaturamentoService(this.db);
+  late final EntitieRepository<Faturamento> _repository;
 
-  // Calcula tudo dinamicamente e retorna um resumo para o PDF/UI
-  Future<Map<String, dynamic>> calcularConta(int idProntuario, int idInternacao) async {
-    // 1. Honorários Médicos
-    final med = await db.rawQuery('''
-      SELECT m.honorario FROM prontuario pr
-      JOIN medico m ON pr.id_medico = m.id_medico
-      WHERE pr.id_prontuario = ?''', [idProntuario]);
-    double valorHonorarios = (med.isNotEmpty) ? (med.first['honorario'] as num).toDouble() : 0.0;
+  FaturamentoService(this.db) {
+    _repository = GenericRepositoryImpl<Faturamento>(
+      db: db,
+      tableName: 'faturamento',
+      fromMap: (map) => Faturamento.fromMap(map),
+      toMap: (f) => f.toMap(),
+    );
+  }
 
-    // 2. Exames
-    final ex = await db.rawQuery('''
-      SELECT SUM(e.valor) as total FROM solicitacao_exame se
-      JOIN exame e ON se.id_exame = e.id_exame
-      WHERE se.id_prontuario = ?''', [idProntuario]);
-    double valorExames = (ex.first['total'] as num? ?? 0).toDouble();
+  /// Método Único: Processa Alta, Calcula Valores e Salva tudo de uma vez
+  Future<void> processarAltaEGerarFaturamento({
+    required int idProntuario,
+    required int? idInternacao,
+    required int? idSala,
+    required int? idLeito,
+  }) async {
+    try {
+      print("Iniciando processamento de alta para Prontuário: $idProntuario");
 
-    // 3. Medicamentos/Consumo (da tabela consumo_item)
-    double valorConsumo = 0;
-    if (idInternacao != null) {
-      final cons = await db.rawQuery('''
-        SELECT SUM(ci.quantidade * a.valor_unitario) as total
-        FROM consumo_item ci
-        JOIN almoxarifado a ON ci.id_almoxarifado = a.id_almoxarifado
-        WHERE ci.id_internacao = ?''', [idInternacao]);
-      valorConsumo = (cons.first['total'] as num? ?? 0).toDouble();
+      await db.transaction((txn) async {
+        // 1. CÁLCULOS
+        // Honorários
+        final med = await txn.rawQuery('SELECT m.honorario FROM prontuario pr JOIN medico m ON pr.id_medico = m.id_medico WHERE pr.id_prontuario = ?', [idProntuario]);
+        double valorHonorarios = (med.isNotEmpty) ? (med.first['honorario'] as num).toDouble() : 0.0;
+
+        // Exames
+        final ex = await txn.rawQuery('SELECT SUM(e.valor) as total FROM solicitacao_exame se JOIN exame e ON se.id_exame = e.id_exame WHERE se.id_prontuario = ?', [idProntuario]);
+        double valorExames = (ex.first['total'] as num? ?? 0).toDouble();
+
+        // Medicamentos/Consumo
+        double valorConsumo = 0;
+        if (idInternacao != null) {
+          final cons = await txn.rawQuery('SELECT SUM(ci.quantidade * a.valor_unitario) as total FROM consumo_item ci JOIN almoxarifado a ON ci.id_almoxarifado = a.id_almoxarifado WHERE ci.id_internacao = ?', [idInternacao]);
+          valorConsumo = (cons.first['total'] as num? ?? 0).toDouble();
+        }
+
+        double totalBruto = valorHonorarios + valorExames + valorConsumo;
+        print("Cálculos: Honorários: $valorHonorarios, Exames: $valorExames, Consumo: $valorConsumo, Total: $totalBruto");
+
+        // 2. INSERT NO FATURAMENTO
+        int idFaturamento = await txn.insert('faturamento', {
+          'id_prontuario': idProntuario,
+          'id_internacao': idInternacao,
+          'valor_medicamentos': valorConsumo,
+          'valor_exames': valorExames,
+          'valor_honorarios': valorHonorarios,
+          'valor_consumo': valorConsumo,
+          'valor_total': totalBruto,
+          'status_pagamento': 'PENDENTE',
+          'data_fechamento': DateTime.now().toIso8601String()
+        });
+        print("Faturamento inserido com ID: $idFaturamento");
+
+        // 3. ARQUIVAR PRONTUÁRIO
+        await txn.update('prontuario', {'status_prontuario': 'ARQUIVADO'}, where: 'id_prontuario = ?', whereArgs: [idProntuario]);
+        print("Prontuário $idProntuario arquivado.");
+
+        // 4. LIBERAR RECURSO (SALA OU LEITO)
+        if (idSala != null) {
+          await txn.update('sala', {'status': 'LIVRE'}, where: 'id_sala = ?', whereArgs: [idSala]);
+          print("Sala $idSala liberada.");
+        }
+        if (idLeito != null) {
+          await txn.update('leito', {'situacao': 'HIGIENIZACAO'}, where: 'id_leito = ?', whereArgs: [idLeito]);
+          await txn.update('internacao', {'status_internacao': 'ALTA'}, where: 'id_internacao = ?', whereArgs: [idInternacao]);
+          print("Leito $idLeito liberado e Internação marcada como ALTA.");
+        }
+      });
+      print("Transação de alta finalizada com sucesso.");
+    } catch (e) {
+      print("ERRO CRÍTICO NA TRANSAÇÃO DE ALTA: $e");
+      rethrow; // Isso é importante para capturar na tela
     }
+  }
 
-    // 4. Busca o desconto do convênio do paciente
-    final conv = await db.rawQuery('''
-      SELECT c.percentual_cobertura FROM paciente_convenio pc
-      JOIN convenio c ON pc.id_convenio = c.id_convenio
-      JOIN prontuario pr ON pr.id_paciente = pc.id_paciente
-      WHERE pr.id_prontuario = ? AND pc.ativo = 1''', [idProntuario]);
-    
-    double percentualCobertura = (conv.isNotEmpty) ? (conv.first['percentual_cobertura'] as num).toDouble() : 0.0;
-    
-    double totalBruto = valorHonorarios + valorExames + valorConsumo;
-    double valorAbatido = totalBruto * (percentualCobertura / 100);
-    double totalAPagar = totalBruto - valorAbatido;
+  Future<List<Map<String, dynamic>>> listarFaturamentosComPaciente() async {
+    return await db.rawQuery('''
+      SELECT f.*, p.nome as nome_paciente, p.cpf
+      FROM faturamento f
+      LEFT JOIN prontuario pr ON f.id_prontuario = pr.id_prontuario
+      LEFT JOIN paciente p ON pr.id_paciente = p.id_paciente
+      ORDER BY f.data_fechamento DESC
+    ''');
+  }
 
-    return {
-      'honorarios': valorHonorarios,
-      'exames': valorExames,
-      'consumo': valorConsumo,
-      'total_bruto': totalBruto,
-      'desconto_plano': valorAbatido,
-      'total_a_pagar': totalAPagar,
-      'percentual': percentualCobertura
-    };
+  Future<void> marcarComoPago(int idFaturamento, int idProntuario) async {
+    await db.transaction((txn) async {
+      // 1. Atualiza status no faturamento
+      await txn.update(
+        'faturamento', 
+        {'status_pagamento': 'PAGO'}, 
+        where: 'id_faturamento = ?', 
+        whereArgs: [idFaturamento]
+      );
+      
+      // 2. Arquiva o prontuário
+      await txn.update(
+        'prontuario', 
+        {'status_prontuario': 'ARQUIVADO'}, 
+        where: 'id_prontuario = ?', 
+        whereArgs: [idProntuario]
+      );
+    });
   }
 }
