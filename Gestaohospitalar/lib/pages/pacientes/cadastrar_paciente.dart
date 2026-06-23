@@ -67,7 +67,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
       // 🟢 Substitua a linha do sexo por este bloco seguro:
       if (p.sexo != null && p.sexo!.isNotEmpty) {
         String s = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
-        if (['Masculino', 'Feminino', 'Outro'].contains(s)) {
+        if (['MASCULINO', 'FEMININO', 'OUTRO'].contains(s)) {
           _sexoSelecionado = s;
         }
       }
@@ -187,7 +187,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                       children: [
                         Expanded(child: TextFormField(controller: _nascimentoCtrl, readOnly: true, onTap: () => _selecionarData(context), decoration: const InputDecoration(labelText: "Nascimento *", prefixIcon: Icon(Icons.calendar_today), border: OutlineInputBorder()), validator: (v) => v == null || v.isEmpty ? "Selecione" : null)),
                         const SizedBox(width: 16),
-                        Expanded(child: DropdownButtonFormField<String>(initialValue: _sexoSelecionado, decoration: const InputDecoration(labelText: "Sexo Biológico", border: OutlineInputBorder()), items: const ['Masculino', 'Feminino', 'Outro'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(), onChanged: (v) => setState(() => _sexoSelecionado = v!))),
+                        Expanded(child: DropdownButtonFormField<String>(initialValue: _sexoSelecionado, decoration: const InputDecoration(labelText: "Sexo Biológico", border: OutlineInputBorder()), items: const ['MASCULINO', 'FEMININO', 'OUTRO'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(), onChanged: (v) => setState(() => _sexoSelecionado = v!))),
                       ],
                     ),
                     const SizedBox(height: 16),

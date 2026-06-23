@@ -2,11 +2,13 @@ import 'entitie.dart';
 
 class Sala extends Entitie {
   String? nomeSala;
+  String? tipo;
   String status;
 
   Sala({
     super.id,
     this.nomeSala,
+    this.tipo,
     this.status = 'LIVRE', // Valor padrão
   });
 
@@ -15,6 +17,7 @@ class Sala extends Entitie {
     return {
       if (id != null) 'id_sala': id,
       'nome_sala': nomeSala,
+      'tipo': tipo,
       'status': status,
     };
   }
@@ -24,6 +27,7 @@ class Sala extends Entitie {
     return Sala(
       id: map['id_sala'],
       nomeSala: map['nome_sala'],
+      tipo: map['tipo'] ?? 'Geral',
       status: map['status'] ?? 'LIVRE',
     );
   }

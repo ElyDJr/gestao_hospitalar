@@ -8,9 +8,7 @@ import '../../domain/services/internacao_service.dart';
 import '../../domain/services/paciente_service.dart';
 import '../../data/resources/database_provider.dart';
 import '../../domain/services/ala_service.dart';
-import '../alas/cadastrar_ala.dart'; // Para o botão de atalho +
-import '../../domain/entities/ala.dart';
-import '../alas/listar_ala.dart';
+// Para o botão de atalho +
 
 class RegistrarInternacao extends StatefulWidget {
   final Paciente paciente;

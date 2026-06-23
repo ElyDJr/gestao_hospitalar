@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/ala.dart';
 import '../../domain/services/leito_service.dart';
 import '../../domain/services/ala_service.dart';
-import 'cadastrar_leito.dart'; // 🟢 ADICIONADO: Importação da tela
+import 'cadastrar_leito.dart'; // 🟢 Importação da tela
 
+// 🟢 Classe principal corrigida (havia sido apagada acidentalmente)
 class MapaLeitos extends StatefulWidget {
   final LeitoService leitoService;
   final AlaService alaService;
@@ -16,9 +17,12 @@ class MapaLeitos extends StatefulWidget {
 
 class _MapaLeitosState extends State<MapaLeitos> {
   List<Ala> _alas = [];
-  // Agora usamos Map<String, dynamic> para receber TODOS os dados da query buscarMapaLeitos
   List<Map<String, dynamic>> _leitos = []; 
   bool _carregando = true;
+
+  // 🟢 Controladores para a barra de pesquisa
+  final TextEditingController _buscaCtrl = TextEditingController();
+  String _termoBusca = '';
 
   @override
   void initState() {
