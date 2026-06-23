@@ -56,6 +56,8 @@ import '../domain/services/convenio_service.dart';
 import '../domain/services/faturamento_service.dart';
 import '../pages/faturamento/listar_faturamento.dart';
 
+import 'auditoria/listar_auditoria.dart'; // Ajuste o caminho se necessário
+
 class Dashboard extends StatefulWidget {
   final Database database;
 
@@ -254,8 +256,8 @@ class _DashboardState extends State<Dashboard> {
                   label: Text("Faturamento")),
               const NavigationRailDestination(
                   icon: Tooltip(
-                      message: 'Atendimento', child: Icon(Icons.healing)),
-                  label: Text("Atendimento")),
+                      message: 'Auditoria e Logs', child: Icon(Icons.healing)),
+                  label: Text("Auditoria e Logs")),
               const NavigationRailDestination(
                   icon: Tooltip(
                       message: 'Convênios', child: Icon(Icons.business)),
@@ -292,7 +294,7 @@ class _DashboardState extends State<Dashboard> {
       case 6:
         return ListarFaturamento(service: _faturamentoService);
       case 7:
-        return TelaAtendimentoMedico(database: widget.database);
+        return const ListarAuditoriaPage();
       case 8:
         return ListarConvenio(service: _convenioService);
       case 9:
