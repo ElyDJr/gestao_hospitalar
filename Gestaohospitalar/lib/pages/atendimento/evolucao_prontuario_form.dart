@@ -4,7 +4,9 @@ import '../../domain/services/exame_service.dart';
 // Import da nova tela de prescrição
 import 'prescricao_prontuario_form.dart';
 // Adicionado para podermos salvar a alteração dos sinais vitais na Triagem
-import '../../data/resources/database_provider.dart'; 
+import '../../data/resources/database_provider.dart';
+
+import '../../domain/services/faturamento_service.dart';
 
 class ProntuarioEvolucaoForm extends StatefulWidget {
   final Map<String, dynamic> dadosLeitoPaciente;
@@ -27,9 +29,9 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
   final LeitoService _leitoService = LeitoService();
   final ExameService _exameService = ExameService();
 
-  int _abaSelecionada = 0; 
+  int _abaSelecionada = 0;
   int? _idExameSelecionado;
-  
+
   List<Map<String, dynamic>> _listaExamesSolicitados = [];
   List<Map<String, dynamic>> _examesDisponiveisNoHospital = [];
   bool _carregandoExames = true;
@@ -43,22 +45,26 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
     _evolucaoCtrl.text = d['evolucao'] ?? '';
 
     // PREENCHE OS SINAIS VITAIS BUSCANDO DE FORMA SEGURA DA TRIAGEM
-    _pressaoCtrl.text = d['pressao_arterial']?.toString() ?? d['pressao']?.toString() ?? '';
+    _pressaoCtrl.text =
+        d['pressao_arterial']?.toString() ?? d['pressao']?.toString() ?? '';
     _tempCtrl.text = d['temperatura']?.toString() ?? '';
     _satCtrl.text = d['saturacao']?.toString() ?? '';
     _fcCtrl.text = d['frequencia_cardiaca']?.toString() ?? '';
-    _queixaCtrl.text = d['queixa_principal']?.toString() ?? d['queixa']?.toString() ?? '';
+    _queixaCtrl.text =
+        d['queixa_principal']?.toString() ?? d['queixa']?.toString() ?? '';
 
     _carregarExamesDoBanco();
   }
 
   Future<void> _carregarExamesDoBanco() async {
     try {
-      final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ?? widget.dadosLeitoPaciente['id'];
-      
-      final exames = await _leitoService.listarExamesCatalogo(); 
-      final historico = await _exameService.buscarExamesPorProntuario(idProntuario);
-      
+      final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ??
+          widget.dadosLeitoPaciente['id'];
+
+      final exames = await _leitoService.listarExamesCatalogo();
+      final historico =
+          await _exameService.buscarExamesPorProntuario(idProntuario);
+
       if (mounted) {
         setState(() {
           _examesDisponiveisNoHospital = exames;
@@ -70,7 +76,9 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
       if (mounted) {
         setState(() => _carregandoExames = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro ao carregar exames: $e"), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text("Erro ao carregar exames: $e"),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -90,22 +98,35 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
   @override
   Widget build(BuildContext context) {
     final d = widget.dadosLeitoPaciente;
+    final bool isLeito = d['numero_leito'] != null;
+
+    String localAtendimento = isLeito
+      ? "Leito ${d['numero_leito']} - Prontuário Médico"
+      : "Sala ${d['nome_sala'] ?? ''} - Prontuário Médico";
 
     // Lógica inteligente para o título: Se tem leito, mostra o Leito. Senão, mostra a Sala.
-    String localAtendimento = "";
-    if (d['numero_leito'] != null) {
-      localAtendimento = "Leito ${d['numero_leito']} - Prontuário Médico";
-    } else if (d['nome_sala'] != null) {
-      localAtendimento = "Sala ${d['nome_sala']} - Prontuário Médico";
-    } else {
-      localAtendimento = "Atendimento - Prontuário Médico";
-    }
+    // String localAtendimento = "";
+    // if (d['numero_leito'] != null) {
+    //   localAtendimento = "Leito ${d['numero_leito']} - Prontuário Médico";
+    // } else if (d['nome_sala'] != null) {
+    //   localAtendimento = "Sala ${d['nome_sala']} - Prontuário Médico";
+    // } else {
+    //   localAtendimento = "Atendimento - Prontuário Médico";
+    // }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(localAtendimento),
-        backgroundColor: Colors.teal.shade700, // Ajustei a cor para Teal para ficar padronizado, mas pode voltar para Red se preferir
+        backgroundColor: Colors.teal
+            .shade700, // Ajustei a cor para Teal para ficar padronizado, mas pode voltar para Red se preferir
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app, color: Colors.white),
+            tooltip: "Dar Alta/Liberar",
+            onPressed: () => _confirmarAlta(isLeito),
+          ),
+        ],
         elevation: 2,
       ),
       body: Row(
@@ -119,9 +140,11 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
             },
             labelType: NavigationRailLabelType.all,
             backgroundColor: Colors.grey.shade100,
-            selectedIconTheme: IconThemeData(color: Colors.teal.shade700, size: 28),
+            selectedIconTheme:
+                IconThemeData(color: Colors.teal.shade700, size: 28),
             unselectedIconTheme: const IconThemeData(color: Colors.grey),
-            selectedLabelTextStyle: TextStyle(color: Colors.teal.shade700, fontWeight: FontWeight.bold),
+            selectedLabelTextStyle: TextStyle(
+                color: Colors.teal.shade700, fontWeight: FontWeight.bold),
             destinations: const [
               NavigationRailDestination(
                 icon: Icon(Icons.description_outlined),
@@ -150,12 +173,15 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                   // CARD 1: Informações Pessoais do Paciente
                   Card(
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     child: ListTile(
-                      leading: const Icon(Icons.person, size: 40, color: Colors.blue),
+                      leading: const Icon(Icons.person,
+                          size: 40, color: Colors.blue),
                       title: Text(
                         "Paciente: ${d['nome_paciente'] ?? d['nome'] ?? 'Não informado'}",
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
                         "CPF: ${d['cpf'] ?? 'N/A'}\nData de Admissão: ${d['data_abertura']?.split('T')[0] ?? 'N/A'}",
@@ -163,11 +189,12 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // CARD 2: Informações Clínicas Fixas
                   Card(
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -175,24 +202,31 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                         children: [
                           const Text(
                             "Informações Clínicas Importantes",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const Divider(),
-                          Text("Alergias: ${d['alergias'] ?? 'Nenhuma relatada'}", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          Text(
+                              "Alergias: ${d['alergias'] ?? 'Nenhuma relatada'}",
+                              style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
-                          Text("Risco de Evasão: ${d['risco_evasao'] ?? 'N/A'} | Isolamento: ${d['isolamento'] ?? 'N/A'}"),
+                          Text(
+                              "Risco de Evasão: ${d['risco_evasao'] ?? 'N/A'} | Isolamento: ${d['isolamento'] ?? 'N/A'}"),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // EXIBIÇÃO DINÂMICA DAS ABAS
-                  _abaSelecionada == 0 
-                      ? _buildSecaoEvolucao() 
+                  _abaSelecionada == 0
+                      ? _buildSecaoEvolucao()
                       : _abaSelecionada == 1
                           ? _buildSecaoExames()
-                          : PrescricaoProntuarioForm(dadosLeitoPaciente: widget.dadosLeitoPaciente),
+                          : PrescricaoProntuarioForm(
+                              dadosLeitoPaciente: widget.dadosLeitoPaciente),
                 ],
               ),
             ),
@@ -210,35 +244,71 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
         // Sinais vitais editáveis
         const Text(
           "Sinais Vitais e Sintomas (Editáveis)",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 8),
-        const Text("Dados aferidos na triagem. Altere-os se houve nova medição no atendimento.", style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+            "Dados aferidos na triagem. Altere-os se houve nova medição no atendimento.",
+            style: TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: TextFormField(controller: _pressaoCtrl, decoration: const InputDecoration(labelText: "Pressão (PA)", border: OutlineInputBorder(), fillColor: Colors.white, filled: true))),
+            Expanded(
+                child: TextFormField(
+                    controller: _pressaoCtrl,
+                    decoration: const InputDecoration(
+                        labelText: "Pressão (PA)",
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true))),
             const SizedBox(width: 10),
-            Expanded(child: TextFormField(controller: _tempCtrl, decoration: const InputDecoration(labelText: "Temp (°C)", border: OutlineInputBorder(), fillColor: Colors.white, filled: true))),
+            Expanded(
+                child: TextFormField(
+                    controller: _tempCtrl,
+                    decoration: const InputDecoration(
+                        labelText: "Temp (°C)",
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true))),
             const SizedBox(width: 10),
-            Expanded(child: TextFormField(controller: _satCtrl, decoration: const InputDecoration(labelText: "SpO2 (%)", border: OutlineInputBorder(), fillColor: Colors.white, filled: true))),
+            Expanded(
+                child: TextFormField(
+                    controller: _satCtrl,
+                    decoration: const InputDecoration(
+                        labelText: "SpO2 (%)",
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true))),
             const SizedBox(width: 10),
-            Expanded(child: TextFormField(controller: _fcCtrl, decoration: const InputDecoration(labelText: "FC (bpm)", border: OutlineInputBorder(), fillColor: Colors.white, filled: true))),
+            Expanded(
+                child: TextFormField(
+                    controller: _fcCtrl,
+                    decoration: const InputDecoration(
+                        labelText: "FC (bpm)",
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true))),
           ],
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _queixaCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(labelText: "Queixa Principal", border: OutlineInputBorder(), fillColor: Colors.white, filled: true),
+          decoration: const InputDecoration(
+              labelText: "Queixa Principal",
+              border: OutlineInputBorder(),
+              fillColor: Colors.white,
+              filled: true),
         ),
-        
+
         const SizedBox(height: 24),
 
         // Campo de texto principal da Evolução
         const Text(
           "Evolução Clínica e Conduta",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 10),
         TextFormField(
@@ -252,17 +322,19 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
           ),
         ),
         const SizedBox(height: 24),
-        
+
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 55),
             backgroundColor: Colors.teal,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           onPressed: _salvarEvolucao,
           child: const Text(
             "Salvar Evolução",
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
           ),
         )
       ],
@@ -276,7 +348,8 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
       children: [
         const Text(
           "Solicitar Novo Exame",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 10),
         Row(
@@ -289,27 +362,29 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                         child: CircularProgressIndicator(),
                       ),
                     )
-                  : DropdownButtonFormField<int>( 
+                  : DropdownButtonFormField<int>(
                       initialValue: _idExameSelecionado,
-                      hint: const Text("Selecione um exame cadastrado no hospital..."),
+                      hint: const Text(
+                          "Selecione um exame cadastrado no hospital..."),
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         fillColor: Colors.white,
                         filled: true,
                       ),
-                      items: _examesDisponiveisNoHospital.isEmpty 
-                        ? [
-                            const DropdownMenuItem<int>(
-                              value: null, 
-                              child: Text("Nenhum exame encontrado no banco")
-                            )
-                          ]
-                        : _examesDisponiveisNoHospital.map((exame) {
-                            return DropdownMenuItem<int>( 
-                              value: exame['id_exame'] as int,
-                              child: Text(exame['nome'] ?? 'Sem Nome'),
-                            );
-                          }).toList(),
+                      items: _examesDisponiveisNoHospital.isEmpty
+                          ? [
+                              const DropdownMenuItem<int>(
+                                  value: null,
+                                  child:
+                                      Text("Nenhum exame encontrado no banco"))
+                            ]
+                          : _examesDisponiveisNoHospital.map((exame) {
+                              return DropdownMenuItem<int>(
+                                value: exame['id_exame'] as int,
+                                child: Text(exame['nome'] ?? 'Sem Nome'),
+                              );
+                            }).toList(),
                       onChanged: (novoValor) {
                         setState(() {
                           _idExameSelecionado = novoValor;
@@ -322,13 +397,17 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(150, 55),
                 backgroundColor: Colors.blue.shade700,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () async {
                 if (_idExameSelecionado != null) {
                   try {
-                    final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ?? widget.dadosLeitoPaciente['id'];
-                    final idMedico = widget.dadosLeitoPaciente['id_medico'] ?? 1;
+                    final idProntuario =
+                        widget.dadosLeitoPaciente['id_prontuario'] ??
+                            widget.dadosLeitoPaciente['id'];
+                    final idMedico =
+                        widget.dadosLeitoPaciente['id_medico'] ?? 1;
 
                     await _exameService.solicitarNovoExame(
                       idProntuario: idProntuario,
@@ -336,55 +415,60 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
                       idMedico: idMedico,
                     );
 
-                    final historicoAtualizado = await _exameService.buscarExamesPorProntuario(idProntuario);
+                    final historicoAtualizado = await _exameService
+                        .buscarExamesPorProntuario(idProntuario);
 
                     setState(() {
                       _listaExamesSolicitados = historicoAtualizado;
-                      _idExameSelecionado = null; 
+                      _idExameSelecionado = null;
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Exame solicitado e salvo no banco com sucesso!"),
+                        content: Text(
+                            "Exame solicitado e salvo no banco com sucesso!"),
                         backgroundColor: Colors.green,
                       ),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Erro ao salvar no banco: $e"), backgroundColor: Colors.red),
+                      SnackBar(
+                          content: Text("Erro ao salvar no banco: $e"),
+                          backgroundColor: Colors.red),
                     );
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text("Selecione um exame da lista antes de solicitar."),
+                      content: Text(
+                          "Selecione um exame da lista antes de solicitar."),
                       backgroundColor: Colors.orange,
                     ),
                   );
                 }
               },
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text("Solicitar", style: TextStyle(color: Colors.white)),
+              label: const Text("Solicitar",
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
         const SizedBox(height: 30),
         const Text(
           "Histórico de Exames Solicitados",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const Divider(),
         const SizedBox(height: 10),
-        
         if (_listaExamesSolicitados.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              "Nenhum exame solicitado para este paciente nesta consulta.", 
+              "Nenhum exame solicitado para este paciente nesta consulta.",
               style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
             ),
           ),
-
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -395,61 +479,67 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
               child: ListTile(
-                leading: Icon(
-                  Icons.biotech, 
-                  color: concluido ? Colors.green : Colors.orange
-                ),
-                title: Text(examen['nome'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                leading: Icon(Icons.biotech,
+                    color: concluido ? Colors.green : Colors.orange),
+                title: Text(examen['nome'],
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: Row(
                   children: [
                     const Text("Status: "),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: concluido ? Colors.green.shade100 : Colors.orange.shade100,
-                        borderRadius: BorderRadius.circular(4)
-                      ),
+                          color: concluido
+                              ? Colors.green.shade100
+                              : Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(4)),
                       child: Text(
                         examen['status'],
                         style: TextStyle(
-                          color: concluido ? Colors.green.shade900 : Colors.orange.shade900,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold
-                        ),
+                            color: concluido
+                                ? Colors.green.shade900
+                                : Colors.orange.shade900,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                trailing: !concluido 
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              examen['status'] = 'CONCLUIDO';
-                            });
-                          },
-                          child: const Text("Liberar Laudo", style: TextStyle(color: Colors.grey)),
-                        ),
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
-                        ),
-                      ],
-                    )
-                  : TextButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Abrindo laudo de: ${examen['nome']}"))
-                        );
-                      },
-                      icon: const Icon(Icons.visibility, color: Colors.blue),
-                      label: const Text("Ver Resultado", style: TextStyle(color: Colors.blue)),
-                    ),
+                trailing: !concluido
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                examen['status'] = 'CONCLUIDO';
+                              });
+                            },
+                            child: const Text("Liberar Laudo",
+                                style: TextStyle(color: Colors.grey)),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.orange),
+                          ),
+                        ],
+                      )
+                    : TextButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content:
+                                  Text("Abrindo laudo de: ${examen['nome']}")));
+                        },
+                        icon: const Icon(Icons.visibility, color: Colors.blue),
+                        label: const Text("Ver Resultado",
+                            style: TextStyle(color: Colors.blue)),
+                      ),
               ),
             );
           },
@@ -461,8 +551,9 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
   // MÉTODO PARA SALVAR EVOLUÇÃO E ATUALIZAR SINAIS VITAIS
   void _salvarEvolucao() async {
     try {
-      final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ?? widget.dadosLeitoPaciente['id'];
-      
+      final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ??
+          widget.dadosLeitoPaciente['id'];
+
       // 1. Atualiza o texto da evolução no prontuário
       await _leitoService.atualizarEvolucaoProntuario(
         idProntuario,
@@ -473,13 +564,17 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
       final idTriagem = widget.dadosLeitoPaciente['id_triagem'];
       if (idTriagem != null) {
         final db = await DatabaseProvider.instance.database;
-        await db.update('triagem', {
-          'pressao': _pressaoCtrl.text, 
-          'temperatura': _tempCtrl.text,
-          'saturacao': _satCtrl.text,
-          'frequencia_cardiaca': _fcCtrl.text,
-          'queixa': _queixaCtrl.text, 
-        }, where: 'id_triagem = ?', whereArgs: [idTriagem]);
+        await db.update(
+            'triagem',
+            {
+              'pressao': _pressaoCtrl.text,
+              'temperatura': _tempCtrl.text,
+              'saturacao': _satCtrl.text,
+              'frequencia_cardiaca': _fcCtrl.text,
+              'queixa': _queixaCtrl.text,
+            },
+            where: 'id_triagem = ?',
+            whereArgs: [idTriagem]);
       }
 
       if (mounted) {
@@ -490,6 +585,48 @@ class _ProntuarioEvolucaoFormState extends State<ProntuarioEvolucaoForm> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Erro: $e"), backgroundColor: Colors.red));
+    }
+  }
+
+  void _confirmarAlta(bool isLeito) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: const Text("Confirmar Alta/Liberação"),
+              content: Text(isLeito
+                  ? "O paciente terá alta, o leito irá para higienização e os custos serão calculados."
+                  : "O atendimento será encerrado e a consulta enviada ao faturamento."),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text("Cancelar")),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    // Chama a lógica de cálculo e alta
+                    await _processarFinalizacao(isLeito);
+                  },
+                  child: const Text("Confirmar"),
+                ),
+              ],
+            ));
+  }
+
+  Future<void> _processarFinalizacao(bool isLeito) async {
+    _salvarEvolucao();
+    final idProntuario = widget.dadosLeitoPaciente['id_prontuario'] ?? widget.dadosLeitoPaciente['id'];
+    
+    // O service agora calcula tudo internamente e insere na tabela faturamento
+    await FaturamentoService(await DatabaseProvider.instance.database)
+        .calcularConta(idProntuario, isLeito ? widget.dadosLeitoPaciente['id_internacao'] : null);
+
+    if (isLeito) {
+      await _leitoService.atualizarStatusLeito(widget.dadosLeitoPaciente['id_leito'], 'HIGIENIZACAO');
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Processo concluído com sucesso!")));
     }
   }
 }

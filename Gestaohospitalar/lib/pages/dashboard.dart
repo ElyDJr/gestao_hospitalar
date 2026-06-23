@@ -47,12 +47,14 @@ import 'alas/listar_ala.dart';
 import '../domain/services/sala_service.dart';
 import '../pages/salas/listar_salas.dart';
 
-import '../telas/tela_faturamento.dart';
-import '../telas/tela_atendimento_medico.dart';
+import '../telas/tela_atendimento_medico.dart'; //deixar danimico
 
 import '../domain/services/paciente_service.dart';
 import '../domain/services/medico_service.dart';
 import '../domain/services/convenio_service.dart';
+
+import '../domain/services/faturamento_service.dart';
+import '../pages/faturamento/listar_faturamento.dart';
 
 class Dashboard extends StatefulWidget {
   final Database database;
@@ -73,6 +75,7 @@ class _DashboardState extends State<Dashboard> {
   late ExameService _exameService;
   late AlmoxarifadoService _almoxarifadoService;
   late AlaService _alaService;
+  late FaturamentoService _faturamentoService;
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -97,7 +100,8 @@ class _DashboardState extends State<Dashboard> {
     _almoxarifadoService = AlmoxarifadoService(widget.database);
 
     _alaService = AlaService();
-    //_alaService.carregarAlas();
+
+    _faturamentoService = FaturamentoService(widget.database);
 
     _almoxarifadoService.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -286,7 +290,7 @@ class _DashboardState extends State<Dashboard> {
       case 5:
         return const AgendaMedicaTela();
       case 6:
-        return const TelaFaturamento();
+        return ListarFaturamento(service: _faturamentoService);
       case 7:
         return TelaAtendimentoMedico(database: widget.database);
       case 8:

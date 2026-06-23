@@ -232,7 +232,8 @@ CREATE TABLE solicitacao_exame(
 
 CREATE TABLE faturamento(
     id_faturamento INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_internacao INTEGER NOT NULL,
+    id_prontuario INTEGER NOT NULL,
+    id_internacao INTEGER,
     valor_medicamentos REAL DEFAULT 0,
     valor_exames REAL DEFAULT 0,
     valor_internacao REAL DEFAULT 0,
