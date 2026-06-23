@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../domain/services/almoxarifado_service.dart';
 import '../../../domain/entities/almoxarifado.dart';
-import '../../domain/entities/medicamento.dart';
 
 class CadastrarAlmoxarifado extends StatefulWidget {
   final AlmoxarifadoService service;
@@ -26,7 +25,11 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
   final _principioAtivoCtrl = TextEditingController();
   final _contraindicacoesCtrl = TextEditingController();
   
-  // ALTERAÇÃO 1: Transformado em variável que aceita nulo e inicia sem valor
+  // ADICIONADO: Controladores para Lote e Validade
+  final _loteCtrl = TextEditingController();
+  final _validadeCtrl = TextEditingController();
+  DateTime? _dataValidade;
+  
   String? _categoriaSelecionada; 
   
   @override
@@ -40,8 +43,14 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
       _valorUnitarioCtrl.text = i.valorUnitario.toString();
       _estoqueMinimoCtrl.text = i.estoqueMinimo.toString();
       _categoriaSelecionada = i.categoria;
+      
+      // ADICIONADO: Carregar Lote e Validade se for edição
+      _loteCtrl.text = i.lote ?? '';
+      if (i.validade != null) {
+        _dataValidade = i.validade;
+        _validadeCtrl.text = "${_dataValidade!.day.toString().padLeft(2, '0')}/${_dataValidade!.month.toString().padLeft(2, '0')}/${_dataValidade!.year}";
+      }
 
-      // ADICIONE ISTO: Pede os dados extra se for um medicamento em edição
       if (_categoriaSelecionada == 'MEDICAMENTO') {
         widget.service.carregarDetalhesMedicamento(i).then((_) {
           if (mounted) {
@@ -64,6 +73,9 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
     _estoqueMinimoCtrl.dispose();
     _principioAtivoCtrl.dispose();
     _contraindicacoesCtrl.dispose();
+    // ADICIONADO: Limpeza dos novos controladores
+    _loteCtrl.dispose();
+    _validadeCtrl.dispose();
     super.dispose();
   }
 
@@ -110,14 +122,12 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                     ),
                     const SizedBox(height: 16),
                     
-                    // ALTERAÇÃO 2: Configuração do Dropdown
                     DropdownButtonFormField<String>(
-                      initialValue: _categoriaSelecionada, // Agora começa nulo
-                      hint: const Text("Selecione uma categoria"), // Dica visual para o admin
+                      initialValue: _categoriaSelecionada, 
+                      hint: const Text("Selecione uma categoria"),
                       decoration: const InputDecoration(labelText: "Categoria *", border: OutlineInputBorder()),
                       items: const ['MEDICAMENTO', 'DESCARTAVEL', 'LIMPEZA', 'EPI', 'INSUMO']
                           .map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                      // Obriga o usuário a selecionar algo antes de salvar
                       validator: (v) => v == null || v.isEmpty ? "Selecione a categoria do item" : null,
                       onChanged: (v) {
                         setState(() {
@@ -151,6 +161,7 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                       decoration: const InputDecoration(labelText: "Descrição", border: OutlineInputBorder()),
                     ),
                     const SizedBox(height: 16),
+                    
                     Row(
                       children: [
                         Expanded(
@@ -169,10 +180,9 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             decoration: const InputDecoration(
-                              labelText: "Estoque Mínimo *", // INDICADOR VISUAL DE OBRIGATÓRIO
+                              labelText: "Estoque Mínimo *",
                               border: OutlineInputBorder(),
                             ),
-                            // ADICIONADO VALIDADOR PARA CAMPO OBRIGATÓRIO
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
                                 return "Obrigatório";
@@ -184,6 +194,47 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    
+                    // ADICIONADO: Linha com Lote e Validade
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _loteCtrl,
+                            decoration: const InputDecoration(labelText: "Lote", border: OutlineInputBorder()),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _validadeCtrl,
+                            readOnly: true, // Impede digitação manual para forçar o seletor
+                            decoration: const InputDecoration(
+                              labelText: "Validade", 
+                              border: OutlineInputBorder(),
+                              suffixIcon: Icon(Icons.calendar_today),
+                            ),
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: _dataValidade ?? DateTime.now(),
+                                firstDate: DateTime.now().subtract(const Duration(days: 365 * 10)), // 10 anos no passado (caso cadastre algo retroativo)
+                                lastDate: DateTime.now().add(const Duration(days: 365 * 20)), // 20 anos no futuro
+                              );
+                              
+                              if (pickedDate != null) {
+                                setState(() {
+                                  _dataValidade = pickedDate;
+                                  _validadeCtrl.text = "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
                     TextFormField(
                       controller: _valorUnitarioCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -204,23 +255,27 @@ class _CadastrarAlmoxarifadoState extends State<CadastrarAlmoxarifado> {
                     backgroundColor: isEdicao ? Colors.blue : Colors.teal,
                     foregroundColor: Colors.white,
                   ),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      final novoItem = Almoxarifado(
-                        id: widget.itemEdicao?.id,
-                        nome: _nomeCtrl.text,
-                        categoria: _categoriaSelecionada!, 
-                        descricao: _descricaoCtrl.text,
-                        quantidade: int.tryParse(_quantidadeCtrl.text) ?? 0,
-                        estoqueMinimo: int.parse(_estoqueMinimoCtrl.text), // Como o validador garante que não é nulo/vazio, pode usar int.parse diretamente.
-                        valorUnitario: double.tryParse(_valorUnitarioCtrl.text.replaceAll(',', '.')) ?? 0.0,
-                        // ADICIONE AS DUAS LINHAS ABAIXO:
-                        principioAtivo: _categoriaSelecionada == 'MEDICAMENTO' ? _principioAtivoCtrl.text : null,
-                        contraindicacoes: _categoriaSelecionada == 'MEDICAMENTO' ? _contraindicacoesCtrl.text : null,
-                      );
-                      
-                      await widget.service.salvarItem(novoItem);
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        final novoItem = Almoxarifado(
+                          id: widget.itemEdicao?.id,
+                          nome: _nomeCtrl.text,
+                          categoria: _categoriaSelecionada!, 
+                          descricao: _descricaoCtrl.text,
+                          quantidade: int.tryParse(_quantidadeCtrl.text) ?? 0,
+                          estoqueMinimo: int.parse(_estoqueMinimoCtrl.text), 
+                          valorUnitario: double.tryParse(_valorUnitarioCtrl.text.replaceAll(',', '.')) ?? 0.0,
+                          
+                          // ADICIONADO: Enviando o Lote e Validade para a Entidade
+                          lote: _loteCtrl.text.trim().isEmpty ? null : _loteCtrl.text.trim(),
+                          validade: _dataValidade,
+                          
+                          principioAtivo: _categoriaSelecionada == 'MEDICAMENTO' ? _principioAtivoCtrl.text : null,
+                          contraindicacoes: _categoriaSelecionada == 'MEDICAMENTO' ? _contraindicacoesCtrl.text : null,
+                        );
+                        
+                        await widget.service.salvarItem(novoItem);
                         
                         if (context.mounted) {
                           Navigator.pop(context);
