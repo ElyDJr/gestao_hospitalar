@@ -41,6 +41,52 @@ class _ListarConvenioState extends State<ListarConvenio> {
     );
   }
 
+  Future<void> _excluirConvenio(Convenio convenio) async {
+    final nomeConvenio = convenio.nomeConvenio ?? 'Sem Nome';
+
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmação'),
+        content: Text('Tem certeza que deseja excluir o convênio "$nomeConvenio"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('NÃO'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('SIM'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      try {
+        await widget.service.arquivarConvenio(convenio);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Convênio "$nomeConvenio" excluído com sucesso!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir convênio: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -148,35 +194,9 @@ class _ListarConvenioState extends State<ListarConvenio> {
                               onPressed: () => _abrirFormularioCadastro(convenioParaEditar: c),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.archive_outlined, color: Colors.orange),
-                              tooltip: "Arquivar Convênio",
-                              onPressed: () async {
-                                final confirmar = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text("Arquivar Convênio?"),
-                                    content: Text("O convênio ${c.nomeConvenio} ficará inativo no sistema."),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancelar")),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
-                                        onPressed: () => Navigator.pop(context, true),
-                                        child: const Text("Arquivar"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirmar == true) {
-                                  await widget.service.arquivarConvenio(c);
-                                  
-                                  // ✅ MENSAGEM DE ARQUIVAMENTO AQUI
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('${c.nomeConvenio} foi arquivado!'), backgroundColor: Colors.orange)
-                                    );
-                                  }
-                                }
-                              },
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              tooltip: "Excluir Convênio",
+                              onPressed: () => _excluirConvenio(c),
                             ),
                           ],
                         ),

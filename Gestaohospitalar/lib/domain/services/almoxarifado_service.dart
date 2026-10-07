@@ -1,4 +1,3 @@
-
 // lib/domain/services/almoxarifado_service.dart
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -8,12 +7,11 @@ import '../../data/repositories/generic_repository_impl.dart';
 
 class AlmoxarifadoService extends ChangeNotifier {
   late final EntitieRepository<Almoxarifado> _repository;
-  final Database db; // Guardamos a referência aqui
+  final Database db;
   
   List<Almoxarifado> _itens = [];
   List<Almoxarifado> get itens => _itens;
 
-  // ADICIONE ESTA LINHA:
   bool get temAlertaEstoque => _itens.any((item) => item.quantidade < item.estoqueMinimo);
   
   bool _isLoading = false;
@@ -41,9 +39,9 @@ class AlmoxarifadoService extends ChangeNotifier {
     }
   }
 
-  // NOVA FUNÇÃO: Vai buscar os dados à tabela medicamento quando vamos editar
   Future<void> carregarDetalhesMedicamento(Almoxarifado item) async {
-    if (item.categoria == 'MEDICAMENTO' && item.id != null) {
+    // 🟢 Acesso seguro usando ?.
+    if (item.categoria?.toUpperCase() == 'MEDICAMENTO' && item.id != null) {
       final result = await db.query('medicamento', where: 'id_almoxarifado = ?', whereArgs: [item.id]);
       if (result.isNotEmpty) {
         item.principioAtivo = result.first['principio_ativo'] as String?;
@@ -56,17 +54,15 @@ class AlmoxarifadoService extends ChangeNotifier {
     try {
       int idAlmoxarifado;
 
-      // 1. SALVAR NA TABELA ALMOXARIFADO (Pai)
       if (item.id == null) {
-        // Usamos db.insert para garantir o retorno imediato do ID
         idAlmoxarifado = await db.insert('almoxarifado', item.toMap());
       } else {
         await _repository.update(item);
         idAlmoxarifado = item.id!;
       }
 
-      // 2. SALVAR NA TABELA MEDICAMENTO (Filha)
-      if (item.categoria == 'MEDICAMENTO') {
+      // 🟢 Acesso seguro usando ?.
+      if (item.categoria?.toUpperCase() == 'MEDICAMENTO') {
         final mapMedicamento = {
           'id_almoxarifado': idAlmoxarifado,
           'principio_ativo': item.principioAtivo,
@@ -81,7 +77,6 @@ class AlmoxarifadoService extends ChangeNotifier {
           await db.update('medicamento', mapMedicamento, where: 'id_almoxarifado = ?', whereArgs: [idAlmoxarifado]);
         }
       } else {
-        // Se mudarem a categoria de "Medicamento" para outra, limpa os dados antigos
         await db.delete('medicamento', where: 'id_almoxarifado = ?', whereArgs: [idAlmoxarifado]);
       }
 
@@ -93,8 +88,15 @@ class AlmoxarifadoService extends ChangeNotifier {
   }
 
   Future<void> deletarItem(int id) async {
-    await db.delete('medicamento', where: 'id_almoxarifado = ?', whereArgs: [id]); // Apaga primeiro a FK
+    await db.delete('medicamento', where: 'id_almoxarifado = ?', whereArgs: [id]);
     await _repository.delete(id);
     await carregarItens();
+  }
+
+  // 🟢 Método de exclusão por entidade
+  Future<void> arquivarItem(Almoxarifado item) async {
+    if (item.id != null) {
+      await deletarItem(item.id!);
+    }
   }
 }

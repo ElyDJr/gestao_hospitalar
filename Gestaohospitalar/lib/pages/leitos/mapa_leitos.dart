@@ -227,8 +227,9 @@ class _MapaLeitosState extends State<MapaLeitos> {
     Color corFundo;
     String status = leito['status_leito']?.toString().toUpperCase() ?? 'VAGO';
 
-    if (status == 'VAGO' || status == 'DESOCUPADO') corFundo = Colors.green.shade600;
-    else if (status == 'OCUPADO') corFundo = Colors.red.shade600;
+    if (status == 'VAGO' || status == 'DESOCUPADO') {
+      corFundo = Colors.green.shade600;
+    } else if (status == 'OCUPADO') corFundo = Colors.red.shade600;
     else corFundo = Colors.orange.shade600;
 
     String primeiroNome = (leito['nome']?.toString().trim().split(' ') ?? [''])[0];

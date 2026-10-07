@@ -1,15 +1,17 @@
 import 'entitie.dart';
 
-class Ala extends Entitie{
+class Ala extends Entitie {
   @override
   final int? id;
   final String nomeAla;
   final String andar;
+  final String tipo; // COMUM, PRIVADO, PREMIUM
 
   Ala({
     this.id,
     required this.nomeAla,
     required this.andar,
+    this.tipo = 'COMUM',
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Ala extends Entitie{
       'id_ala': id,
       'nome_ala': nomeAla,
       'andar': andar,
+      'tipo': tipo,
     };
   }
 
@@ -28,6 +31,7 @@ class Ala extends Entitie{
           : (map['id'] != null ? int.tryParse(map['id'].toString()) : null),
       nomeAla: map['nome']?.toString() ?? map['nome_ala']?.toString() ?? 'Sem Nome',
       andar: map['andar']?.toString() ?? 'Sem Andar',
+      tipo: map['tipo']?.toString() ?? 'COMUM',
     );
   }
 

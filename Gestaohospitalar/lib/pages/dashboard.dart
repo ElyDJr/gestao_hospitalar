@@ -47,7 +47,7 @@ import 'alas/listar_ala.dart';
 import '../domain/services/sala_service.dart';
 import '../pages/salas/listar_salas.dart';
 
-import '../telas/tela_atendimento_medico.dart'; //deixar danimico
+//deixar danimico
 
 import '../domain/services/paciente_service.dart';
 import '../domain/services/medico_service.dart';
@@ -431,10 +431,12 @@ class _DashboardState extends State<Dashboard> {
                   icon: const Icon(Icons.house),
                   label: const Text("Ala Medica")),
               ElevatedButton.icon(
-                  onPressed: () =>
-                      abrirDialogoLateral(ListarSalas(service: SalaService())),
+                  onPressed: () => abrirDialogoLateral(ListarSalas(
+                      service: SalaService(), 
+                      alaService: _alaService, // 🟢 Adicionado aqui
+                  )),
                   icon: const Icon(Icons.meeting_room),
-                  label: const Text("Salas"))
+                  label: const Text("Salas")),
             ],
           ),
         ],

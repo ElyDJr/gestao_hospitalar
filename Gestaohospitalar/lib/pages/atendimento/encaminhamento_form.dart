@@ -9,6 +9,7 @@ import '../../domain/entities/ala.dart';
 import '../../domain/entities/paciente.dart';
 import '../../domain/services/medico_service.dart';
 import '../../domain/entities/medico.dart';
+// Ajuste os '..' conforme a pasta
 
 class EncaminhamentoForm extends StatefulWidget {
   final Paciente paciente;

@@ -1,3 +1,4 @@
+// lib/pages/leitos/cadastrar_leito.dart
 import 'package:flutter/material.dart';
 import '../../domain/entities/leito.dart';
 import '../../domain/services/leito_service.dart';
@@ -6,12 +7,14 @@ import '../../domain/entities/ala.dart';
 
 class CadastrarLeito extends StatefulWidget {
   final LeitoService leitoService;
-  final AlaService alaService; // Adicionado para carregar as alas
+  final AlaService alaService;
+  final Leito? leitoEdicao; // Opcional para suportar edição
 
   const CadastrarLeito({
     super.key,
     required this.leitoService,
-    required this.alaService
+    required this.alaService,
+    this.leitoEdicao,
   });
 
   @override
@@ -22,15 +25,29 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
   final _formKey = GlobalKey<FormState>();
   final _numeroController = TextEditingController();
   
-  // Estado para os dados
   List<Ala> _alasDisponiveis = [];
   int? _idAlaSelecionada;
+  String? _tipoSelecionado;
   bool _carregando = true;
+
+  final List<String> _tiposLeito = ['COMUM', 'PRIVADO', 'PREMIUM', 'UTI', 'ISOLAMENTO'];
 
   @override
   void initState() {
     super.initState();
+    if (widget.leitoEdicao != null) {
+      final l = widget.leitoEdicao!;
+      _numeroController.text = l.numero ?? '';
+      _idAlaSelecionada = l.idAla;
+      _tipoSelecionado = l.tipo; 
+    }
     _carregarAlas();
+  }
+
+  @override
+  void dispose() {
+    _numeroController.dispose();
+    super.dispose();
   }
 
   Future<void> _carregarAlas() async {
@@ -39,6 +56,9 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
       if (mounted) {
         setState(() {
           _alasDisponiveis = alas;
+          if (_idAlaSelecionada == null && alas.isNotEmpty) {
+            _idAlaSelecionada = alas.first.id;
+          }
           _carregando = false;
         });
       }
@@ -46,7 +66,7 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
       if (mounted) {
         setState(() => _carregando = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar alas: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('ERRO AO CARREGAR ALAS: $e'.toUpperCase()), backgroundColor: Colors.red),
         );
       }
     }
@@ -54,25 +74,29 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
 
   void _salvar() async {
     if (_formKey.currentState!.validate()) {
-      // Aqui você ajusta para salvar o ID da ala
       final novoLeito = Leito(
+        id: widget.leitoEdicao?.id,
         numero: _numeroController.text,
-        idAla: _idAlaSelecionada, // Certifique-se que sua entidade Leito tenha este campo
-        situacao: 'VAGO',
+        idAla: _idAlaSelecionada,
+        tipo: _tipoSelecionado ?? 'COMUM',
+        situacao: widget.leitoEdicao?.situacao ?? 'VAGO',
       );
 
       try {
         await widget.leitoService.cadastrarLeito(novoLeito);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Leito cadastrado com sucesso!'), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text(widget.leitoEdicao != null ? 'LEITO ATUALIZADO COM SUCESSO!' : 'LEITO CADASTRADO COM SUCESSO!'),
+              backgroundColor: Colors.teal,
+            ),
           );
           Navigator.pop(context, true);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+            SnackBar(content: Text('ERRO AO SALVAR: $e'.toUpperCase()), backgroundColor: Colors.red),
           );
         }
       }
@@ -81,61 +105,109 @@ class _CadastrarLeitoState extends State<CadastrarLeito> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cadastrar Leito'),
-        backgroundColor: const Color.fromRGBO(0, 150, 136, 1),
-        foregroundColor: Colors.white,
+    final isEdicao = widget.leitoEdicao != null;
+
+    return Container(
+      height: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: Colors.white,
       ),
-      body: _carregando 
-        ? const Center(child: CircularProgressIndicator())
-        : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    controller: _numeroController,
-                    decoration: const InputDecoration(
-                      labelText: 'Número do Leito (Ex: 101-A)',
-                      border: OutlineInputBorder(),
+      child: _carregando 
+        ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+        : Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Cabeçalho
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isEdicao ? "EDITAR LEITO" : "NOVO LEITO",
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Informe o número' : null,
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 16),
+
+                // Formulário com Scroll
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _numeroController,
+                          decoration: const InputDecoration(
+                            labelText: 'NÚMERO DO LEITO (EX: 101-A) *',
+                            prefixIcon: Icon(Icons.bed),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value!.isEmpty ? 'INFORME O NÚMERO DO LEITO' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Dropdown de Tipo de Leito
+                        DropdownButtonFormField<String>(
+                          initialValue: _tipoSelecionado,
+                          decoration: const InputDecoration(
+                            labelText: 'TIPO DO LEITO *',
+                            prefixIcon: Icon(Icons.category),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: _tiposLeito.map((tipo) {
+                            return DropdownMenuItem<String>(
+                              value: tipo,
+                              child: Text(tipo),
+                            );
+                          }).toList(),
+                          onChanged: (val) => setState(() => _tipoSelecionado = val),
+                          validator: (value) => value == null ? 'SELECIONE O TIPO DO LEITO' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Dropdown Dinâmico de Ala
+                        DropdownButtonFormField<int>(
+                          initialValue: _idAlaSelecionada,
+                          decoration: const InputDecoration(
+                            labelText: 'SELECIONE A ALA *',
+                            prefixIcon: Icon(Icons.apartment),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: _alasDisponiveis.map((ala) {
+                            return DropdownMenuItem<int>(
+                              value: ala.id,
+                              child: Text("${ala.nomeAla} - ${ala.andar ?? ''}".toUpperCase()),
+                            );
+                          }).toList(),
+                          onChanged: (val) => setState(() => _idAlaSelecionada = val),
+                          validator: (value) => value == null ? 'SELECIONE A ALA' : null,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Dropdown Dinâmico
-                  DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'Selecione a Ala',
-                      border: OutlineInputBorder(),
-                    ),
-                    initialValue: _idAlaSelecionada,
-                    items: _alasDisponiveis.map((ala) {
-                      return DropdownMenuItem<int>(
-                        value: ala.id,
-                        child: Text("${ala.nomeAla} - ${ala.andar}"),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setState(() => _idAlaSelecionada = val),
-                    validator: (value) => value == null ? 'Selecione a Ala' : null,
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Botão de Salvar
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isEdicao ? Colors.blue : Colors.teal,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
                   ),
-                  
-                  const Spacer(),
-                  
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal, 
-                      foregroundColor: Colors.white, 
-                      padding: const EdgeInsets.symmetric(vertical: 16)
-                    ),
-                    onPressed: _salvar,
-                    child: const Text('Salvar Leito', style: TextStyle(fontSize: 16)),
-                  )
-                ],
-              ),
+                  icon: Icon(isEdicao ? Icons.update : Icons.save),
+                  label: Text(isEdicao ? "ATUALIZAR LEITO" : "SALVAR LEITO", style: const TextStyle(fontSize: 16)),
+                  onPressed: _salvar,
+                ),
+              ],
             ),
           ),
     );

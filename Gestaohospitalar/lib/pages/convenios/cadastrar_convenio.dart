@@ -47,14 +47,64 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
     super.dispose();
   }
 
+  // 🔴 Função para confirmar e excluir o convênio
+  Future<void> _excluirConvenio() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmação'),
+        content: const Text('Tem certeza que deseja excluir este convênio?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('NÃO'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('SIM'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true && widget.convenioEdicao != null) {
+      try {
+        await widget.service.arquivarConvenio(widget.convenioEdicao!);
+
+        if (context.mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Convênio excluído com sucesso!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEdicao = widget.convenioEdicao != null;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
       ),
       padding: const EdgeInsets.all(24),
       child: Form(
@@ -66,15 +116,26 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
               children: [
                 Row(
                   children: [
-                    Icon(isEdicao ? Icons.edit : Icons.business, color: Colors.teal, size: 28),
+                    Icon(
+                      isEdicao ? Icons.edit : Icons.business,
+                      color: Colors.teal,
+                      size: 28,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       isEdicao ? "Editar Convênio" : "Cadastro de Convênio",
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
                     ),
                   ],
                 ),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                )
               ],
             ),
             const Divider(),
@@ -84,16 +145,26 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
                   children: [
                     TextFormField(
                       controller: _nomeCtrl,
-                      decoration: const InputDecoration(labelText: "Nome do Convênio *", border: OutlineInputBorder()),
-                      validator: (v) => v == null || v.isEmpty ? "Obrigatório" : null,
+                      decoration: const InputDecoration(
+                        labelText: "Nome do Convênio *",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? "Obrigatório" : null,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      initialValue: _tipoLeitoSelecionado, // Corrigido deprecation!
-                      decoration: const InputDecoration(labelText: "Tipo de Leito Coberto", border: OutlineInputBorder()),
+                      initialValue: _tipoLeitoSelecionado,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: "Tipo de Leito Coberto",
+                        border: OutlineInputBorder(),
+                      ),
                       items: const ['COMUM', 'PRIVADO', 'PREMIUM']
-                          .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                      onChanged: (v) => setState(() => _tipoLeitoSelecionado = v!),
+                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                          .toList(),
+                      onChanged: (v) =>
+                          setState(() => _tipoLeitoSelecionado = v!),
                     ),
                     const SizedBox(height: 16),
                     SwitchListTile(
@@ -117,16 +188,26 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
                         Expanded(
                           child: TextFormField(
                             controller: _limiteCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(labelText: "Limite Medicamento (R\$)", border: OutlineInputBorder()),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: const InputDecoration(
+                              labelText: "Limite Medicamento (R\$)",
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: TextFormField(
                             controller: _coberturaCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(labelText: "Cobertura (%)", border: OutlineInputBorder()),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: const InputDecoration(
+                              labelText: "Cobertura (%)",
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
                       ],
@@ -137,49 +218,94 @@ class _CadastrarConvenioState extends State<CadastrarConvenio> {
             ),
             const Divider(),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isEdicao ? Colors.blue : Colors.teal,
-                    foregroundColor: Colors.white
-                  ),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      try {
-                        final novoConvenio = Convenio(
-                          id: widget.convenioEdicao?.id,
-                          ativo: widget.convenioEdicao?.ativo ?? 1,
-                          nomeConvenio: _nomeCtrl.text,
-                          tipoLeito: _tipoLeitoSelecionado,
-                          cobreInternacao: _cobreInternacao,
-                          cobreExames: _cobreExames,
-                          cobreCirurgia: _cobreCirurgia,
-                          limiteMedicamento: double.tryParse(_limiteCtrl.text),
-                          percentualCobertura: double.tryParse(_coberturaCtrl.text),
-                        );
-                        await widget.service.salvarConvenio(novoConvenio);
-                        
-                        // ✅ MENSAGEM DE SUCESSO AQUI
-                        if (context.mounted) {
-                          Navigator.pop(context); // Fecha a tela
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(isEdicao ? 'Convênio atualizado com sucesso!' : 'Convênio cadastrado com sucesso!'),
-                              backgroundColor: isEdicao ? Colors.blue : Colors.teal
-                            )
-                          );
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancelar"),
+                ),
+                
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 🔴 Botão EXCLUIR CONVÊNIO (Exibido apenas em Edição)
+                    if (widget.convenioEdicao != null) ...[
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        icon: const Icon(Icons.delete, size: 18),
+                        label: const Text("Excluir"),
+                        onPressed: _excluirConvenio,
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+
+                    // 🔵 Botão ATUALIZAR / SALVAR CONVÊNIO
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isEdicao ? Colors.blue : Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      icon: Icon(isEdicao ? Icons.update : Icons.save, size: 18),
+                      label: Text(
+                        isEdicao ? "Atualizar Convênio" : "Salvar Convênio",
+                      ),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          try {
+                            final novoConvenio = Convenio(
+                              id: widget.convenioEdicao?.id,
+                              ativo: widget.convenioEdicao?.ativo ?? 1,
+                              nomeConvenio: _nomeCtrl.text,
+                              tipoLeito: _tipoLeitoSelecionado,
+                              cobreInternacao: _cobreInternacao,
+                              cobreExames: _cobreExames,
+                              cobreCirurgia: _cobreCirurgia,
+                              limiteMedicamento:
+                                  double.tryParse(_limiteCtrl.text),
+                              percentualCobertura:
+                                  double.tryParse(_coberturaCtrl.text),
+                            );
+                            await widget.service.salvarConvenio(novoConvenio);
+
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isEdicao
+                                        ? 'Convênio atualizado com sucesso!'
+                                        : 'Convênio cadastrado com sucesso!',
+                                  ),
+                                  backgroundColor:
+                                      isEdicao ? Colors.blue : Colors.teal,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Erro: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
                         }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red));
-                        }
-                      }
-                    }
-                  },
-                  child: Text(isEdicao ? "Atualizar Convênio" : "Salvar Convênio"),
+                      },
+                    ),
+                  ],
                 ),
               ],
             )

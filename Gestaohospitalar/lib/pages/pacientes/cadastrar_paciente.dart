@@ -64,7 +64,6 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
       _cepCtrl.text = p.cep ?? '';
       _responsavelCtrl.text = p.nomeResponsavel ?? '';
       
-      // 🟢 Substitua a linha do sexo por este bloco seguro:
       if (p.sexo != null && p.sexo!.isNotEmpty) {
         String s = p.sexo![0].toUpperCase() + p.sexo!.substring(1).toLowerCase();
         if (['MASCULINO', 'FEMININO', 'OUTRO'].contains(s)) {
@@ -131,6 +130,47 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
         _validadeCtrl.text = "${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}";
       });
     }
+  }
+
+  // ✅ Função para confirmar e executar a exclusão
+  void _confirmarExclusao() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Excluir Paciente"),
+        content: Text("Tem certeza que deseja excluir o paciente ${_nomeCtrl.text}? Esta ação não pode ser desfeita."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(context); // Fecha o diálogo de confirmação
+              try {
+                if (widget.pacienteEdicao?.id != null) {
+                  await widget.service.deletarPaciente(widget.pacienteEdicao!.id!);
+                  if (mounted) {
+                    Navigator.pop(context); // Fecha o modal de cadastro/edição
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Paciente excluído com sucesso!'), backgroundColor: Colors.red),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao excluir: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            child: const Text("Excluir"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -235,7 +275,6 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                     const Text("4. Cobertura de Saúde (Opcional)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 12),
                     
-                    // ✅ AQUI ESTÁ A IMPLEMENTAÇÃO DO BOTÃO DE "+" DO LADO DO CONVÊNIO
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -257,7 +296,7 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                         ),
                         const SizedBox(width: 12),
                         Container(
-                          height: 56, // Mesma altura do Dropdown
+                          height: 56,
                           decoration: BoxDecoration(
                             color: Colors.teal,
                             borderRadius: BorderRadius.circular(8),
@@ -266,7 +305,6 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
                             icon: const Icon(Icons.add, color: Colors.white),
                             tooltip: "Adicionar Novo Convênio Rápido",
                             onPressed: () {
-                              // Abre o modal do convênio sem fechar o modal do paciente!
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -301,63 +339,99 @@ class _CadastrarPacienteState extends State<CadastrarPaciente> {
               ),
             ),
             const Divider(),
+            
+            // ✅ BARRA INFERIOR COM O BOTÃO DE EXCLUIR (SE FOR EDIÇÃO) E SALVAR
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar", style: TextStyle(color: Colors.grey))),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: isEdicao ? Colors.blue : Colors.teal, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
-                  icon: Icon(isEdicao ? Icons.update : Icons.save),
-                  label: Text(isEdicao ? "Atualizar Paciente" : "Salvar Prontuário"),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
+                // Se estiver editando, mostra o botão de excluir à esquerda
+                if (isEdicao)
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    ),
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Excluir"),
+                    onPressed: _confirmarExclusao,
+                  )
+                else
+                  const SizedBox.shrink(), // Se for cadastro novo, deixa o espaço vazio
 
-                      // ✅ AQUI ESTÁ A CORREÇÃO DO ERRO DO SQL: EXIGIR A VALIDADE!
-                      if (_idConvenioSelecionado != null && _validadeCarteira == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Por favor, informe a validade da carteira do convênio!'), backgroundColor: Colors.red)
-                        );
-                        return; // Trava a execução para não quebrar o banco
-                      }
+                // Botões da direita (Cancelar e Salvar)
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context), 
+                      child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isEdicao ? Colors.blue : Colors.teal, 
+                        foregroundColor: Colors.white, 
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      ),
+                      icon: Icon(isEdicao ? Icons.update : Icons.save),
+                      label: Text(isEdicao ? "Atualizar Paciente" : "Salvar Prontuário"),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          if (_idConvenioSelecionado != null && _validadeCarteira == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Por favor, informe a validade da carteira do convênio!'), backgroundColor: Colors.red)
+                            );
+                            return;
+                          }
 
-                      try {
-                        final novoPaciente = Paciente(
-                          id: widget.pacienteEdicao?.id, 
-                          ativo: widget.pacienteEdicao?.ativo ?? 1, 
-                          nome: _nomeCtrl.text,
-                          cpf: _cpfCtrl.text,
-                          sexo: _sexoSelecionado, 
-                          nascimento: _dataNascimento,
-                          alergias: _alergiasCtrl.text.isEmpty ? null : _alergiasCtrl.text,
-                          tipoSanguineo: _tipoSanguineoCtrl.text.isEmpty ? null : _tipoSanguineoCtrl.text,
-                          historicoClinico: _historicoCtrl.text.isEmpty ? null : _historicoCtrl.text,
-                          telefone: _telefoneCtrl.text.isEmpty ? null : _telefoneCtrl.text,
-                          rua: _ruaCtrl.text.isEmpty ? null : _ruaCtrl.text,
-                          numeroCasa: _numeroCasaCtrl.text.isEmpty ? null : int.tryParse(_numeroCasaCtrl.text),
-                          bairro: _bairroCtrl.text.isEmpty ? null : _bairroCtrl.text,
-                          cidade: _cidadeCtrl.text.isEmpty ? null : _cidadeCtrl.text,
-                          estado: _estadoCtrl.text.isEmpty ? null : _estadoCtrl.text,
-                          cep: _cepCtrl.text.length == 8 ? _cepCtrl.text : null,
-                          nomeResponsavel: _responsavelCtrl.text.isEmpty ? null : _responsavelCtrl.text,
-                        );
+                          try {
+                            final novoPaciente = Paciente(
+                              id: widget.pacienteEdicao?.id, 
+                              ativo: widget.pacienteEdicao?.ativo ?? 1, 
+                              nome: _nomeCtrl.text,
+                              cpf: _cpfCtrl.text,
+                              sexo: _sexoSelecionado, 
+                              nascimento: _dataNascimento,
+                              alergias: _alergiasCtrl.text.isEmpty ? null : _alergiasCtrl.text,
+                              tipoSanguineo: _tipoSanguineoCtrl.text.isEmpty ? null : _tipoSanguineoCtrl.text,
+                              historicoClinico: _historicoCtrl.text.isEmpty ? null : _historicoCtrl.text,
+                              telefone: _telefoneCtrl.text.isEmpty ? null : _telefoneCtrl.text,
+                              rua: _ruaCtrl.text.isEmpty ? null : _ruaCtrl.text,
+                              numeroCasa: _numeroCasaCtrl.text.isEmpty ? null : int.tryParse(_numeroCasaCtrl.text),
+                              bairro: _bairroCtrl.text.isEmpty ? null : _bairroCtrl.text,
+                              cidade: _cidadeCtrl.text.isEmpty ? null : _cidadeCtrl.text,
+                              estado: _estadoCtrl.text.isEmpty ? null : _estadoCtrl.text,
+                              cep: _cepCtrl.text.length == 8 ? _cepCtrl.text : null,
+                              nomeResponsavel: _responsavelCtrl.text.isEmpty ? null : _responsavelCtrl.text,
+                            );
 
-                        await widget.service.salvarPaciente(
-                          novoPaciente, 
-                          idConvenio: _idConvenioSelecionado,
-                          numeroCarteira: _carteiraCtrl.text.isEmpty ? null : _carteiraCtrl.text,
-                          validade: _validadeCarteira,
-                        );
+                            await widget.service.salvarPaciente(
+                              novoPaciente, 
+                              idConvenio: _idConvenioSelecionado,
+                              numeroCarteira: _carteiraCtrl.text.isEmpty ? null : _carteiraCtrl.text,
+                              validade: _validadeCarteira,
+                            );
 
-                        if (context.mounted) {
-                          Navigator.pop(context); 
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isEdicao ? 'Paciente atualizado!' : 'Cadastrado com sucesso!'), backgroundColor: isEdicao ? Colors.blue : Colors.teal));
+                            if (context.mounted) {
+                              Navigator.pop(context); 
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(isEdicao ? 'Paciente atualizado!' : 'Cadastrado com sucesso!'), 
+                                  backgroundColor: isEdicao ? Colors.blue : Colors.teal,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+                              );
+                            }
+                          }
                         }
-                      } catch (e) {
-                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red));
-                      }
-                    }
-                  },
+                      },
+                    ),
+                  ],
                 ),
               ],
             )

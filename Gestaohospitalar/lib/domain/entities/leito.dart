@@ -1,25 +1,28 @@
 class Leito {
   final int? id;
   final String? numero;
-  final int? idAla; //adicionei
+  final int? idAla; 
   final DateTime? dataHigienizacao;
   final String? situacao;
+  final String? tipo; // 🟢 Adicionado aqui
 
   Leito({
     this.id,
     this.numero,
-    this.idAla, //adicionei
+    this.idAla, 
     this.dataHigienizacao,
     this.situacao,
+    this.tipo, // 🟢 Adicionado aqui no construtor
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id_leito': id,
       'numero': numero,
-      'id_ala': idAla, //adicionei
+      'id_ala': idAla, 
       'data_higienizacao': dataHigienizacao?.toIso8601String(),
       'situacao': situacao,
+      'tipo': tipo, // 🟢 Adicionado para salvar no banco/mapa
     };
   }
 
@@ -27,19 +30,19 @@ class Leito {
     return Leito(
       id: map['id_leito'],
       numero: map['numero'],
-      idAla: map['id_ala'] != null ? int.tryParse(map['id_ala'].toString()) : null, //adicionei
+      idAla: map['id_ala'] != null ? int.tryParse(map['id_ala'].toString()) : null, 
       dataHigienizacao: map['data_higienizacao'] != null
           ? DateTime.parse(map['data_higienizacao'])
           : null,
       situacao: map['situacao'],
+      tipo: map['tipo'], // 🟢 Adicionado para ler do banco/mapa
     );
   }
 
-  // 🟢 ADICIONE ESTAS LINHAS AQUI (Sobrescrita de Igualdade)
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Leito && other.id == id; // Dois leitos são o mesmo se o ID for igual
+    return other is Leito && other.id == id;
   }
 
   @override

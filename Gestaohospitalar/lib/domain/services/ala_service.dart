@@ -9,7 +9,7 @@ class AlaService {
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> maps = await db.query('ala', orderBy: 'nome_ala');
       
-      // 🟢 RASTREAMENTO: Vai imprimir no Console do VS Code/Android Studio!
+      // 🟢 RASTREAMENTO: Imprime no Console do VS Code/Android Studio
       debugPrint("🟢 BANCO LEU AS ALAS: ${maps.length} registros encontrados no DB.");
       if (maps.isNotEmpty) {
         debugPrint("🟢 EXEMPLO DE DADO DO BANCO: ${maps.first}");
@@ -28,19 +28,28 @@ class AlaService {
     final db = await DatabaseProvider.instance.database;
     try {
       if (ala.id == null) {
+        // 🟢 INSERÇÃO: Envia o Map com nome_ala, andar e tipo
         await db.insert('ala', ala.toMap());
-        debugPrint("🟢 ALA INSERIDA COM SUCESSO: ${ala.nomeAla}");
+        debugPrint("🟢 ALA INSERIDA COM SUCESSO: ${ala.nomeAla} (${ala.tipo})");
       } else {
+        // 🔵 ATUALIZAÇÃO: Atualiza os dados pelo id_ala
         await db.update('ala', ala.toMap(), where: 'id_ala = ?', whereArgs: [ala.id]);
-        debugPrint("🟢 ALA ATUALIZADA COM SUCESSO: ${ala.nomeAla}");
+        debugPrint("🟢 ALA ATUALIZADA COM SUCESSO: ${ala.nomeAla} (${ala.tipo})");
       }
     } catch (e) {
+      debugPrint("🔴 ERRO AO SALVAR ALA: $e");
       throw Exception("Falha ao salvar ala: $e");
     }
   }
 
-  Future<void> deletarAla(int id) async {
-    final db = await DatabaseProvider.instance.database;
-    await db.delete('ala', where: 'id_ala = ?', whereArgs: [id]);
+  Future<void> deletarAla(dynamic id) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      await db.delete('ala', where: 'id_ala = ?', whereArgs: [id]);
+      debugPrint("🟢 ALA REMOVIDA DO BANCO (ID: $id)");
+    } catch (e) {
+      debugPrint("🔴 ERRO AO DELETAR ALA: $e");
+      throw Exception("Falha ao deletar ala: $e");
+    }
   }
 }

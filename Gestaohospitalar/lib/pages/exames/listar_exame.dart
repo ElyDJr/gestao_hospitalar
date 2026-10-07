@@ -42,6 +42,51 @@ class _ListarExameState extends State<ListarExame> {
     );
   }
 
+  // 🔴 Diálogo de confirmação e chamada do arquivarExame
+  Future<void> _excluirExame(Exame exame) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmação'),
+        content: Text('Tem certeza que deseja excluir o exame "${exame.nome}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('NÃO'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('SIM'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      try {
+        await widget.service.arquivarExame(exame);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Exame "${exame.nome}" excluído com sucesso!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir exame: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -87,7 +132,7 @@ class _ListarExameState extends State<ListarExame> {
           ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _abrirFormularioCadastro(),
-            backgroundColor:Colors.teal,
+            backgroundColor: Colors.teal,
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text("Novo Exame", style: TextStyle(color: Colors.white)),
           ),
@@ -101,9 +146,18 @@ class _ListarExameState extends State<ListarExame> {
                     return Card(
                       child: ListTile(
                         title: Text(exame.nome),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _abrirFormularioCadastro(exameParaEditar: exame),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _abrirFormularioCadastro(exameParaEditar: exame),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _excluirExame(exame),
+                            ),
+                          ],
                         ),
                       ),
                     );

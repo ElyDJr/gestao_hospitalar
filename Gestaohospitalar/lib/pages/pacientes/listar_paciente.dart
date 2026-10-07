@@ -109,12 +109,84 @@ class _ListarPacienteState extends State<ListarPaciente> {
                           children: [
                             if (p.tipoSanguineo != null) Chip(label: Text(p.tipoSanguineo!), backgroundColor: Colors.red.withValues(alpha: 0.1), labelStyle: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                             const SizedBox(width: 8),
-                            IconButton(icon: const Icon(Icons.edit, color: Colors.blue), tooltip: "Editar Paciente", onPressed: () => _abrirFormularioCadastro(pacienteParaEditar: p)),
                             IconButton(
-                              icon: const Icon(Icons.archive_outlined, color: Colors.orange), tooltip: "Arquivar Paciente",
+                              icon: const Icon(Icons.edit, color: Colors.blue), 
+                              tooltip: "Editar Paciente", 
+                              onPressed: () => _abrirFormularioCadastro(pacienteParaEditar: p),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.archive_outlined, color: Colors.orange), 
+                              tooltip: "Arquivar Paciente",
                               onPressed: () async {
-                                final confirmar = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text("Arquivar Paciente?"), content: Text("O paciente ${p.nome} sairá desta lista ativa, mantendo o histórico no banco."), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancelar")), ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), onPressed: () => Navigator.pop(context, true), child: const Text("Arquivar"))]));
-                                if (confirmar == true) { await widget.service.arquivarPaciente(p); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Prontuário de ${p.nome} arquivado!'), backgroundColor: Colors.orange)); }
+                                final confirmar = await showDialog<bool>(
+                                  context: context, 
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Arquivar Paciente?"), 
+                                    content: Text("O paciente ${p.nome} sairá desta lista ativa, mantendo o histórico no banco."), 
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancelar")), 
+                                      ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), onPressed: () => Navigator.pop(context, true), child: const Text("Arquivar")),
+                                    ],
+                                  ),
+                                );
+                                if (confirmar == true) { 
+                                  await widget.service.arquivarPaciente(p); 
+                                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Prontuário de ${p.nome} arquivado!'), backgroundColor: Colors.orange)); 
+                                }
+                              },
+                            ),
+                            // 🗑️ Botão de Excluir ajustado para chamar deletarPaciente
+                            IconButton(
+  style: ButtonStyle(
+    foregroundColor: WidgetStateProperty.all<Color>(
+      const Color.fromARGB(255, 244, 67, 54),
+    ),
+    overlayColor: WidgetStateProperty.all<Color>(
+      const Color.fromARGB(255, 244, 67, 54).withValues(alpha: 0.1),
+    ),
+  ),
+  icon: const Icon(
+    Icons.delete, // 🔴 Ícone preenchido em vez de apenas o contorno
+    color: Color.fromARGB(255, 244, 67, 54),
+  ),
+  tooltip: "Excluir Paciente",
+  onPressed: () async {
+    if (p.id == null) return;
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Excluir Paciente?"),
+        content: Text(
+          "Tem certeza que deseja excluir permanentemente o cadastro de ${p.nome}? Esta ação não poderá ser desfeita.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 244, 67, 54), // Fundo vermelho
+              foregroundColor: Colors.white, // ✅ Texto em branco para legibilidade
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Excluir"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      await widget.service.deletarPaciente(p.id!);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Paciente ${p.nome} excluído permanentemente!'),
+            backgroundColor: const Color.fromARGB(255, 244, 67, 54)
+                                      )
+                                    );                                 
+                                  }
+                                }
                               },
                             ),
                           ],

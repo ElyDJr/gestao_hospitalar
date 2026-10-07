@@ -17,7 +17,7 @@ class _ListarAlasState extends State<ListarAlas> {
 
   List<Ala> _alas = [];
   bool _carregando = true;
-  String? _erroAviso; // Se houver um erro, ele não mais ficará oculto!
+  String? _erroAviso;
 
   @override
   void initState() {
@@ -26,14 +26,18 @@ class _ListarAlasState extends State<ListarAlas> {
   }
 
   @override
-  void dispose() {//pra q serve isso?
+  void dispose() {
+    // Destrói o controller para liberar memória quando a tela é fechada
     _buscaCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _carregarAlas() async {
     if (!mounted) return;
-    setState(() { _carregando = true; _erroAviso = null; });
+    setState(() {
+      _carregando = true;
+      _erroAviso = null;
+    });
 
     try {
       final alasDoBanco = await widget.service.listarAlas();
@@ -53,8 +57,8 @@ class _ListarAlasState extends State<ListarAlas> {
     }
   }
 
-  void _abrirFormulario({Ala? alaEdicao}) async { //função async: espera a resposta do formulario
-    final atualizou = await showModalBottomSheet<bool>( //se o salvar ala receber true, atrualiza a lista
+  void _abrirFormulario({Ala? alaEdicao}) async {
+    final atualizou = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -63,11 +67,22 @@ class _ListarAlasState extends State<ListarAlas> {
         alaEdicao: alaEdicao,
       ),
     );
+
     if (atualizou == true) {
-      await _carregarAlas(); // Pede ao service para buscar as alas novas
-      if (mounted) {
-        setState(() {}); // Força a tela a ser desenhada novamente com a lista atual
-      }
+      await _carregarAlas();
+    }
+  }
+
+  // Cor personalizada para cada tipo de ala
+  Color _getTipoColor(String? tipo) {
+    switch (tipo?.toUpperCase()) {
+      case 'PREMIUM':
+        return Colors.amber.shade800;
+      case 'PRIVADO':
+        return Colors.blue.shade700;
+      case 'COMUM':
+      default:
+        return Colors.teal;
     }
   }
 
@@ -75,7 +90,10 @@ class _ListarAlasState extends State<ListarAlas> {
   Widget build(BuildContext context) {
     // Filtro de pesquisa visual
     final listaFiltrada = _alas.where((a) {
-      return a.nomeAla.toLowerCase().trim().contains(_termoBusca.toLowerCase().trim());
+      return a.nomeAla
+          .toLowerCase()
+          .trim()
+          .contains(_termoBusca.toLowerCase().trim());
     }).toList();
 
     return Scaffold(
@@ -95,15 +113,18 @@ class _ListarAlasState extends State<ListarAlas> {
                 fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
         ),
       ),
-      // Botão +
+      // Botão Novo
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _abrirFormulario(), // Chama a criação
+        onPressed: () => _abrirFormulario(),
         backgroundColor: Colors.teal,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text("Nova Ala", style: TextStyle(color: Colors.white)),
@@ -111,67 +132,148 @@ class _ListarAlasState extends State<ListarAlas> {
       body: _carregando
           ? const Center(child: CircularProgressIndicator(color: Colors.teal))
           : _erroAviso != null
-              // 🟢 MOSTRA NA TELA O MOTIVO REAL DE ESTAR VAZIO!
-              ? Center(child: Text("⚠️ ERRO:\n\n$_erroAviso", textAlign: TextAlign.center, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))
+              ? Center(
+                  child: Text(
+                    "⚠️ ERRO:\n\n$_erroAviso",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
               : listaFiltrada.isEmpty
-          //: listaFiltrada.isEmpty
-              ? const Center(child: Text("Nenhuma ala cadastrada ou encontrada."))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: listaFiltrada.length,
-                  itemBuilder: (context, i) {
-                    final ala = listaFiltrada[i];
-                    return Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.teal,
-                          child: Icon(Icons.domain, color: Colors.white),
-                        ),
-                        title: Text(ala.nomeAla, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text("Localização: ${ala.andar}"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(icon: const Icon(Icons.edit, color: Colors.blue), tooltip: "Editar Ala", onPressed: () => _abrirFormulario(alaEdicao: ala)),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              tooltip: "Excluir Ala",
-                              onPressed: () async {
-                                final confirmar = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text("Excluir Ala?"),
-                                    content: const Text("Tem certeza? Alas com leitos vinculados não podem ser excluídas."),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancelar")),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-                                        onPressed: () => Navigator.pop(ctx, true),
-                                        child: const Text("Excluir"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                // Se confirmou a exclusão, deleta e atualiza a lista!
-                                if (confirmar == true) {
-                                  try {
-                                    await widget.service.deletarAla(ala.id!);
-                                    await _carregarAlas(); // 🟢 Atualiza a lista pós-exclusão
-                                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ala removida.'), backgroundColor: Colors.red));
-                                  } catch (e) {
-                                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'), backgroundColor: Colors.red));
-                                  }
-                                }
-                              },
+                  ? const Center(
+                      child: Text("Nenhuma ala cadastrada ou encontrada."),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: listaFiltrada.length,
+                      itemBuilder: (context, i) {
+                        final ala = listaFiltrada[i];
+                        final tipoText = ala.tipo ?? 'COMUM';
+
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.teal.shade50,
+                              child: const Icon(Icons.domain, color: Colors.teal),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    ala.nomeAla,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Tag visual com o Tipo de Ala
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _getTipoColor(tipoText)
+                                        .withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: _getTipoColor(tipoText),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    tipoText,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: _getTipoColor(tipoText),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text("Localização: ${ala.andar}"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.blue),
+                                  tooltip: "Editar Ala",
+                                  onPressed: () =>
+                                      _abrirFormulario(alaEdicao: ala),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  tooltip: "Excluir Ala",
+                                  onPressed: () async {
+                                    final confirmar = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text("Excluir Ala?"),
+                                        content: const Text(
+                                          "Tem certeza? Alas com leitos vinculados não podem ser excluídas.",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, false),
+                                            child: const Text("Cancelar"),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, true),
+                                            child: const Text("Excluir"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirmar == true) {
+                                      try {
+                                        await widget.service
+                                            .deletarAla(ala.id!);
+                                        await _carregarAlas();
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Ala removida.'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text('$e'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
     );
   }
 }

@@ -6,7 +6,7 @@ class HistoricoService {
 
   Future<List<Map<String, dynamic>>> listarHistoricoUnificado() async {
     // Unimos as duas tabelas garantindo que as colunas tenham o mesmo nome na saída
-    final sql = '''
+    const sql = '''
       SELECT 
         'CLINICO' as tipo, 
         id_log as id, 
