@@ -66,19 +66,20 @@ class _ListarMedicoState extends State<ListarMedico> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: Colors.teal),
             )
           : _medicos.isEmpty
               ? const Center(
                   child: Text(
                     'Nenhum médico cadastrado.',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 )
               : ListView.builder(
                   itemCount: _medicos.length,
                   itemBuilder: (context, index) {
                     final medico = _medicos[index];
+                    final nomeMedico = medico.nome ?? 'Sem Nome';
 
                     return ListTile(
                       leading: const CircleAvatar(
@@ -88,30 +89,93 @@ class _ListarMedicoState extends State<ListarMedico> {
                           color: Colors.white,
                         ),
                       ),
-                      title: Text(
-                        medico.nome ?? 'Sem Nome',
-                      ),
+                      title: Text(nomeMedico),
                       subtitle: Text(
                         'CRM: ${medico.crm ?? 'Não informado'}',
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.blue,
-                        ),
-                        onPressed: () async {
-                          await showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) => CadastrarMedico(
-                              service: widget.service,
-                              medicoEdicao: medico,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // ✏️ Editar
+                          IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.blue,
                             ),
-                          );
+                            tooltip: 'Editar Médico',
+                            onPressed: () async {
+                              await showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (context) => CadastrarMedico(
+                                  service: widget.service,
+                                  medicoEdicao: medico,
+                                ),
+                              );
 
-                          // Recarrega a lista depois de editar
-                          _carregarMedicos();
-                        },
+                              _carregarMedicos();
+                            },
+                          ),
+
+                          // 📦 Arquivar
+                          IconButton(
+                            icon: const Icon(
+                              Icons.archive_outlined,
+                              color: Colors.orange,
+                            ),
+                            tooltip: 'Arquivar Médico',
+                            onPressed: () async {
+                              final confirmar = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text("Arquivar Médico?"),
+                                  content: Text(
+                                    "O médico $nomeMedico sairá desta lista ativa e será movido para o arquivo.",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false),
+                                      child: const Text("Cancelar"),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () => Navigator.pop(context, true),
+                                      child: const Text("Arquivar"),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirmar == true) {
+                                try {
+                                  await widget.service.arquivarMedico(medico);
+                                  await _carregarMedicos();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Médico $nomeMedico arquivado com sucesso!'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erro ao arquivar: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -131,7 +195,6 @@ class _ListarMedicoState extends State<ListarMedico> {
             ),
           );
 
-          // Recarrega a lista depois de cadastrar
           _carregarMedicos();
         },
       ),

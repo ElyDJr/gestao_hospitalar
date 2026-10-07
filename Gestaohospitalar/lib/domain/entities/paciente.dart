@@ -3,7 +3,7 @@ import 'entitie.dart';
 
 class Paciente extends Entitie {
   final int? ativo; // 1 para Ativo, 0 para Arquivado
-  final String? nome;
+  final String nome; // 🟢 Obrigatório (não é mais String?)
   final String? cpf;
   final String? sexo;
   final DateTime? nascimento;
@@ -22,7 +22,7 @@ class Paciente extends Entitie {
   Paciente({
     super.id,
     this.ativo = 1, // Por padrão, todo paciente nasce ativo
-    this.nome,
+    required this.nome, // 🟢 required garante que o nome não seja nulo
     this.cpf,
     this.sexo,
     this.nascimento,
@@ -39,7 +39,7 @@ class Paciente extends Entitie {
     this.nomeResponsavel,
   });
 
-  // ✅ Método mágico agora aceita atualizar QUALQUER atributo
+  // Método copyWith atualizado
   Paciente copyWith({
     int? id,
     int? ativo,
@@ -68,7 +68,7 @@ class Paciente extends Entitie {
       nascimento: nascimento ?? this.nascimento,
       alergias: alergias ?? this.alergias,
       tipoSanguineo: tipoSanguineo ?? this.tipoSanguineo,
-      historicoClinico: historicoClinico ?? this.historicoClinico, // ✅ Agora ele recebe o valor novo da Triagem!
+      historicoClinico: historicoClinico ?? this.historicoClinico,
       telefone: telefone ?? this.telefone,
       rua: rua ?? this.rua,
       numeroCasa: numeroCasa ?? this.numeroCasa,
@@ -83,11 +83,13 @@ class Paciente extends Entitie {
   Map<String, dynamic> toMap() {
     return {
       'id_paciente': id,
-      'ativo': ativo ?? 1, // Salva no banco
+      'ativo': ativo ?? 1,
       'nome': nome,
       'cpf': cpf,
       'sexo': sexo,
-      'nascimento': nascimento != null ? "${nascimento!.year}-${nascimento!.month.toString().padLeft(2, '0')}-${nascimento!.day.toString().padLeft(2, '0')}" : null,
+      'nascimento': nascimento != null 
+          ? "${nascimento!.year}-${nascimento!.month.toString().padLeft(2, '0')}-${nascimento!.day.toString().padLeft(2, '0')}" 
+          : null,
       'alergias': alergias,
       'tipo_sanguineo': tipoSanguineo,
       'historico_clinico': historicoClinico,
@@ -105,8 +107,8 @@ class Paciente extends Entitie {
   factory Paciente.fromMap(Map<String, dynamic> map) {
     return Paciente(
       id: map['id_paciente'],
-      ativo: map['ativo'], // Lê do banco
-      nome: map['nome'],
+      ativo: map['ativo'],
+      nome: map['nome'] ?? '', // 🟢 Trata nulo como String vazia ao ler do banco
       cpf: map['cpf'],
       sexo: map['sexo'],
       nascimento: map['nascimento'] != null ? DateTime.tryParse(map['nascimento']) : null,

@@ -1,15 +1,20 @@
 // lib/pages/pacientes/listar_paciente.dart
 import 'package:flutter/material.dart';
 import '../../../domain/services/paciente_service.dart';
-import '../../../domain/services/convenio_service.dart'; // ✅ NOVO
+import '../../../domain/services/convenio_service.dart';
+import '../../../domain/services/arquivo_service.dart';
 import '../../../domain/entities/paciente.dart';
 import 'cadastrar_paciente.dart';
 
 class ListarPaciente extends StatefulWidget {
   final PacienteService service;
-  final ConvenioService convenioService; // ✅ O Pulo do Gato
+  final ConvenioService convenioService;
 
-  const ListarPaciente({super.key, required this.service, required this.convenioService});
+  const ListarPaciente({
+    super.key,
+    required this.service,
+    required this.convenioService,
+  });
 
   @override
   State<ListarPaciente> createState() => _ListarPacienteState();
@@ -17,6 +22,7 @@ class ListarPaciente extends StatefulWidget {
 
 class _ListarPacienteState extends State<ListarPaciente> {
   final TextEditingController _buscaCtrl = TextEditingController();
+  final ArquivoService _arquivoService = ArquivoService();
   String _termoBusca = '';
 
   @override
@@ -38,7 +44,7 @@ class _ListarPacienteState extends State<ListarPaciente> {
       backgroundColor: Colors.transparent,
       builder: (context) => CadastrarPaciente(
         service: widget.service,
-        convenioService: widget.convenioService, // ✅ Passando a dependência pra frente
+        convenioService: widget.convenioService,
         pacienteEdicao: pacienteParaEditar,
       ),
     );
@@ -50,11 +56,15 @@ class _ListarPacienteState extends State<ListarPaciente> {
       listenable: widget.service,
       builder: (context, _) {
         if (widget.service.isLoading) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator(color: Colors.teal)));
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.teal),
+            ),
+          );
         }
 
         final listaFiltrada = widget.service.pacientes.where((p) {
-          final nome = p.nome?.toLowerCase() ?? '';
+          final nome = p.nome.toLowerCase();
           final cpf = p.cpf ?? '';
           final busca = _termoBusca.toLowerCase();
           return nome.contains(busca) || cpf.contains(busca);
@@ -75,11 +85,23 @@ class _ListarPacienteState extends State<ListarPaciente> {
                   style: const TextStyle(color: Colors.black87),
                   decoration: InputDecoration(
                     hintText: "Buscar paciente por nome ou CPF...",
-                    fillColor: Colors.white, filled: true,
+                    fillColor: Colors.white,
+                    filled: true,
                     prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                    suffixIcon: _termoBusca.isNotEmpty ? IconButton(icon: const Icon(Icons.clear, color: Colors.grey), onPressed: () { _buscaCtrl.clear(); setState(() => _termoBusca = ''); }) : null,
+                    suffixIcon: _termoBusca.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _buscaCtrl.clear();
+                              setState(() => _termoBusca = '');
+                            },
+                          )
+                        : null,
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
               ),
@@ -89,102 +111,169 @@ class _ListarPacienteState extends State<ListarPaciente> {
             onPressed: () => _abrirFormularioCadastro(),
             backgroundColor: Colors.teal,
             icon: const Icon(Icons.person_add, color: Colors.white),
-            label: const Text("Registrar Paciente", style: TextStyle(color: Colors.white)),
+            label: const Text(
+              "Registrar Paciente",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           body: listaFiltrada.isEmpty
-              ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.search_off, size: 60, color: Colors.grey), const SizedBox(height: 16), Text(_termoBusca.isEmpty ? "Nenhum prontuário ativo encontrado." : "Nenhum paciente encontrado para '$_termoBusca'.", style: const TextStyle(fontSize: 16, color: Colors.grey))],))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.search_off, size: 60, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(
+                        _termoBusca.isEmpty
+                            ? "Nenhum prontuário ativo encontrado."
+                            : "Nenhum paciente encontrado para '$_termoBusca'.",
+                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.all(20),
                   itemCount: listaFiltrada.length,
                   itemBuilder: (context, i) {
                     final p = listaFiltrada[i];
                     return Card(
-                      elevation: 2, margin: const EdgeInsets.symmetric(vertical: 6),
+                      elevation: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 6),
                       child: ListTile(
-                        leading: const CircleAvatar(backgroundColor: Colors.teal, child: Icon(Icons.person, color: Colors.white)),
-                        title: Text(p.nome ?? 'Sem Nome', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text("CPF: ${p.cpf} | Cidade: ${p.cidade ?? 'Não Informada'}"),
+                        leading: const CircleAvatar(
+                          backgroundColor: Colors.teal,
+                          child: Icon(Icons.person, color: Colors.white),
+                        ),
+                        title: Text(
+                          p.nome,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          "CPF: ${p.cpf ?? 'Não Informado'} | Cidade: ${p.cidade ?? 'Não Informada'}",
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (p.tipoSanguineo != null) Chip(label: Text(p.tipoSanguineo!), backgroundColor: Colors.red.withValues(alpha: 0.1), labelStyle: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            if (p.tipoSanguineo != null)
+                              Chip(
+                                label: Text(p.tipoSanguineo!),
+                                backgroundColor: Colors.red.withValues(alpha: 0.1),
+                                labelStyle: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue), 
-                              tooltip: "Editar Paciente", 
-                              onPressed: () => _abrirFormularioCadastro(pacienteParaEditar: p),
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              tooltip: "Editar Paciente",
+                              onPressed: () =>
+                                  _abrirFormularioCadastro(pacienteParaEditar: p),
                             ),
+                            // 📦 Arquivar Paciente para a Pasta de Arquivos
                             IconButton(
-                              icon: const Icon(Icons.archive_outlined, color: Colors.orange), 
+                              icon: const Icon(Icons.archive_outlined, color: Colors.orange),
                               tooltip: "Arquivar Paciente",
                               onPressed: () async {
                                 final confirmar = await showDialog<bool>(
-                                  context: context, 
+                                  context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text("Arquivar Paciente?"), 
-                                    content: Text("O paciente ${p.nome} sairá desta lista ativa, mantendo o histórico no banco."), 
+                                    title: const Text("Arquivar Paciente?"),
+                                    content: Text(
+                                      "O paciente ${p.nome} sairá desta lista ativa e será movido para o Arquivo de Pacientes.",
+                                    ),
                                     actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancelar")), 
-                                      ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white), onPressed: () => Navigator.pop(context, true), child: const Text("Arquivar")),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: const Text("Cancelar"),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.orange,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: const Text("Arquivar"),
+                                      ),
                                     ],
                                   ),
                                 );
-                                if (confirmar == true) { 
-                                  await widget.service.arquivarPaciente(p); 
-                                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Prontuário de ${p.nome} arquivado!'), backgroundColor: Colors.orange)); 
+
+                                if (confirmar == true && p.id != null) {
+                                  await _arquivoService.arquivarPaciente({
+                                    'id': p.id,
+                                    'nome': p.nome,
+                                    'cpf': p.cpf ?? '',
+                                  });
+                                  await widget.service.carregarPacientes();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Prontuário de ${p.nome} arquivado!'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                             ),
-                            // 🗑️ Botão de Excluir ajustado para chamar deletarPaciente
+                            // 🗑️ Excluir Paciente
                             IconButton(
-  style: ButtonStyle(
-    foregroundColor: WidgetStateProperty.all<Color>(
-      const Color.fromARGB(255, 244, 67, 54),
-    ),
-    overlayColor: WidgetStateProperty.all<Color>(
-      const Color.fromARGB(255, 244, 67, 54).withValues(alpha: 0.1),
-    ),
-  ),
-  icon: const Icon(
-    Icons.delete, // 🔴 Ícone preenchido em vez de apenas o contorno
-    color: Color.fromARGB(255, 244, 67, 54),
-  ),
-  tooltip: "Excluir Paciente",
-  onPressed: () async {
-    if (p.id == null) return;
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Excluir Paciente?"),
-        content: Text(
-          "Tem certeza que deseja excluir permanentemente o cadastro de ${p.nome}? Esta ação não poderá ser desfeita.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 244, 67, 54), // Fundo vermelho
-              foregroundColor: Colors.white, // ✅ Texto em branco para legibilidade
-            ),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Excluir"),
-          ),
-        ],
-      ),
-    );
+                              style: ButtonStyle(
+                                foregroundColor: WidgetStateProperty.all<Color>(
+                                  const Color.fromARGB(255, 244, 67, 54),
+                                ),
+                                overlayColor: WidgetStateProperty.all<Color>(
+                                  const Color.fromARGB(255, 244, 67, 54)
+                                      .withValues(alpha: 0.1),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Color.fromARGB(255, 244, 67, 54),
+                              ),
+                              tooltip: "Excluir Paciente",
+                              onPressed: () async {
+                                if (p.id == null) return;
+                                final confirmar = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Excluir Paciente?"),
+                                    content: Text(
+                                      "Tem certeza que deseja excluir permanentemente o cadastro de ${p.nome}? Esta ação não poderá ser desfeita.",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: const Text("Cancelar"),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color.fromARGB(255, 244, 67, 54),
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: const Text("Excluir"),
+                                      ),
+                                    ],
+                                  ),
+                                );
 
-    if (confirmar == true) {
-      await widget.service.deletarPaciente(p.id!);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Paciente ${p.nome} excluído permanentemente!'),
-            backgroundColor: const Color.fromARGB(255, 244, 67, 54)
-                                      )
-                                    );                                 
+                                if (confirmar == true) {
+                                  await widget.service.deletarPaciente(p.id!);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Paciente ${p.nome} excluído permanentemente!',
+                                        ),
+                                        backgroundColor:
+                                            const Color.fromARGB(255, 244, 67, 54),
+                                      ),
+                                    );
                                   }
                                 }
                               },

@@ -40,14 +40,12 @@ import 'leitos/cadastrar_leito.dart';
 import '../domain/services/leito_service.dart';
 import '../domain/services/exame_service.dart';
 
-//ALAS
+// ALAS
 import '../domain/services/ala_service.dart';
 import 'alas/listar_ala.dart';
 
 import '../domain/services/sala_service.dart';
 import '../pages/salas/listar_salas.dart';
-
-//deixar danimico
 
 import '../domain/services/paciente_service.dart';
 import '../domain/services/medico_service.dart';
@@ -56,7 +54,11 @@ import '../domain/services/convenio_service.dart';
 import '../domain/services/faturamento_service.dart';
 import '../pages/faturamento/listar_faturamento.dart';
 
-import 'auditoria/listar_auditoria.dart'; // Ajuste o caminho se necessário
+import 'auditoria/listar_auditoria.dart';
+
+// ARQUIVO
+import 'arquivo/tela_arquivo.dart';
+import '../domain/services/arquivo_service.dart';
 
 class Dashboard extends StatefulWidget {
   final Database database;
@@ -78,6 +80,7 @@ class _DashboardState extends State<Dashboard> {
   late AlmoxarifadoService _almoxarifadoService;
   late AlaService _alaService;
   late FaturamentoService _faturamentoService;
+  final _arquivoService = ArquivoService();
 
   List<Map<String, dynamic>> _filaTriagem = [];
 
@@ -120,9 +123,6 @@ class _DashboardState extends State<Dashboard> {
   void dispose() {
     _almoxarifadoService.dispose();
     super.dispose();
-
-    /*void dispose()
-    O dispose limpa a memória quando a tela é fechada. */
   }
 
   Future<void> _carregarFila() async {
@@ -222,7 +222,6 @@ class _DashboardState extends State<Dashboard> {
                   icon:
                       Tooltip(message: 'Início', child: Icon(Icons.dashboard)),
                   label: Text("Início")),
-              // VOLTOU PARA A ORDEM ORIGINAL (Índice 1) com o alerta
               NavigationRailDestination(
                 icon: Badge(
                   isLabelVisible: _almoxarifadoService.temAlertaEstoque,
@@ -275,7 +274,6 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget _getPage(int index) {
-    // VOLTOU PARA A ORDEM ORIGINAL
     switch (index) {
       case 0:
         return _dashboard();
@@ -409,8 +407,7 @@ class _DashboardState extends State<Dashboard> {
                   onPressed: () => abrirDialogoLateral(CadastrarLeito(
                       leitoService: _leitoService, alaService: _alaService)),
                   icon: const Icon(Icons.bed),
-                  label: const Text(
-                      "Leito")), //descomentar depois de arrumar a ala
+                  label: const Text("Leito")),
               ElevatedButton.icon(
                   onPressed: () => abrirDialogoLateral(const CadastrarExame()),
                   icon: const Icon(Icons.science),
@@ -433,10 +430,32 @@ class _DashboardState extends State<Dashboard> {
               ElevatedButton.icon(
                   onPressed: () => abrirDialogoLateral(ListarSalas(
                       service: SalaService(), 
-                      alaService: _alaService, // 🟢 Adicionado aqui
+                      alaService: _alaService,
                   )),
                   icon: const Icon(Icons.meeting_room),
                   label: const Text("Salas")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(TelaArquivo(
+                      titulo: 'Arquivo de Pacientes',
+                      carregarArquivados:
+                          _arquivoService.listarPacientesArquivados,
+                      restaurar: (id) async {
+                        await _arquivoService.restaurarPaciente(id);
+                        await _pacienteService.carregarPacientes();
+                      })),
+                  icon: const Icon(Icons.archive),
+                  label: const Text("Arquivo de Pacientes")),
+              ElevatedButton.icon(
+                  onPressed: () => abrirDialogoLateral(TelaArquivo(
+                      titulo: 'Arquivo de Médicos',
+                      carregarArquivados:
+                          _arquivoService.listarMedicosArquivados,
+                      restaurar: (id) async {
+                        await _arquivoService.restaurarMedico(id);
+                        await _medicoService.carregarMedicos();
+                      })),
+                  icon: const Icon(Icons.archive),
+                  label: const Text("Arquivo de Médicos")),
             ],
           ),
         ],
